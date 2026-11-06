@@ -1,0 +1,25 @@
+# Secrets & env — never commit
+.env
+.env.*
+*.key
+*.pem
+secrets/
+
+# Dependencies & builds
+node_modules/
+venv/
+__pycache__/
+build/
+dist/
+target/
+.next/
+
+# IDE & editor
+.idea/
+.vscode/
+*.swp
+
+# OS & logs
+.DS_Store
+*.log
+.terraform/
