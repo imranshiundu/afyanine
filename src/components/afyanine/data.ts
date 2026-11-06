@@ -23,6 +23,7 @@ export const PREGNANCY = {
   trimester: "Third trimester",
   headline: "Your baby is growing beautifully.",
   size: "About the size of an eggplant",
+  daysLeft: 84,
 } as const;
 
 export const ANC_VISIT = {
@@ -57,6 +58,7 @@ export interface Facility {
   distance: string;
   meta: string;
   open: boolean;
+  alwaysOpen: boolean;
   services: string[];
   drive: string;
 }
@@ -69,6 +71,7 @@ export const FACILITIES: Record<CareTab, Facility[]> = {
       distance: "0.3 km",
       meta: "On duty · Until 6:00 PM",
       open: true,
+      alwaysOpen: false,
       services: ["Home visits", "ANC referrals"],
       drive: "2 min",
     },
@@ -78,6 +81,7 @@ export const FACILITIES: Record<CareTab, Facility[]> = {
       distance: "1.1 km",
       meta: "On duty · Until 5:00 PM",
       open: true,
+      alwaysOpen: false,
       services: ["Home visits", "Health talks"],
       drive: "5 min",
     },
@@ -89,6 +93,7 @@ export const FACILITIES: Record<CareTab, Facility[]> = {
       distance: "0.8 km",
       meta: "Open · Closes 8:00 PM",
       open: true,
+      alwaysOpen: false,
       services: ["ANC", "Maternity"],
       drive: "4 min",
     },
@@ -98,6 +103,7 @@ export const FACILITIES: Record<CareTab, Facility[]> = {
       distance: "3.1 km",
       meta: "Open · Closes 6:00 PM",
       open: true,
+      alwaysOpen: false,
       services: ["ANC", "Pharmacy"],
       drive: "12 min",
     },
@@ -109,6 +115,7 @@ export const FACILITIES: Record<CareTab, Facility[]> = {
       distance: "2.4 km",
       meta: "Open 24 hours",
       open: true,
+      alwaysOpen: true,
       services: ["Emergency", "Maternity"],
       drive: "9 min",
     },
@@ -118,6 +125,7 @@ export const FACILITIES: Record<CareTab, Facility[]> = {
       distance: "4.9 km",
       meta: "Open 24 hours",
       open: true,
+      alwaysOpen: true,
       services: ["Emergency", "Maternity", "NICU"],
       drive: "18 min",
     },
@@ -129,6 +137,7 @@ export const FACILITIES: Record<CareTab, Facility[]> = {
       distance: "2.4 km",
       meta: "Open 24 hours",
       open: true,
+      alwaysOpen: true,
       services: ["Emergency", "Basic life support"],
       drive: "9 min",
     },
@@ -138,11 +147,19 @@ export const FACILITIES: Record<CareTab, Facility[]> = {
       distance: "3.8 km",
       meta: "Open 24 hours",
       open: true,
+      alwaysOpen: true,
       services: ["Emergency", "Inter-facility"],
       drive: "14 min",
     },
   ],
 };
+
+export const CARE_FILTERS: Array<{ id: string; label: string }> = [
+  { id: "open", label: "Open now" },
+  { id: "maternity", label: "Maternity services" },
+  { id: "anc", label: "Antenatal care (ANC)" },
+  { id: "always", label: "Open 24 hours" },
+];
 
 /* ------------------------------------------------------------------ */
 /* 04 — SOS                                                            */
@@ -170,23 +187,168 @@ export const AMBULANCE = {
   plate: "KCA 482M",
   driver: "Joseph Mwangi",
   initials: "JM",
-  eta: "8 minutes",
   status: "Ambulance is on the way",
   updated: "Updated just now",
 } as const;
 
-export const TIMELINE: Array<{
+export interface TimelineStep {
   label: string;
   meta?: string;
-  done?: boolean;
-  live?: boolean;
-}> = [
-  { label: "Request sent", meta: "10:42 AM", done: true },
-  { label: "Accepted", meta: "10:43 AM", done: true },
-  { label: "On the way", meta: "Now", done: true, live: true },
+}
+
+export const TIMELINE: TimelineStep[] = [
+  { label: "Request sent", meta: "10:42 AM" },
+  { label: "Accepted", meta: "10:43 AM" },
+  { label: "On the way", meta: "10:44 AM" },
   { label: "Arrived" },
   { label: "Heading to hospital" },
 ];
+
+/* Live progression script: how the trip unfolds on screen */
+export const TRACKING_STAGES: Array<{
+  status: string;
+  eta: string;
+  note: string;
+  doneSteps: number;
+}> = [
+  {
+    status: "Ambulance is on the way",
+    eta: "8 minutes",
+    note: "Updated just now",
+    doneSteps: 3,
+  },
+  {
+    status: "Ambulance is close by",
+    eta: "3 minutes",
+    note: "Updated 1 min ago",
+    doneSteps: 3,
+  },
+  {
+    status: "Ambulance has arrived",
+    eta: "Now",
+    note: "Updated just now",
+    doneSteps: 4,
+  },
+  {
+    status: "Heading to hospital",
+    eta: "12 min to Kibera Health Centre",
+    note: "Updated just now",
+    doneSteps: 5,
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* 06 — Vitals (redesigned)                                            */
+/* ------------------------------------------------------------------ */
+
+export type VitalsRange = "Hourly" | "Daily" | "Weekly";
+
+export interface VitalsSeries {
+  labels: string[];
+  systolic: number[];
+  diastolic: number[];
+  heart: number[];
+  bpInsight: string;
+  hrSummary: string;
+}
+
+export const VITALS: Record<VitalsRange, VitalsSeries> = {
+  Hourly: {
+    labels: ["6 AM", "8 AM", "10 AM", "12 PM", "2 PM", "NOW"],
+    systolic: [112, 114, 116, 115, 117, 118],
+    diastolic: [68, 70, 72, 71, 74, 76],
+    heart: [76, 81, 78, 84, 79, 82],
+    bpInsight: "Steady and healthy — 6 mmHg below this morning’s peak.",
+    hrSummary: "Resting range 76–84 bpm",
+  },
+  Daily: {
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    systolic: [116, 114, 119, 117, 121, 116, 118],
+    diastolic: [72, 70, 76, 73, 79, 72, 76],
+    heart: [78, 76, 80, 79, 83, 77, 82],
+    bpInsight: "Averaging 117/74 this week — inside the healthy band.",
+    hrSummary: "Weekly average 79 bpm",
+  },
+  Weekly: {
+    labels: ["W23", "W24", "W25", "W26", "W27", "W28"],
+    systolic: [108, 110, 112, 114, 116, 118],
+    diastolic: [64, 66, 68, 70, 72, 76],
+    heart: [74, 75, 77, 78, 80, 82],
+    bpInsight: "Mild, expected rise through the third trimester.",
+    hrSummary: "Trending with your pregnancy, all normal",
+  },
+};
+
+export const VITALS_CURRENT = {
+  systolic: 118,
+  diastolic: 76,
+  heartRate: 82,
+  heartLow: 64,
+  heartHigh: 96,
+  device: "AfyaBand",
+  synced: "just now",
+  weightKg: 68.2,
+  weightDelta: "+0.4 this week",
+  sleep: "7h 20m",
+  sleepDeep: "Deep sleep 2h 05m",
+  kicks: 32,
+  kicksSince: "since 8 AM",
+} as const;
+
+/* Systolic scale used by the category meter */
+export const BP_SCALE = { min: 80, max: 160, threshold: 140 } as const;
+
+export const BP_CATEGORIES: Array<{
+  key: "low" | "normal" | "elevated" | "high";
+  label: string;
+  from: number;
+  to: number;
+}> = [
+  { key: "low", label: "Low", from: 80, to: 89 },
+  { key: "normal", label: "Normal", from: 90, to: 129 },
+  { key: "elevated", label: "Elevated", from: 130, to: 139 },
+  { key: "high", label: "High", from: 140, to: 160 },
+];
+
+export function bpCategory(sys: number): "low" | "normal" | "elevated" | "high" {
+  if (sys < 90) return "low";
+  if (sys < 130) return "normal";
+  if (sys < 140) return "elevated";
+  return "high";
+}
+
+export const MINI_METRICS: Array<{
+  icon: IconName;
+  label: string;
+  value: string;
+  sub: string;
+  toast: string;
+}> = [
+  {
+    icon: "scale",
+    label: "Weight",
+    value: "68.2",
+    unit: "kg",
+    sub: "+0.4 this week",
+    toast: "On track — at week 28, about 0.5 kg a week is healthy.",
+  },
+  {
+    icon: "moon",
+    label: "Sleep",
+    value: "7h 20m",
+    unit: "",
+    sub: "Deep sleep 2h 05m",
+    toast: "Great rest. Sleeping on your side boosts blood flow to baby.",
+  },
+  {
+    icon: "baby",
+    label: "Baby kicks",
+    value: "32",
+    unit: "today",
+    sub: "Counted since 8 AM",
+    toast: "32 kicks is a strong, healthy pattern for week 28.",
+  },
+] as Array<{ icon: IconName; label: string; value: string; unit: string; sub: string; toast: string }>;
 
 /* ------------------------------------------------------------------ */
 /* 07 — CHW patient register                                           */
@@ -303,7 +465,49 @@ export const BP_TREND = {
   status: "High" as const,
   axis: ["12 Jun", "14 Jun", "16 Jun", "Today"],
   yLabels: ["160", "140", "120", "100"],
+  series: [128, 132, 136, 134, 141, 145, 148],
+  threshold: 140,
 };
+
+/* ------------------------------------------------------------------ */
+/* Shared: CHP contact, notifications                                  */
+/* ------------------------------------------------------------------ */
+
+export const CHP_CONTACT = {
+  name: "Grace Wanjiru",
+  role: "Community Health Promoter · Kibera",
+  initials: "GW",
+  hours: "On duty until 6:00 PM",
+  prompts: [
+    { label: "Book a home visit", toast: "Grace will confirm your home visit shortly" },
+    { label: "Ask about swelling", toast: "Sent. Grace typically replies within 10 minutes" },
+    { label: "Nutrition advice", toast: "Sent. A nutrition tip sheet is on its way" },
+  ],
+} as const;
+
+export const NOTIFICATIONS = [
+  {
+    icon: "calendar" as IconName,
+    title: "ANC visit tomorrow",
+    body: "10:30 AM · Kibera Health Centre. Bring your clinic book.",
+    time: "2h ago",
+    tone: "lime" as const,
+  },
+  {
+    icon: "check" as IconName,
+    title: "Vitals checked by AfyaNine AI",
+    body: "Yesterday’s readings look normal. Keep it up, mama!",
+    time: "Yesterday",
+    tone: "plain" as const,
+  },
+  {
+    icon: "chat" as IconName,
+    title: "Grace shared a health tip",
+    body: "Try iron-rich foods like beans and dark greens this week.",
+    time: "2 days ago",
+    tone: "plain" as const,
+  },
+];
 
 /* ------------------------------------------------------------------ */
 /* 01 — Login copy (EN / SW)                                           */
@@ -320,8 +524,10 @@ export const LOGIN_COPY = {
     chw: "I'm a CHW",
     chwSub: "Support your community",
     phone: "Phone number",
+    phoneHint: "Enter the number linked to your AfyaNine account",
     cta: "Continue",
     privacy: "By continuing, you agree to our Terms & Privacy Policy.",
+    otpSent: (phone: string) => `Sending a code to +254 ${phone}`,
   },
   SW: {
     eyebrow: "AFYA YAKO. SAFARI YAKO.",
@@ -333,8 +539,10 @@ export const LOGIN_COPY = {
     chw: "Mimi ni CHW",
     chwSub: "Hudumia jamii yako",
     phone: "Nambari ya simu",
+    phoneHint: "Weka nambari iliyounganishwa na akaunti yako ya AfyaNine",
     cta: "Endelea",
     privacy: "Kwa kuendelea, unakubali Masharti na Sera ya Faragha.",
+    otpSent: (phone: string) => `Tunatuma nambari kwa +254 ${phone}`,
   },
 } as const;
 

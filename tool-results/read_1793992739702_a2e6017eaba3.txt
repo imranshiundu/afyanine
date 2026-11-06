@@ -1,0 +1,2002 @@
+     1→     1→@import "tailwindcss";
+     2→     2→
+     3→     3→/* ==========================================================================
+     4→     4→   AfyaNine design system — every value is a token.
+     5→     5→   Palette: warm cream surfaces, lime accent, near-black ink, emergency red.
+     6→     6→   ========================================================================== */
+     7→     7→
+     8→     8→:root {
+     9→     9→  /* ---- Surfaces ---- */
+    10→    10→  --paper: #dcd8cf;            /* page behind the phone shell */
+    11→    11→  --cream: #f3f0e8;            /* app background */
+    12→    12→  --cream-raised: #faf8f3;     /* nav bars, raised chrome */
+    13→    13→  --card: #e4dfd5;             /* grey-beige cards */
+    14→    14→  --card-deep: #d8d4c9;        /* map canvas, depressed surfaces */
+    15→    15→  --surface: #ffffff;          /* elevated cards */
+    16→    16→
+    17→    17→  /* ---- Ink & text ramp ---- */
+    18→    18→  --ink: #1a1a1a;
+    19→    19→  --ink-soft: #4f4b45;
+    20→    20→  --muted: #77736c;
+    21→    21→  --muted-deep: #67645f;
+    22→    22→  --faint: #918c84;
+    23→    23→  --faint-2: #9a958d;
+    24→    24→  --ghost: #a9a9a4;            /* labels on dark ink */
+    25→    25→
+    26→    26→  /* ---- Hairlines ---- */
+    27→    27→  --line-soft: #dcd7ce;
+    28→    28→  --line: #d5d0c6;
+    29→    29→  --line-strong: #c9c3b8;
+    30→    30→  --nav-line: #ded9d0;
+    31→    31→
+    32→    32→  /* ---- Lime accent ---- */
+    33→    33→  --lime: #d8f03a;
+    34→    34→  --lime-20: rgba(216, 240, 58, 0.2);
+    35→    35→  --lime-22: rgba(216, 240, 58, 0.22);
+    36→    36→  --lime-25: rgba(216, 240, 58, 0.25);
+    37→    37→  --lime-50: rgba(216, 240, 58, 0.5);
+    38→    38→  --lime-deep: #788411;        /* lime-toned text on light surfaces */
+    39→    39→  --lime-btn-shadow: rgba(126, 143, 27, 0.16);
+    40→    40→  --lime-tile-shadow: rgba(120, 132, 17, 0.28);
+    41→    41→
+    42→    42→  /* ---- Emergency red ---- */
+    43→    43→  --red: #c62828;
+    44→    44→  --red-deep: #a51e1e;
+    45→    45→  --red-tint: #f0d1cf;
+    46→    46→
+    47→    47→  /* ---- Chips ---- */
+    48→    48→  --watch-bg: #eddfaf;
+    49→    49→  --watch-ink: #75601c;
+    50→    50→
+    51→    51→  /* ---- Map & chart ---- */
+    52→    52→  --map-road: #efeee6;
+    53→    53→  --chart-grid: #e5e0d7;
+    54→    54→
+    55→    55→  /* ---- Overlays ---- */
+    56→    56→  --white-overlay: rgba(255, 255, 255, 0.14);
+    57→    57→  --white-overlay-soft: rgba(255, 255, 255, 0.1);
+    58→    58→  --white-overlay-strong: rgba(255, 255, 255, 0.48);
+    59→    59→  --white-overlay-line: rgba(255, 255, 255, 0.18);
+    60→    60→  --divider-on-red: rgba(255, 255, 255, 0.2);
+    61→    61→
+    62→    62→  /* ---- Typography ---- */
+    63→    63→  --font-sans: var(--font-inter), "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    64→    64→  --text-2xs: 8px;
+    65→    65→  --text-xs: 9px;
+    66→    66→  --text-sm: 10px;
+    67→    67→  --text-base: 11px;
+    68→    68→  --text-md: 12px;
+    69→    69→  --text-lg: 13px;
+    70→    70→  --text-xl: 14px;
+    71→    71→  --text-2xl: 15px;
+    72→    72→  --text-3xl: 16px;
+    73→    73→  --text-4xl: 17px;
+    74→    74→  --text-5xl: 21px;
+    75→    75→  --text-6xl: 28px;
+    76→    76→  --text-7xl: 29px;
+    77→    77→  --text-hero: 36px;
+    78→    78→  --text-stat: 38px;
+    79→    79→  --text-display: 44px;
+    80→    80→  --text-input: 16px;          /* >=16px prevents iOS focus zoom */
+    81→    81→  --leading-tight: 1.03;
+    82→    82→  --leading-snug: 1.2;
+    83→    83→  --leading-body: 1.5;
+    84→    84→  --leading-cozy: 1.55;
+    85→    85→  --tracking-display: -0.055em;
+    86→    86→  --tracking-tight: -0.04em;
+    87→    87→  --tracking-mid: -0.025em;
+    88→    88→  --tracking-soft: -0.03em;
+    89→    89→  --tracking-label: 0.12em;
+    90→    90→  --tracking-label-wide: 0.15em;
+    91→    91→  --tracking-chip: 0.08em;
+    92→    92→  --weight-semibold: 600;
+    93→    93→  --weight-bold: 700;
+    94→    94→  --weight-extrabold: 800;
+    95→    95→
+    96→    96→  /* ---- Radius scale (24px = signature card corner) ---- */
+    97→    97→  --r-xs: 8px;
+    98→    98→  --r-sm: 10px;
+    99→    99→  --r-md: 12px;
+   100→   100→  --r-tile: 14px;
+   101→   101→  --r-lg: 16px;
+   102→   102→  --r-xl: 20px;
+   103→   103→  --r-2xl: 24px;
+   104→   104→  --r-3xl: 28px;
+   105→   105→  --r-4xl: 32px;
+   106→   106→  --r-full: 999px;
+   107→   107→
+   108→   108→  /* ---- Spacing scale ---- */
+   109→   109→  --s-1: 4px;
+   110→   110→  --s-15: 6px;
+   111→   111→  --s-2: 8px;
+   112→   112→  --s-25: 10px;
+   113→   113→  --s-3: 12px;
+   114→   114→  --s-35: 14px;
+   115→   115→  --s-4: 16px;
+   116→   116→  --s-45: 18px;
+   117→   117→  --s-5: 20px;
+   118→   118→  --s-6: 24px;
+   119→   119→  --s-7: 32px;
+   120→   120→  --gutter: 20px;
+   121→   121→
+   122→   122→  /* ---- Shell & chrome ---- */
+   123→   123→  --shell-w: 390px;
+   124→   124→  --shell-h: 844px;
+   125→   125→  --nav-h: 84px;
+   126→   126→  --header-h: 48px;
+   127→   127→  --frame-w: 6px;
+   128→   128→
+   129→   129→  /* ---- Component dimensions ---- */
+   130→   130→  --logo-size: 35px;
+   131→   131→  --icon-btn: 40px;
+   132→   132→  --notif-btn: 43px;
+   133→   133→  --tile-md: 42px;
+   134→   134→  --tile-lg: 43px;
+   135→   135→  --avatar-row: 41px;
+   136→   136→  --avatar-driver: 46px;
+   137→   137→  --avatar-hero: 53px;
+   138→   138→  --sos-orb: 58px;
+   139→   139→  --sos-symbol: 55px;
+   140→   140→  --add-btn: 52px;
+   141→   141→  --ring-size: 126px;
+   142→   142→  --h-field: 54px;
+   143→   143→  --h-cta: 54px;
+   144→   144→  --h-mini-btn: 35px;
+   145→   145→  --h-tab: 31px;
+   146→   146→
+   147→   147→  /* ---- Elevation ---- */
+   148→   148→  --shadow-shell: 0 18px 70px rgba(33, 29, 22, 0.18);
+   149→   149→  --shadow-card: 0 12px 28px rgba(26, 26, 26, 0.17);
+   150→   150→  --shadow-role: 0 7px 15px rgba(67, 73, 20, 0.09);
+   151→   151→  --shadow-field: 0 4px 13px rgba(45, 40, 30, 0.04);
+   152→   152→  --shadow-btn: 0 8px 18px var(--lime-btn-shadow);
+   153→   153→  --shadow-red: 0 9px 20px rgba(198, 40, 40, 0.2);
+   154→   154→  --shadow-red-lg: 0 10px 22px rgba(198, 40, 40, 0.19);
+   155→   155→  --shadow-orb: 0 8px 16px rgba(198, 40, 40, 0.25);
+   156→   156→  --shadow-nav: 0 -8px 24px rgba(55, 47, 35, 0.05);
+   157→   157→  --shadow-float: 0 5px 13px rgba(90, 86, 78, 0.35);
+   158→   158→  --shadow-pin: 0 5px 12px rgba(80, 76, 68, 0.45);
+   159→   159→  --shadow-toast: 0 12px 30px rgba(0, 0, 0, 0.25);
+   160→   160→  --shadow-add: 0 6px 13px var(--lime-tile-shadow);
+   161→   161→
+   162→   162→  /* ---- Motion ---- */
+   163→   163→  --dur-fast: 150ms;
+   164→   164→  --dur-med: 220ms;
+   165→   165→  --dur-screen: 300ms;
+   166→   166→  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+   167→   167→
+   168→   168→  /* ---- Z-index ---- */
+   169→   169→  --z-nav: 20;
+   170→   170→  --z-toast: 100;
+   171→   171→}
+   172→   172→
+   173→   173→/* ==========================================================================
+   174→   174→   Base
+   175→   175→   ========================================================================== */
+   176→   176→
+   177→   177→html {
+   178→   178→  -webkit-text-size-adjust: 100%;
+   179→   179→}
+   180→   180→
+   181→   181→body {
+   182→   182→  margin: 0;
+   183→   183→  min-width: 320px;
+   184→   184→  min-height: 100dvh;
+   185→   185→  background: var(--paper);
+   186→   186→  color: var(--ink);
+   187→   187→  font-family: var(--font-sans);
+   188→   188→  font-synthesis: none;
+   189→   189→  -webkit-font-smoothing: antialiased;
+   190→   190→}
+   191→   191→
+   192→   192→button,
+   193→   193→input,
+   194→   194→textarea {
+   195→   195→  font: inherit;
+   196→   196→}
+   197→   197→
+   198→   198→button {
+   199→   199→  color: inherit;
+   200→   200→  -webkit-tap-highlight-color: transparent;
+   201→   201→}
+   202→   202→
+   203→   203→h1, h2, h3, p {
+   204→   204→  margin: 0;
+   205→   205→}
+   206→   206→
+   207→   207→:focus-visible {
+   208→   208→  outline: 2px solid var(--ink);
+   209→   209→  outline-offset: 2px;
+   210→   210→}
+   211→   211→
+   212→   212→/* ==========================================================================
+   213→   213→   Page & phone shell — responsive
+   214→   214→   ========================================================================== */
+   215→   215→
+   216→   216→.page {
+   217→   217→  min-height: 100dvh;
+   218→   218→  display: flex;
+   219→   219→  justify-content: center;
+   220→   220→  align-items: flex-start;
+   221→   221→  background: var(--paper);
+   222→   222→}
+   223→   223→
+   224→   224→.app-shell {
+   225→   225→  width: min(var(--shell-w), 100vw);
+   226→   226→  height: min(var(--shell-h), 100dvh);
+   227→   227→  overflow-x: hidden;
+   228→   228→  overflow-y: auto;
+   229→   229→  overscroll-behavior: contain;
+   230→   230→  position: relative;
+   231→   231→  background: var(--cream);
+   232→   232→  box-shadow: var(--shadow-shell);
+   233→   233→  scrollbar-width: none;
+   234→   234→}
+   235→   235→.app-shell::-webkit-scrollbar {
+   236→   236→  display: none;
+   237→   237→}
+   238→   238→
+   239→   239→.screen {
+   240→   240→  min-height: 100%;
+   241→   241→  background: var(--cream);
+   242→   242→  padding: 22px var(--gutter) 28px;
+   243→   243→  position: relative;
+   244→   244→  animation: screen-in var(--dur-screen) var(--ease-out);
+   245→   245→}
+   246→   246→/* Screens with a bottom nav: nav sticks to the scrollport and is pushed
+   247→   247→   to the true bottom even when content is shorter than the shell */
+   248→   248→.with-nav,
+   249→   249→.chw-screen {
+   250→   250→  display: flex;
+   251→   251→  flex-direction: column;
+   252→   252→  padding-bottom: 0;
+   253→   253→}
+   254→   254→.bottom-nav,
+   255→   255→.chw-nav {
+   256→   256→  margin-top: auto;
+   257→   257→}
+   258→   258→
+   259→   259→@keyframes screen-in {
+   260→   260→  from {
+   261→   261→    opacity: 0;
+   262→   262→    transform: translateY(10px);
+   263→   263→  }
+   264→   264→  to {
+   265→   265→    opacity: 1;
+   266→   266→    transform: none;
+   267→   267→  }
+   268→   268→}
+   269→   269→
+   270→   270→/* ==========================================================================
+   271→   271→   Shared primitives
+   272→   272→   ========================================================================== */
+   273→   273→
+   274→   274→.eyebrow,
+   275→   275→.field-label {
+   276→   276→  font-size: var(--text-sm);
+   277→   277→  font-weight: var(--weight-extrabold);
+   278→   278→  letter-spacing: var(--tracking-label);
+   279→   279→}
+   280→   280→
+   281→   281→.logo {
+   282→   282→  display: flex;
+   283→   283→  align-items: center;
+   284→   284→  gap: var(--s-2);
+   285→   285→  font-size: 20px;
+   286→   286→  font-weight: var(--weight-extrabold);
+   287→   287→  letter-spacing: var(--tracking-display);
+   288→   288→}
+   289→   289→.logo-word b {
+   290→   290→  color: var(--lime-deep);
+   291→   291→  font-weight: var(--weight-extrabold);
+   292→   292→}
+   293→   293→.logo-mark {
+   294→   294→  width: var(--logo-size);
+   295→   295→  height: var(--logo-size);
+   296→   296→  flex: none;
+   297→   297→  background: var(--ink);
+   298→   298→  border-radius: var(--r-tile);
+   299→   299→  display: grid;
+   300→   300→  place-items: center;
+   301→   301→  transform: rotate(-4deg);
+   302→   302→  box-shadow: var(--shadow-float);
+   303→   303→}
+   304→   304→.logo-mark svg {
+   305→   305→  width: 78%;
+   306→   306→  height: 78%;
+   307→   307→}
+   308→   308→.logo-mark .logo-heart {
+   309→   309→  stroke: var(--lime);
+   310→   310→  fill: none;
+   311→   311→  stroke-width: 1.7;
+   312→   312→}
+   313→   313→.logo-mark .logo-figure {
+   314→   314→  stroke: var(--cream);
+   315→   315→  fill: none;
+   316→   316→  stroke-width: 1.9;
+   317→   317→  stroke-linecap: round;
+   318→   318→}
+   319→   319→.logo-mark .logo-baby {
+   320→   320→  fill: var(--lime);
+   321→   321→  stroke: none;
+   322→   322→}
+   323→   323→
+   324→   324→.primary-button {
+   325→   325→  width: 100%;
+   326→   326→  height: var(--h-cta);
+   327→   327→  border: 0;
+   328→   328→  border-radius: var(--r-lg);
+   329→   329→  background: var(--lime);
+   330→   330→  color: var(--ink);
+   331→   331→  font-size: var(--text-xl);
+   332→   332→  font-weight: var(--weight-extrabold);
+   333→   333→  display: flex;
+   334→   334→  align-items: center;
+   335→   335→  justify-content: center;
+   336→   336→  gap: var(--s-25);
+   337→   337→  box-shadow: var(--shadow-btn);
+   338→   338→  transition: transform var(--dur-fast) var(--ease-out), filter var(--dur-fast) var(--ease-out);
+   339→   339→}
+   340→   340→.primary-button:active {
+   341→   341→  transform: scale(0.98);
+   342→   342→  filter: brightness(0.97);
+   343→   343→}
+   344→   344→
+   345→   345→.icon-button,
+   346→   346→.header-spacer {
+   347→   347→  width: var(--icon-btn);
+   348→   348→  height: var(--icon-btn);
+   349→   349→  display: grid;
+   350→   350→  place-items: center;
+   351→   351→  border-radius: var(--r-full);
+   352→   352→  flex: none;
+   353→   353→}
+   354→   354→.icon-button {
+   355→   355→  border: 0;
+   356→   356→  background: var(--card);
+   357→   357→  transition: background var(--dur-fast) var(--ease-out);
+   358→   358→}
+   359→   359→.icon-button:active {
+   360→   360→  background: var(--line-strong);
+   361→   361→}
+   362→   362→
+   363→   363→.status {
+   364→   364→  font-size: var(--text-2xs);
+   365→   365→  font-weight: var(--weight-extrabold);
+   366→   366→  border-radius: var(--r-sm);
+   367→   367→  padding: 5px 9px;
+   368→   368→  white-space: nowrap;
+   369→   369→}
+   370→   370→.status.normal {
+   371→   371→  background: var(--lime);
+   372→   372→  color: var(--ink);
+   373→   373→}
+   374→   374→.status.high {
+   375→   375→  background: var(--red-tint);
+   376→   376→  color: var(--red-deep);
+   377→   377→}
+   378→   378→
+   379→   379→.emergency-button {
+   380→   380→  width: 100%;
+   381→   381→  min-height: 66px;
+   382→   382→  margin-top: var(--s-3);
+   383→   383→  border: 0;
+   384→   384→  background: var(--red);
+   385→   385→  color: #ffffff;
+   386→   386→  border-radius: var(--r-xl);
+   387→   387→  display: flex;
+   388→   388→  align-items: center;
+   389→   389→  text-align: left;
+   390→   390→  padding: 11px 15px;
+   391→   391→  box-shadow: var(--shadow-red);
+   392→   392→  transition: transform var(--dur-fast) var(--ease-out);
+   393→   393→}
+   394→   394→.emergency-button:active {
+   395→   395→  transform: scale(0.985);
+   396→   396→}
+   397→   397→.emergency-button > span {
+   398→   398→  width: var(--tile-md);
+   399→   399→  height: var(--tile-md);
+   400→   400→  background: var(--white-overlay);
+   401→   401→  border-radius: var(--r-full);
+   402→   402→  display: grid;
+   403→   403→  place-items: center;
+   404→   404→  margin-right: 11px;
+   405→   405→  flex: none;
+   406→   406→}
+   407→   407→.emergency-button div {
+   408→   408→  flex: 1;
+   409→   409→  display: flex;
+   410→   410→  flex-direction: column;
+   411→   411→}
+   412→   412→.emergency-button b {
+   413→   413→  font-size: var(--text-lg);
+   414→   414→}
+   415→   415→.emergency-button small {
+   416→   416→  font-size: var(--text-xs);
+   417→   417→  opacity: 0.72;
+   418→   418→  margin-top: 3px;
+   419→   419→}
+   420→   420→
+   421→   421→/* ==========================================================================
+   422→   422→   01 — Login
+   423→   423→   ========================================================================== */
+   424→   424→
+   425→   425→.login-screen {
+   426→   426→  display: flex;
+   427→   427→  flex-direction: column;
+   428→   428→  justify-content: space-between;
+   429→   429→  padding-top: 26px;
+   430→   430→}
+   431→   431→.login-top {
+   432→   432→  position: relative;
+   433→   433→}
+   434→   434→.language-toggle {
+   435→   435→  position: absolute;
+   436→   436→  right: 0;
+   437→   437→  top: 0;
+   438→   438→  display: flex;
+   439→   439→  background: var(--card);
+   440→   440→  padding: 3px;
+   441→   441→  border-radius: var(--r-xl);
+   442→   442→}
+   443→   443→.language-toggle button {
+   444→   444→  border: 0;
+   445→   445→  background: transparent;
+   446→   446→  font-size: var(--text-sm);
+   447→   447→  font-weight: var(--weight-extrabold);
+   448→   448→  padding: 6px 9px;
+   449→   449→  border-radius: var(--r-lg);
+   450→   450→  color: var(--muted);
+   451→   451→  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+   452→   452→}
+   453→   453→.language-toggle button.active {
+   454→   454→  color: var(--ink);
+   455→   455→  background: var(--lime);
+   456→   456→}
+   457→   457→.brand-tagline {
+   458→   458→  margin-top: var(--s-2);
+   459→   459→  font-size: var(--text-sm);
+   460→   460→  color: var(--faint);
+   461→   461→  font-weight: var(--weight-semibold);
+   462→   462→}
+   463→   463→.login-top .eyebrow {
+   464→   464→  margin: 54px 0 10px;
+   465→   465→  color: var(--muted);
+   466→   466→}
+   467→   467→.login-top h1 {
+   468→   468→  font-size: var(--text-display);
+   469→   469→  line-height: 1;
+   470→   470→  letter-spacing: var(--tracking-display);
+   471→   471→}
+   472→   472→.lead {
+   473→   473→  margin-top: var(--s-3);
+   474→   474→  max-width: 310px;
+   475→   475→  color: var(--muted-deep);
+   476→   476→  font-size: var(--text-xl);
+   477→   477→  line-height: var(--leading-cozy);
+   478→   478→}
+   479→   479→.field-label {
+   480→   480→  display: block;
+   481→   481→  margin: 0 0 10px;
+   482→   482→  color: var(--muted);
+   483→   483→}
+   484→   484→.role-grid {
+   485→   485→  display: grid;
+   486→   486→  grid-template-columns: 1fr 1fr;
+   487→   487→  gap: var(--s-25);
+   488→   488→  margin-bottom: 22px;
+   489→   489→}
+   490→   490→.role-card {
+   491→   491→  min-height: 134px;
+   492→   492→  position: relative;
+   493→   493→  text-align: left;
+   494→   494→  padding: var(--s-35);
+   495→   495→  border: 1.5px solid transparent;
+   496→   496→  background: var(--card);
+   497→   497→  border-radius: var(--r-xl);
+   498→   498→  display: flex;
+   499→   499→  flex-direction: column;
+   500→   500→  justify-content: space-between;
+   501→   501→  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+   502→   502→}
+   503→   503→.role-card:active {
+   504→   504→  transform: scale(0.98);
+   505→   505→}
+   506→   506→.role-card.selected {
+   507→   507→  border-color: var(--ink);
+   508→   508→  background: var(--lime);
+   509→   509→  box-shadow: var(--shadow-role);
+   510→   510→}
+   511→   511→.role-icon {
+   512→   512→  width: var(--tile-md);
+   513→   513→  height: var(--tile-md);
+   514→   514→  border-radius: var(--r-tile);
+   515→   515→  background: var(--white-overlay-strong);
+   516→   516→  display: grid;
+   517→   517→  place-items: center;
+   518→   518→}
+   519→   519→.role-card .role-copy {
+   520→   520→  display: flex;
+   521→   521→  flex-direction: column;
+   522→   522→  gap: 3px;
+   523→   523→}
+   524→   524→.role-card b {
+   525→   525→  font-size: var(--text-xl);
+   526→   526→}
+   527→   527→.role-card small {
+   528→   528→  font-size: var(--text-sm);
+   529→   529→  color: var(--muted-deep);
+   530→   530→}
+   531→   531→.role-card i {
+   532→   532→  position: absolute;
+   533→   533→  right: 12px;
+   534→   534→  top: 12px;
+   535→   535→  width: 21px;
+   536→   536→  height: 21px;
+   537→   537→  border-radius: var(--r-full);
+   538→   538→  background: var(--ink);
+   539→   539→  color: #ffffff;
+   540→   540→  display: grid;
+   541→   541→  place-items: center;
+   542→   542→  font-style: normal;
+   543→   543→}
+   544→   544→.phone-field {
+   545→   545→  height: var(--h-field);
+   546→   546→  display: flex;
+   547→   547→  align-items: center;
+   548→   548→  background: var(--surface);
+   549→   549→  border: 1px solid var(--line);
+   550→   550→  border-radius: var(--r-lg);
+   551→   551→  overflow: hidden;
+   552→   552→  margin-bottom: var(--s-3);
+   553→   553→  box-shadow: var(--shadow-field);
+   554→   554→}
+   555→   555→.phone-field span {
+   556→   556→  padding: 0 13px 0 16px;
+   557→   557→  font-size: var(--text-lg);
+   558→   558→  font-weight: var(--weight-bold);
+   559→   559→  border-right: 1px solid var(--line);
+   560→   560→}
+   561→   561→.phone-field input {
+   562→   562→  flex: 1;
+   563→   563→  width: 0;
+   564→   564→  min-width: 0;
+   565→   565→  border: 0;
+   566→   566→  outline: 0;
+   567→   567→  background: transparent;
+   568→   568→  padding: 0 var(--s-35);
+   569→   569→  font-size: var(--text-input);
+   570→   570→  color: var(--ink);
+   571→   571→}
+   572→   572→.phone-field input::placeholder {
+   573→   573→  color: var(--faint-2);
+   574→   574→}
+   575→   575→.privacy {
+   576→   576→  text-align: center;
+   577→   577→  font-size: var(--text-xs);
+   578→   578→  color: var(--faint);
+   579→   579→  margin: 12px auto 0;
+   580→   580→}
+   581→   581→
+   582→   582→/* ==========================================================================
+   583→   583→   Headers & greeting
+   584→   584→   ========================================================================== */
+   585→   585→
+   586→   586→.home-head,
+   587→   587→.chw-head {
+   588→   588→  display: flex;
+   589→   589→  justify-content: space-between;
+   590→   590→  align-items: center;
+   591→   591→  margin: 4px 2px 21px;
+   592→   592→}
+   593→   593→.home-head p {
+   594→   594→  font-size: 12px;
+   595→   595→  color: var(--muted);
+   596→   596→}
+   597→   597→.home-head h1 {
+   598→   598→  font-size: var(--text-7xl);
+   599→   599→  letter-spacing: var(--tracking-tight);
+   600→   600→  line-height: 1.1;
+   601→   601→}
+   602→   602→.notification {
+   603→   603→  width: var(--notif-btn);
+   604→   604→  height: var(--notif-btn);
+   605→   605→  border: 0;
+   606→   606→  border-radius: var(--r-full);
+   607→   607→  background: var(--card);
+   608→   608→  display: grid;
+   609→   609→  place-items: center;
+   610→   610→  position: relative;
+   611→   611→  flex: none;
+   612→   612→}
+   613→   613→.notification i {
+   614→   614→  position: absolute;
+   615→   615→  right: 9px;
+   616→   616→  top: 8px;
+   617→   617→  width: 7px;
+   618→   618→  height: 7px;
+   619→   619→  border: 1.5px solid var(--cream);
+   620→   620→  border-radius: var(--r-full);
+   621→   621→  background: var(--red);
+   622→   622→}
+   623→   623→
+   624→   624→.screen-header {
+   625→   625→  height: var(--header-h);
+   626→   626→  margin-bottom: 16px;
+   627→   627→  display: flex;
+   628→   628→  align-items: center;
+   629→   629→  justify-content: space-between;
+   630→   630→}
+   631→   631→.screen-header h2 {
+   632→   632→  font-size: var(--text-3xl);
+   633→   633→}
+   634→   634→
+   635→   635→/* ==========================================================================
+   636→   636→   02 — Home (mother)
+   637→   637→   ========================================================================== */
+   638→   638→
+   639→   639→.pregnancy-card {
+   640→   640→  min-height: 182px;
+   641→   641→  padding: 20px 15px;
+   642→   642→  border-radius: var(--r-3xl);
+   643→   643→  background: var(--ink);
+   644→   644→  color: #ffffff;
+   645→   645→  display: flex;
+   646→   646→  align-items: center;
+   647→   647→  gap: 17px;
+   648→   648→  box-shadow: var(--shadow-card);
+   649→   649→}
+   650→   650→.week-ring {
+   651→   651→  width: var(--ring-size);
+   652→   652→  min-width: var(--ring-size);
+   653→   653→  height: var(--ring-size);
+   654→   654→  position: relative;
+   655→   655→}
+   656→   656→.week-ring svg {
+   657→   657→  width: 100%;
+   658→   658→  height: 100%;
+   659→   659→  transform: rotate(-90deg);
+   660→   660→}
+   661→   661→.week-ring circle {
+   662→   662→  fill: none;
+   663→   663→  stroke: #3c3c39;
+   664→   664→  stroke-width: 7;
+   665→   665→}
+   666→   666→.week-ring circle.progress {
+   667→   667→  stroke: var(--lime);
+   668→   668→  stroke-linecap: round;
+   669→   669→}
+   670→   670→.week-ring div {
+   671→   671→  position: absolute;
+   672→   672→  inset: 0;
+   673→   673→  display: flex;
+   674→   674→  flex-direction: column;
+   675→   675→  justify-content: center;
+   676→   676→  align-items: center;
+   677→   677→}
+   678→   678→.week-ring small {
+   679→   679→  font-size: var(--text-2xs);
+   680→   680→  color: var(--ghost);
+   681→   681→  font-weight: var(--weight-extrabold);
+   682→   682→  letter-spacing: var(--tracking-label-wide);
+   683→   683→}
+   684→   684→.week-ring b {
+   685→   685→  font-size: var(--text-stat);
+   686→   686→  letter-spacing: -0.06em;
+   687→   687→  line-height: 1;
+   688→   688→}
+   689→   689→.week-ring span {
+   690→   690→  font-size: var(--text-xs);
+   691→   691→  color: var(--ghost);
+   692→   692→}
+   693→   693→.pregnancy-copy .tag {
+   694→   694→  display: inline-block;
+   695→   695→  color: var(--ink);
+   696→   696→  background: var(--lime);
+   697→   697→  padding: 5px 8px;
+   698→   698→  border-radius: var(--r-xl);
+   699→   699→  font-size: var(--text-2xs);
+   700→   700→  text-transform: uppercase;
+   701→   701→  font-weight: var(--weight-extrabold);
+   702→   702→  letter-spacing: var(--tracking-chip);
+   703→   703→}
+   704→   704→.pregnancy-copy h2 {
+   705→   705→  font-size: var(--text-4xl);
+   706→   706→  line-height: var(--leading-snug);
+   707→   707→  margin: 12px 0 9px;
+   708→   708→  letter-spacing: var(--tracking-mid);
+   709→   709→}
+   710→   710→.pregnancy-copy p {
+   711→   711→  font-size: var(--text-sm);
+   712→   712→  color: var(--ghost);
+   713→   713→  line-height: 1.4;
+   714→   714→}
+   715→   715→.appointment-card {
+   716→   716→  background: var(--card);
+   717→   717→  border-radius: var(--r-2xl);
+   718→   718→  margin-top: var(--s-3);
+   719→   719→  padding: 15px;
+   720→   720→}
+   721→   721→.appointment-title {
+   722→   722→  display: flex;
+   723→   723→  gap: var(--s-3);
+   724→   724→  align-items: center;
+   725→   725→}
+   726→   726→.square-icon {
+   727→   727→  width: var(--tile-lg);
+   728→   728→  height: var(--tile-lg);
+   729→   729→  border-radius: var(--r-tile);
+   730→   730→  background: var(--lime);
+   731→   731→  display: grid;
+   732→   732→  place-items: center;
+   733→   733→  flex: none;
+   734→   734→}
+   735→   735→.appointment-title small {
+   736→   736→  font-size: var(--text-2xs);
+   737→   737→  letter-spacing: var(--tracking-label);
+   738→   738→  font-weight: var(--weight-extrabold);
+   739→   739→  color: var(--muted);
+   740→   740→}
+   741→   741→.appointment-title h3 {
+   742→   742→  font-size: var(--text-xl);
+   743→   743→  margin: 2px 0;
+   744→   744→}
+   745→   745→.appointment-title p {
+   746→   746→  font-size: var(--text-sm);
+   747→   747→  color: var(--muted);
+   748→   748→}
+   749→   749→.appointment-actions {
+   750→   750→  display: grid;
+   751→   751→  grid-template-columns: 1.2fr 1fr;
+   752→   752→  gap: var(--s-2);
+   753→   753→  margin-top: 13px;
+   754→   754→}
+   755→   755→.appointment-actions button {
+   756→   756→  height: var(--h-mini-btn);
+   757→   757→  border: 0;
+   758→   758→  background: var(--cream);
+   759→   759→  border-radius: var(--r-md);
+   760→   760→  font-size: var(--text-sm);
+   761→   761→  font-weight: var(--weight-bold);
+   762→   762→  transition: transform var(--dur-fast) var(--ease-out);
+   763→   763→}
+   764→   764→.appointment-actions button:active {
+   765→   765→  transform: scale(0.97);
+   766→   766→}
+   767→   767→.appointment-actions button:first-child {
+   768→   768→  background: var(--ink);
+   769→   769→  color: #ffffff;
+   770→   770→  display: flex;
+   771→   771→  gap: 6px;
+   772→   772→  align-items: center;
+   773→   773→  justify-content: center;
+   774→   774→}
+   775→   775→.section-title {
+   776→   776→  display: flex;
+   777→   777→  justify-content: space-between;
+   778→   778→  align-items: center;
+   779→   779→  margin: 21px 2px 11px;
+   780→   780→}
+   781→   781→.section-title h2 {
+   782→   782→  font-size: var(--text-4xl);
+   783→   783→  letter-spacing: var(--tracking-soft);
+   784→   784→}
+   785→   785→.section-title button {
+   786→   786→  border: 0;
+   787→   787→  background: transparent;
+   788→   788→  font-size: var(--text-sm);
+   789→   789→  font-weight: var(--weight-bold);
+   790→   790→  text-decoration: underline;
+   791→   791→  color: var(--ink);
+   792→   792→}
+   793→   793→.quick-grid {
+   794→   794→  display: grid;
+   795→   795→  grid-template-columns: 1fr 1fr;
+   796→   796→  gap: var(--s-25);
+   797→   797→}
+   798→   798→.quick-grid button {
+   799→   799→  min-height: 104px;
+   800→   800→  padding: var(--s-3);
+   801→   801→  border: 0;
+   802→   802→  border-radius: var(--r-xl);
+   803→   803→  background: var(--surface);
+   804→   804→  text-align: left;
+   805→   805→  display: flex;
+   806→   806→  flex-direction: column;
+   807→   807→  align-items: flex-start;
+   808→   808→  transition: transform var(--dur-fast) var(--ease-out);
+   809→   809→}
+   810→   810→.quick-grid button:active {
+   811→   811→  transform: scale(0.97);
+   812→   812→}
+   813→   813→.quick-grid button > span {
+   814→   814→  width: 34px;
+   815→   815→  height: 34px;
+   816→   816→  background: var(--card);
+   817→   817→  border-radius: var(--r-md);
+   818→   818→  display: grid;
+   819→   819→  place-items: center;
+   820→   820→  margin-bottom: var(--s-25);
+   821→   821→}
+   822→   822→.quick-grid b {
+   823→   823→  font-size: 12px;
+   824→   824→}
+   825→   825→.quick-grid small {
+   826→   826→  font-size: var(--text-xs);
+   827→   827→  color: var(--muted);
+   828→   828→  margin-top: 2px;
+   829→   829→}
+   830→   830→
+   831→   831→/* ==========================================================================
+   832→   832→   Bottom navigation (mother) — sticky so it is always reachable
+   833→   833→   ========================================================================== */
+   834→   834→
+   835→   835→.bottom-nav,
+   836→   836→.chw-nav {
+   837→   837→  position: sticky;
+   838→   838→  z-index: var(--z-nav);
+   839→   839→  bottom: 0;
+   840→   840→  left: 0;
+   841→   841→  right: 0;
+   842→   842→  height: var(--nav-h);
+   843→   843→  padding: 10px 16px max(17px, env(safe-area-inset-bottom));
+   844→   844→  background: var(--cream-raised);
+   845→   845→  border-top: 1px solid var(--nav-line);
+   846→   846→  display: grid;
+   847→   847→  grid-template-columns: repeat(5, 1fr);
+   848→   848→  align-items: center;
+   849→   849→  box-shadow: var(--shadow-nav);
+   850→   850→}
+   851→   851→.bottom-nav button,
+   852→   852→.chw-nav button {
+   853→   853→  border: 0;
+   854→   854→  background: transparent;
+   855→   855→  display: flex;
+   856→   856→  flex-direction: column;
+   857→   857→  align-items: center;
+   858→   858→  justify-content: center;
+   859→   859→  gap: 4px;
+   860→   860→  font-size: var(--text-2xs);
+   861→   861→  color: var(--muted);
+   862→   862→}
+   863→   863→.bottom-nav button.active,
+   864→   864→.chw-nav button.active {
+   865→   865→  color: var(--ink);
+   866→   866→  font-weight: var(--weight-extrabold);
+   867→   867→}
+   868→   868→.bottom-nav .sos-nav {
+   869→   869→  width: var(--sos-orb);
+   870→   870→  height: var(--sos-orb);
+   871→   871→  border-radius: var(--r-full);
+   872→   872→  background: var(--red);
+   873→   873→  border: 5px solid var(--cream);
+   874→   874→  color: #ffffff;
+   875→   875→  font-size: var(--text-lg);
+   876→   876→  font-weight: var(--weight-extrabold);
+   877→   877→  transform: translateY(-17px);
+   878→   878→  justify-self: center;
+   879→   879→  box-shadow: var(--shadow-orb);
+   880→   880→}
+   881→   881→
+   882→   882→/* ==========================================================================
+   883→   883→   03 — Find care
+   884→   884→   ========================================================================== */
+   885→   885→
+   886→   886→.care-screen {
+   887→   887→  padding-left: 0;
+   888→   888→  padding-right: 0;
+   889→   889→}
+   890→   890→.care-screen .screen-header {
+   891→   891→  padding: 0 var(--gutter);
+   892→   892→}
+   893→   893→.care-tabs {
+   894→   894→  display: flex;
+   895→   895→  gap: var(--s-2);
+   896→   896→  overflow-x: auto;
+   897→   897→  scrollbar-width: none;
+   898→   898→  padding: 0 var(--gutter) 13px;
+   899→   899→}
+   900→   900→.care-tabs::-webkit-scrollbar {
+   901→   901→  display: none;
+   902→   902→}
+   903→   903→.care-tabs button {
+   904→   904→  white-space: nowrap;
+   905→   905→  padding: 9px 13px;
+   906→   906→  border: 1px solid var(--line);
+   907→   907→  border-radius: var(--r-xl);
+   908→   908→  background: transparent;
+   909→   909→  font-size: var(--text-sm);
+   910→   910→  font-weight: var(--weight-semibold);
+   911→   911→  color: var(--ink);
+   912→   912→}
+   913→   913→.care-tabs button.active {
+   914→   914→  background: var(--ink);
+   915→   915→  color: #ffffff;
+   916→   916→  border-color: var(--ink);
+   917→   917→}
+   918→   918→.map-preview {
+   919→   919→  height: 180px;
+   920→   920→  position: relative;
+   921→   921→  overflow: hidden;
+   922→   922→  background: var(--card-deep);
+   923→   923→}
+   924→   924→/* Map mode: the map takes over the viewport, the list steps aside */
+   925→   925→.care-screen.map-mode .map-preview {
+   926→   926→  flex: 1;
+   927→   927→  min-height: 420px;
+   928→   928→}
+   929→   929→.care-screen.map-mode .facility-list {
+   930→   930→  display: none;
+   931→   931→}
+   932→   932→.road {
+   933→   933→  position: absolute;
+   934→   934→  height: 9px;
+   935→   935→  background: var(--map-road);
+   936→   936→  border: 1px solid var(--line-strong);
+   937→   937→}
+   938→   938→.r1 {
+   939→   939→  width: 450px;
+   940→   940→  top: 80px;
+   941→   941→  left: -20px;
+   942→   942→  transform: rotate(-7deg);
+   943→   943→}
+   944→   944→.r2 {
+   945→   945→  width: 250px;
+   946→   946→  top: 75px;
+   947→   947→  left: 170px;
+   948→   948→  transform: rotate(67deg);
+   949→   949→}
+   950→   950→.r3 {
+   951→   951→  width: 240px;
+   952→   952→  top: 135px;
+   953→   953→  left: -30px;
+   954→   954→  transform: rotate(33deg);
+   955→   955→}
+   956→   956→.map-pin {
+   957→   957→  position: absolute;
+   958→   958→  width: 38px;
+   959→   959→  height: 38px;
+   960→   960→  border-radius: 50% 50% 50% 4px;
+   961→   961→  transform: rotate(-45deg);
+   962→   962→  background: var(--ink);
+   963→   963→  color: #ffffff;
+   964→   964→  display: grid;
+   965→   965→  place-items: center;
+   966→   966→  box-shadow: var(--shadow-pin);
+   967→   967→}
+   968→   968→.map-pin svg {
+   969→   969→  transform: rotate(45deg);
+   970→   970→}
+   971→   971→.map-pin.p1 {
+   972→   972→  left: 90px;
+   973→   973→  top: 40px;
+   974→   974→}
+   975→   975→.map-pin.p2 {
+   976→   976→  right: 55px;
+   977→   977→  top: 90px;
+   978→   978→  background: var(--lime);
+   979→   979→  color: var(--ink);
+   980→   980→}
+   981→   981→.you-dot {
+   982→   982→  position: absolute;
+   983→   983→  left: 195px;
+   984→   984→  top: 118px;
+   985→   985→  width: 17px;
+   986→   986→  height: 17px;
+   987→   987→  background: var(--ink);
+   988→   988→  border-radius: var(--r-full);
+   989→   989→  border: 4px solid #ffffff;
+   990→   990→  box-shadow: 0 0 0 5px var(--lime-50);
+   991→   991→}
+   992→   992→.view-toggle {
+   993→   993→  position: absolute;
+   994→   994→  bottom: 10px;
+   995→   995→  left: 50%;
+   996→   996→  transform: translateX(-50%);
+   997→   997→  display: flex;
+   998→   998→  background: var(--cream);
+   999→   999→  border-radius: var(--r-lg);
+  1000→  1000→  padding: 3px;
+  1001→  1001→  box-shadow: var(--shadow-float);
+  1002→  1002→}
+  1003→  1003→.view-toggle button {
+  1004→  1004→  border: 0;
+  1005→  1005→  background: transparent;
+  1006→  1006→  font-size: var(--text-xs);
+  1007→  1007→  font-weight: var(--weight-bold);
+  1008→  1008→  padding: 6px 14px;
+  1009→  1009→  border-radius: var(--r-tile);
+  1010→  1010→  color: var(--ink);
+  1011→  1011→}
+  1012→  1012→.view-toggle button.active {
+  1013→  1013→  background: var(--ink);
+  1014→  1014→  color: #ffffff;
+  1015→  1015→}
+  1016→  1016→.filter-row {
+  1017→  1017→  display: flex;
+  1018→  1018→  gap: 7px;
+  1019→  1019→  overflow: auto;
+  1020→  1020→  padding: 13px var(--gutter) 7px;
+  1021→  1021→  scrollbar-width: none;
+  1022→  1022→}
+  1023→  1023→.filter-row::-webkit-scrollbar {
+  1024→  1024→  display: none;
+  1025→  1025→}
+  1026→  1026→.filter-row button {
+  1027→  1027→  white-space: nowrap;
+  1028→  1028→  border: 0;
+  1029→  1029→  padding: 8px 11px;
+  1030→  1030→  border-radius: var(--r-lg);
+  1031→  1031→  background: var(--card);
+  1032→  1032→  font-size: var(--text-xs);
+  1033→  1033→  font-weight: var(--weight-bold);
+  1034→  1034→  color: var(--ink);
+  1035→  1035→}
+  1036→  1036→.filter-row .filter-main {
+  1037→  1037→  display: flex;
+  1038→  1038→  align-items: center;
+  1039→  1039→  gap: 5px;
+  1040→  1040→  background: var(--lime);
+  1041→  1041→}
+  1042→  1042→.result-count {
+  1043→  1043→  padding: 8px var(--gutter) 9px;
+  1044→  1044→  display: flex;
+  1045→  1045→  justify-content: space-between;
+  1046→  1046→  font-size: var(--text-sm);
+  1047→  1047→}
+  1048→  1048→.result-count b {
+  1049→  1049→  font-weight: var(--weight-bold);
+  1050→  1050→}
+  1051→  1051→.result-count span {
+  1052→  1052→  color: var(--muted);
+  1053→  1053→}
+  1054→  1054→.facility-list {
+  1055→  1055→  padding: 0 12px;
+  1056→  1056→  display: flex;
+  1057→  1057→  flex-direction: column;
+  1058→  1058→  gap: var(--s-2);
+  1059→  1059→}
+  1060→  1060→.facility-card {
+  1061→  1061→  width: 100%;
+  1062→  1062→  min-height: 113px;
+  1063→  1063→  border: 0;
+  1064→  1064→  background: var(--surface);
+  1065→  1065→  border-radius: var(--r-xl);
+  1066→  1066→  padding: 13px 11px;
+  1067→  1067→  display: flex;
+  1068→  1068→  align-items: flex-start;
+  1069→  1069→  text-align: left;
+  1070→  1070→  gap: var(--s-25);
+  1071→  1071→  transition: transform var(--dur-fast) var(--ease-out);
+  1072→  1072→}
+  1073→  1073→.facility-card:active {
+  1074→  1074→  transform: scale(0.98);
+  1075→  1075→}
+  1076→  1076→.facility-icon {
+  1077→  1077→  width: var(--tile-md);
+  1078→  1078→  height: var(--tile-md);
+  1079→  1079→  border-radius: var(--r-md);
+  1080→  1080→  background: var(--card);
+  1081→  1081→  display: grid;
+  1082→  1082→  place-items: center;
+  1083→  1083→  flex: none;
+  1084→  1084→}
+  1085→  1085→.facility-content {
+  1086→  1086→  flex: 1;
+  1087→  1087→  min-width: 0;
+  1088→  1088→}
+  1089→  1089→.facility-title {
+  1090→  1090→  display: flex;
+  1091→  1091→  justify-content: space-between;
+  1092→  1092→  gap: 5px;
+  1093→  1093→  align-items: center;
+  1094→  1094→}
+  1095→  1095→.facility-title h3 {
+  1096→  1096→  font-size: 12px;
+  1097→  1097→  white-space: nowrap;
+  1098→  1098→  overflow: hidden;
+  1099→  1099→  text-overflow: ellipsis;
+  1100→  1100→}
+  1101→  1101→.facility-title span {
+  1102→  1102→  font-size: var(--text-xs);
+  1103→  1103→  color: var(--muted-deep);
+  1104→  1104→  white-space: nowrap;
+  1105→  1105→}
+  1106→  1106→.facility-content > p {
+  1107→  1107→  font-size: var(--text-xs);
+  1108→  1108→  margin: 4px 0 7px;
+  1109→  1109→  color: var(--lime-deep);
+  1110→  1110→}
+  1111→  1111→.facility-content > p.closed {
+  1112→  1112→  color: var(--red-deep);
+  1113→  1113→}
+  1114→  1114→.service-chip {
+  1115→  1115→  display: inline-block;
+  1116→  1116→  padding: 4px 6px;
+  1117→  1117→  border-radius: var(--r-xs);
+  1118→  1118→  margin-right: 4px;
+  1119→  1119→  background: var(--cream);
+  1120→  1120→  font-size: var(--text-2xs);
+  1121→  1121→  color: var(--ink-soft);
+  1122→  1122→}
+  1123→  1123→.facility-content > small {
+  1124→  1124→  margin-top: 7px;
+  1125→  1125→  display: flex;
+  1126→  1126→  align-items: center;
+  1127→  1127→  gap: 4px;
+  1128→  1128→  font-size: var(--text-2xs);
+  1129→  1129→  color: var(--muted);
+  1130→  1130→}
+  1131→  1131→.facility-card > svg {
+  1132→  1132→  flex: none;
+  1133→  1133→  color: var(--faint);
+  1134→  1134→}
+  1135→  1135→
+  1136→  1136→/* ==========================================================================
+  1137→  1137→   04 — SOS emergency
+  1138→  1138→   ========================================================================== */
+  1139→  1139→
+  1140→  1140→.sos-screen {
+  1141→  1141→  padding: 0;
+  1142→  1142→}
+  1143→  1143→.sos-header {
+  1144→  1144→  height: 333px;
+  1145→  1145→  padding: 24px 24px 25px;
+  1146→  1146→  background: var(--red);
+  1147→  1147→  color: #ffffff;
+  1148→  1148→  border-radius: 0 0 var(--r-4xl) var(--r-4xl);
+  1149→  1149→  position: relative;
+  1150→  1150→}
+  1151→  1151→.red-back {
+  1152→  1152→  background: rgba(255, 255, 255, 0.13);
+  1153→  1153→  position: absolute;
+  1154→  1154→  top: 22px;
+  1155→  1155→  left: var(--gutter);
+  1156→  1156→  border: 0;
+  1157→  1157→}
+  1158→  1158→.sos-symbol {
+  1159→  1159→  width: var(--sos-symbol);
+  1160→  1160→  height: var(--sos-symbol);
+  1161→  1161→  border: 2px solid rgba(255, 255, 255, 0.7);
+  1162→  1162→  border-radius: var(--r-full);
+  1163→  1163→  display: grid;
+  1164→  1164→  place-items: center;
+  1165→  1165→  margin: 36px auto 12px;
+  1166→  1166→}
+  1167→  1167→.sos-header > p {
+  1168→  1168→  text-align: center;
+  1169→  1169→  font-size: var(--text-xs);
+  1170→  1170→  font-weight: var(--weight-extrabold);
+  1171→  1171→  letter-spacing: 0.16em;
+  1172→  1172→  opacity: 0.8;
+  1173→  1173→}
+  1174→  1174→.sos-header h1 {
+  1175→  1175→  text-align: center;
+  1176→  1176→  font-size: var(--text-hero);
+  1177→  1177→  line-height: 1.02;
+  1178→  1178→  letter-spacing: var(--tracking-display);
+  1179→  1179→  margin: 9px 0;
+  1180→  1180→}
+  1181→  1181→.sos-header > span {
+  1182→  1182→  display: block;
+  1183→  1183→  text-align: center;
+  1184→  1184→  max-width: 290px;
+  1185→  1185→  margin: auto;
+  1186→  1186→  font-size: 11px;
+  1187→  1187→  line-height: var(--leading-body);
+  1188→  1188→  opacity: 0.78;
+  1189→  1189→}
+  1190→  1190→.sos-options {
+  1191→  1191→  padding: var(--gutter);
+  1192→  1192→}
+  1193→  1193→.sos-options > button {
+  1194→  1194→  width: 100%;
+  1195→  1195→  min-height: 59px;
+  1196→  1196→  padding: 8px 8px 8px 10px;
+  1197→  1197→  border: 0;
+  1198→  1198→  background: transparent;
+  1199→  1199→  border-bottom: 1px solid var(--line-soft);
+  1200→  1200→  display: flex;
+  1201→  1201→  align-items: center;
+  1202→  1202→  text-align: left;
+  1203→  1203→  transition: background var(--dur-fast) var(--ease-out);
+  1204→  1204→}
+  1205→  1205→.sos-options > button:active {
+  1206→  1206→  background: var(--card);
+  1207→  1207→}
+  1208→  1208→.emergency-icon {
+  1209→  1209→  width: var(--tile-md);
+  1210→  1210→  height: var(--tile-md);
+  1211→  1211→  flex: none;
+  1212→  1212→  border-radius: var(--r-md);
+  1213→  1213→  background: var(--card);
+  1214→  1214→  display: grid;
+  1215→  1215→  place-items: center;
+  1216→  1216→  margin-right: 11px;
+  1217→  1217→}
+  1218→  1218→.sos-options button .sos-copy {
+  1219→  1219→  flex: 1;
+  1220→  1220→  display: flex;
+  1221→  1221→  flex-direction: column;
+  1222→  1222→  gap: 2px;
+  1223→  1223→}
+  1224→  1224→.sos-options button b {
+  1225→  1225→  font-size: 12px;
+  1226→  1226→}
+  1227→  1227→.sos-options button small {
+  1228→  1228→  font-size: var(--text-xs);
+  1229→  1229→  color: var(--muted);
+  1230→  1230→}
+  1231→  1231→.emergency-call {
+  1232→  1232→  padding-top: var(--s-4);
+  1233→  1233→  text-align: center;
+  1234→  1234→  font-size: var(--text-xs);
+  1235→  1235→  color: var(--muted);
+  1236→  1236→}
+  1237→  1237→.emergency-call div {
+  1238→  1238→  margin-top: var(--s-2);
+  1239→  1239→  display: flex;
+  1240→  1240→  justify-content: center;
+  1241→  1241→  align-items: center;
+  1242→  1242→  gap: var(--s-3);
+  1243→  1243→}
+  1244→  1244→.emergency-call a {
+  1245→  1245→  color: var(--red);
+  1246→  1246→  text-decoration: none;
+  1247→  1247→  font-size: 11px;
+  1248→  1248→  font-weight: var(--weight-extrabold);
+  1249→  1249→  display: flex;
+  1250→  1250→  align-items: center;
+  1251→  1251→  gap: 5px;
+  1252→  1252→}
+  1253→  1253→.emergency-call i {
+  1254→  1254→  width: 1px;
+  1255→  1255→  height: 14px;
+  1256→  1256→  background: var(--line-strong);
+  1257→  1257→}
+  1258→  1258→
+  1259→  1259→/* ==========================================================================
+  1260→  1260→   05 — Live tracking
+  1261→  1261→   ========================================================================== */
+  1262→  1262→
+  1263→  1263→.tracking-screen {
+  1264→  1264→  padding: 0;
+  1265→  1265→  background: var(--card-deep);
+  1266→  1266→  display: flex;
+  1267→  1267→  flex-direction: column;
+  1268→  1268→}
+  1269→  1269→.tracking-map {
+  1270→  1270→  flex: 1 1 auto;
+  1271→  1271→  min-height: 435px;
+  1272→  1272→  position: relative;
+  1273→  1273→  overflow: hidden;
+  1274→  1274→  background: var(--card-deep);
+  1275→  1275→}
+  1276→  1276→.tracking-map .road {
+  1277→  1277→  height: 13px;
+  1278→  1278→  box-shadow: 0 0 0 3px var(--line-strong);
+  1279→  1279→}
+  1280→  1280→.tr1 {
+  1281→  1281→  width: 520px;
+  1282→  1282→  left: -50px;
+  1283→  1283→  top: 210px;
+  1284→  1284→  transform: rotate(-12deg);
+  1285→  1285→}
+  1286→  1286→.tr2 {
+  1287→  1287→  width: 410px;
+  1288→  1288→  left: 60px;
+  1289→  1289→  top: 180px;
+  1290→  1290→  transform: rotate(67deg);
+  1291→  1291→}
+  1292→  1292→.tr3 {
+  1293→  1293→  width: 300px;
+  1294→  1294→  left: -80px;
+  1295→  1295→  top: 90px;
+  1296→  1296→  transform: rotate(51deg);
+  1297→  1297→}
+  1298→  1298→.tr4 {
+  1299→  1299→  width: 240px;
+  1300→  1300→  right: -90px;
+  1301→  1301→  top: 95px;
+  1302→  1302→  transform: rotate(-26deg);
+  1303→  1303→}
+  1304→  1304→.map-label {
+  1305→  1305→  position: absolute;
+  1306→  1306→  color: var(--faint);
+  1307→  1307→  font-size: var(--text-xs);
+  1308→  1308→  letter-spacing: var(--tracking-label-wide);
+  1309→  1309→  font-weight: var(--weight-extrabold);
+  1310→  1310→}
+  1311→  1311→.map-label.l1 {
+  1312→  1312→  left: 38px;
+  1313→  1313→  top: 215px;
+  1314→  1314→}
+  1315→  1315→.map-label.l2 {
+  1316→  1316→  right: 30px;
+  1317→  1317→  top: 195px;
+  1318→  1318→}
+  1319→  1319→.route {
+  1320→  1320→  position: absolute;
+  1321→  1321→  inset: 0;
+  1322→  1322→  width: 100%;
+  1323→  1323→  height: 100%;
+  1324→  1324→}
+  1325→  1325→.route path {
+  1326→  1326→  fill: none;
+  1327→  1327→  stroke: var(--red);
+  1328→  1328→  stroke-width: 5;
+  1329→  1329→  stroke-linecap: round;
+  1330→  1330→  stroke-dasharray: 8 7;
+  1331→  1331→}
+  1332→  1332→.route circle {
+  1333→  1333→  fill: var(--ink);
+  1334→  1334→  stroke: #ffffff;
+  1335→  1335→  stroke-width: 3;
+  1336→  1336→}
+  1337→  1337→.tracking-back {
+  1338→  1338→  position: absolute;
+  1339→  1339→  left: var(--gutter);
+  1340→  1340→  top: 23px;
+  1341→  1341→  width: var(--tile-md);
+  1342→  1342→  height: var(--tile-md);
+  1343→  1343→  border: 0;
+  1344→  1344→  background: var(--cream);
+  1345→  1345→  border-radius: var(--r-full);
+  1346→  1346→  display: grid;
+  1347→  1347→  place-items: center;
+  1348→  1348→  box-shadow: var(--shadow-float);
+  1349→  1349→}
+  1350→  1350→.eta-pill {
+  1351→  1351→  position: absolute;
+  1352→  1352→  top: 23px;
+  1353→  1353→  left: 80px;
+  1354→  1354→  height: 48px;
+  1355→  1355→  display: flex;
+  1356→  1356→  align-items: center;
+  1357→  1357→  gap: 9px;
+  1358→  1358→  background: var(--ink);
+  1359→  1359→  color: #ffffff;
+  1360→  1360→  border-radius: var(--r-2xl);
+  1361→  1361→  padding: 5px 17px 5px 6px;
+  1362→  1362→  box-shadow: var(--shadow-float);
+  1363→  1363→}
+  1364→  1364→.eta-pill > span {
+  1365→  1365→  width: 38px;
+  1366→  1366→  height: 38px;
+  1367→  1367→  border-radius: var(--r-full);
+  1368→  1368→  display: grid;
+  1369→  1369→  place-items: center;
+  1370→  1370→  background: var(--lime);
+  1371→  1371→  color: var(--ink);
+  1372→  1372→  flex: none;
+  1373→  1373→}
+  1374→  1374→.eta-pill div {
+  1375→  1375→  display: flex;
+  1376→  1376→  flex-direction: column;
+  1377→  1377→}
+  1378→  1378→.eta-pill small {
+  1379→  1379→  font-size: var(--text-2xs);
+  1380→  1380→  color: var(--ghost);
+  1381→  1381→  letter-spacing: 0.1em;
+  1382→  1382→}
+  1383→  1383→.eta-pill b {
+  1384→  1384→  font-size: var(--text-lg);
+  1385→  1385→}
+  1386→  1386→.destination-pin {
+  1387→  1387→  position: absolute;
+  1388→  1388→  right: 54px;
+  1389→  1389→  top: 72px;
+  1390→  1390→  line-height: 0;
+  1391→  1391→}
+  1392→  1392→.ambulance-pin {
+  1393→  1393→  position: absolute;
+  1394→  1394→  left: 146px;
+  1395→  1395→  top: 197px;
+  1396→  1396→  width: 48px;
+  1397→  1397→  height: 48px;
+  1398→  1398→  background: var(--lime);
+  1399→  1399→  border: 4px solid #ffffff;
+  1400→  1400→  border-radius: var(--r-full);
+  1401→  1401→  display: grid;
+  1402→  1402→  place-items: center;
+  1403→  1403→  box-shadow: var(--shadow-float);
+  1404→  1404→  line-height: 0;
+  1405→  1405→}
+  1406→  1406→.tracking-sheet {
+  1407→  1407→  flex: none;
+  1408→  1408→  min-height: 409px;
+  1409→  1409→  background: var(--cream);
+  1410→  1410→  border-radius: var(--r-4xl) var(--r-4xl) 0 0;
+  1411→  1411→  padding: 12px var(--gutter) 24px;
+  1412→  1412→  position: relative;
+  1413→  1413→  margin-top: -15px;
+  1414→  1414→}
+  1415→  1415→.grabber {
+  1416→  1416→  width: 39px;
+  1417→  1417→  height: 4px;
+  1418→  1418→  background: var(--line-strong);
+  1419→  1419→  border-radius: 3px;
+  1420→  1420→  margin: 0 auto 16px;
+  1421→  1421→}
+  1422→  1422→.tracking-status {
+  1423→  1423→  display: flex;
+  1424→  1424→  align-items: center;
+  1425→  1425→  flex-wrap: wrap;
+  1426→  1426→  gap: 7px;
+  1427→  1427→}
+  1428→  1428→.tracking-status .live-dot {
+  1429→  1429→  width: 9px;
+  1430→  1430→  height: 9px;
+  1431→  1431→  border-radius: var(--r-full);
+  1432→  1432→  background: var(--lime);
+  1433→  1433→  box-shadow: 0 0 0 5px var(--lime-20);
+  1434→  1434→  animation: live-pulse 2s var(--ease-out) infinite;
+  1435→  1435→}
+  1436→  1436→@keyframes live-pulse {
+  1437→  1437→  0%, 100% {
+  1438→  1438→    box-shadow: 0 0 0 5px var(--lime-20);
+  1439→  1439→  }
+  1440→  1440→  50% {
+  1441→  1441→    box-shadow: 0 0 0 7px var(--lime-25);
+  1442→  1442→  }
+  1443→  1443→}
+  1444→  1444→.tracking-status b {
+  1445→  1445→  font-size: var(--text-2xl);
+  1446→  1446→}
+  1447→  1447→.tracking-status small {
+  1448→  1448→  width: 100%;
+  1449→  1449→  margin-left: 16px;
+  1450→  1450→  font-size: var(--text-2xs);
+  1451→  1451→  color: var(--muted);
+  1452→  1452→}
+  1453→  1453→.driver-card {
+  1454→  1454→  min-height: 80px;
+  1455→  1455→  background: var(--card);
+  1456→  1456→  border-radius: var(--r-xl);
+  1457→  1457→  margin: 13px 0 17px;
+  1458→  1458→  padding: 11px;
+  1459→  1459→  display: flex;
+  1460→  1460→  align-items: center;
+  1461→  1461→  gap: var(--s-25);
+  1462→  1462→}
+  1463→  1463→.avatar {
+  1464→  1464→  width: var(--avatar-driver);
+  1465→  1465→  height: var(--avatar-driver);
+  1466→  1466→  border-radius: var(--r-full);
+  1467→  1467→  color: #ffffff;
+  1468→  1468→  background: #7a6b5f;
+  1469→  1469→  display: grid;
+  1470→  1470→  place-items: center;
+  1471→  1471→  font-weight: var(--weight-bold);
+  1472→  1472→  font-size: 12px;
+  1473→  1473→  flex: none;
+  1474→  1474→}
+  1475→  1475→.driver-card > div {
+  1476→  1476→  flex: 1;
+  1477→  1477→  min-width: 0;
+  1478→  1478→}
+  1479→  1479→.driver-card small {
+  1480→  1480→  font-size: var(--text-2xs);
+  1481→  1481→  letter-spacing: 0.1em;
+  1482→  1482→  font-weight: var(--weight-extrabold);
+  1483→  1483→  color: var(--muted);
+  1484→  1484→}
+  1485→  1485→.driver-card h3 {
+  1486→  1486→  font-size: var(--text-lg);
+  1487→  1487→  margin: 2px 0;
+  1488→  1488→}
+  1489→  1489→.driver-card p {
+  1490→  1490→  font-size: var(--text-2xs);
+  1491→  1491→  color: var(--muted);
+  1492→  1492→}
+  1493→  1493→.driver-card button {
+  1494→  1494→  width: 51px;
+  1495→  1495→  height: 51px;
+  1496→  1496→  border: 0;
+  1497→  1497→  background: var(--lime);
+  1498→  1498→  border-radius: var(--r-lg);
+  1499→  1499→  display: flex;
+  1500→  1500→  flex-direction: column;
+  1501→  1501→  justify-content: center;
+  1502→  1502→  align-items: center;
+  1503→  1503→  font-size: var(--text-2xs);
+  1504→  1504→  font-weight: var(--weight-bold);
+  1505→  1505→  gap: 2px;
+  1506→  1506→  flex: none;
+  1507→  1507→  transition: transform var(--dur-fast) var(--ease-out);
+  1508→  1508→}
+  1509→  1509→.driver-card button:active {
+  1510→  1510→  transform: scale(0.95);
+  1511→  1511→}
+  1512→  1512→.timeline {
+  1513→  1513→  display: flex;
+  1514→  1514→  flex-direction: column;
+  1515→  1515→  padding-left: 4px;
+  1516→  1516→}
+  1517→  1517→.timeline > div {
+  1518→  1518→  height: 39px;
+  1519→  1519→  display: flex;
+  1520→  1520→  align-items: flex-start;
+  1521→  1521→  position: relative;
+  1522→  1522→}
+  1523→  1523→.timeline > div:not(:last-child)::before {
+  1524→  1524→  content: "";
+  1525→  1525→  position: absolute;
+  1526→  1526→  left: 10px;
+  1527→  1527→  top: 21px;
+  1528→  1528→  bottom: -2px;
+  1529→  1529→  width: 1px;
+  1530→  1530→  background: var(--line-strong);
+  1531→  1531→}
+  1532→  1532→.timeline > div.done:not(:last-child)::before {
+  1533→  1533→  background: var(--ink);
+  1534→  1534→}
+  1535→  1535→.timeline > div > span {
+  1536→  1536→  width: 21px;
+  1537→  1537→  height: 21px;
+  1538→  1538→  border: 1px solid var(--line-strong);
+  1539→  1539→  background: var(--cream);
+  1540→  1540→  border-radius: var(--r-full);
+  1541→  1541→  display: grid;
+  1542→  1542→  place-items: center;
+  1543→  1543→  margin-right: 11px;
+  1544→  1544→  z-index: 1;
+  1545→  1545→  flex: none;
+  1546→  1546→}
+  1547→  1547→.timeline > div.done > span {
+  1548→  1548→  background: var(--ink);
+  1549→  1549→  color: var(--lime);
+  1550→  1550→  border-color: var(--ink);
+  1551→  1551→}
+  1552→  1552→.timeline b {
+  1553→  1553→  font-size: var(--text-sm);
+  1554→  1554→  padding-top: 4px;
+  1555→  1555→  font-weight: var(--weight-bold);
+  1556→  1556→}
+  1557→  1557→.timeline small {
+  1558→  1558→  margin-left: auto;
+  1559→  1559→  font-size: var(--text-2xs);
+  1560→  1560→  color: var(--muted);
+  1561→  1561→  padding-top: 4px;
+  1562→  1562→}
+  1563→  1563→.timeline em {
+  1564→  1564→  margin-left: auto;
+  1565→  1565→  color: var(--lime-deep);
+  1566→  1566→  background: var(--lime);
+  1567→  1567→  padding: 3px 7px;
+  1568→  1568→  border-radius: var(--r-sm);
+  1569→  1569→  font-size: var(--text-2xs);
+  1570→  1570→  font-style: normal;
+  1571→  1571→  font-weight: var(--weight-extrabold);
+  1572→  1572→}
+  1573→  1573→.tracking-note {
+  1574→  1574→  text-align: center;
+  1575→  1575→  font-size: var(--text-2xs);
+  1576→  1576→  color: var(--muted);
+  1577→  1577→  margin-top: 5px;
+  1578→  1578→}
+  1579→  1579→
+  1580→  1580→/* ==========================================================================
+  1581→  1581→   06 — Vitals (mother)
+  1582→  1582→   ========================================================================== */
+  1583→  1583→
+  1584→  1584→.sync-state {
+  1585→  1585→  height: 53px;
+  1586→  1586→  display: flex;
+  1587→  1587→  align-items: center;
+  1588→  1588→  padding: 0 13px;
+  1589→  1589→  background: var(--card);
+  1590→  1590→  border-radius: var(--r-lg);
+  1591→  1591→}
+  1592→  1592→.sync-state > span {
+  1593→  1593→  width: 10px;
+  1594→  1594→  height: 10px;
+  1595→  1595→  background: var(--lime);
+  1596→  1596→  border-radius: var(--r-full);
+  1597→  1597→  margin-right: var(--s-25);
+  1598→  1598→  box-shadow: 0 0 0 4px var(--lime-25);
+  1599→  1599→  flex: none;
+  1600→  1600→}
+  1601→  1601→.sync-state p {
+  1602→  1602→  flex: 1;
+  1603→  1603→  display: flex;
+  1604→  1604→  flex-direction: column;
+  1605→  1605→}
+  1606→  1606→.sync-state b {
+  1607→  1607→  font-size: var(--text-sm);
+  1608→  1608→}
+  1609→  1609→.sync-state small {
+  1610→  1610→  font-size: var(--text-2xs);
+  1611→  1611→  color: var(--muted);
+  1612→  1612→  margin-top: 2px;
+  1613→  1613→}
+  1614→  1614→.period-tabs {
+  1615→  1615→  display: grid;
+  1616→  1616→  grid-template-columns: repeat(3, 1fr);
+  1617→  1617→  margin: var(--s-35) 0;
+  1618→  1618→  background: var(--card);
+  1619→  1619→  padding: 4px;
+  1620→  1620→  border-radius: var(--r-lg);
+  1621→  1621→}
+  1622→  1622→.period-tabs button {
+  1623→  1623→  height: var(--h-tab);
+  1624→  1624→  border: 0;
+  1625→  1625→  background: transparent;
+  1626→  1626→  border-radius: var(--r-md);
+  1627→  1627→  font-size: var(--text-xs);
+  1628→  1628→  font-weight: var(--weight-bold);
+  1629→  1629→  color: var(--ink);
+  1630→  1630→  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  1631→  1631→}
+  1632→  1632→.period-tabs button.active {
+  1633→  1633→  background: var(--ink);
+  1634→  1634→  color: #ffffff;
+  1635→  1635→}
+  1636→  1636→.vital-card {
+  1637→  1637→  background: var(--surface);
+  1638→  1638→  padding: var(--s-4);
+  1639→  1639→  border-radius: var(--r-2xl);
+  1640→  1640→  margin-bottom: 11px;
+  1641→  1641→}
+  1642→  1642→.vital-card-head,
+  1643→  1643→.vital-card-head > div {
+  1644→  1644→  display: flex;
+  1645→  1645→  align-items: flex-start;
+  1646→  1646→}
+  1647→  1647→.vital-card-head {
+  1648→  1648→  justify-content: space-between;
+  1649→  1649→}
+  1650→  1650→.vital-icon {
+  1651→  1651→  width: 39px;
+  1652→  1652→  height: 39px;
+  1653→  1653→  display: grid;
+  1654→  1654→  place-items: center;
+  1655→  1655→  background: var(--card);
+  1656→  1656→  border-radius: var(--r-md);
+  1657→  1657→  margin-right: var(--s-25);
+  1658→  1658→  flex: none;
+  1659→  1659→}
+  1660→  1660→.vital-card-head p {
+  1661→  1661→  display: flex;
+  1662→  1662→  align-items: baseline;
+  1663→  1663→  flex-wrap: wrap;
+  1664→  1664→  max-width: 150px;
+  1665→  1665→}
+  1666→  1666→.vital-card-head small {
+  1667→  1667→  width: 100%;
+  1668→  1668→  font-size: var(--text-2xs);
+  1669→  1669→  letter-spacing: 0.1em;
+  1670→  1670→  font-weight: var(--weight-extrabold);
+  1671→  1671→  color: var(--muted);
+  1672→  1672→  margin-bottom: 2px;
+  1673→  1673→}
+  1674→  1674→.vital-card-head b {
+  1675→  1675→  font-size: 29px;
+  1676→  1676→  letter-spacing: -0.06em;
+  1677→  1677→  line-height: 1;
+  1678→  1678→}
+  1679→  1679→.vital-card-head b em {
+  1680→  1680→  font-size: 17px;
+  1681→  1681→  font-style: normal;
+  1682→  1682→  color: var(--muted);
+  1683→  1683→}
+  1684→  1684→.vital-card-head p > i {
+  1685→  1685→  font-size: var(--text-2xs);
+  1686→  1686→  font-style: normal;
+  1687→  1687→  color: var(--muted);
+  1688→  1688→  margin-left: 4px;
+  1689→  1689→}
+  1690→  1690→.line-chart {
+  1691→  1691→  width: 100%;
+  1692→  1692→  height: 84px;
+  1693→  1693→  margin-top: var(--s-3);
+  1694→  1694→  overflow: visible;
+  1695→  1695→}
+  1696→  1696→.line-chart.compact {
+  1697→  1697→  height: 57px;
+  1698→  1698→}
+  1699→  1699→.chart-grid line {
+  1700→  1700→  stroke: var(--chart-grid);
+  1701→  1701→  stroke-width: 1;
+  1702→  1702→  stroke-dasharray: 3 4;
+  1703→  1703→}
+  1704→  1704→.chart-line {
+  1705→  1705→  fill: none;
+  1706→  1706→  stroke: var(--ink);
+  1707→  1707→  stroke-width: 2.5;
+  1708→  1708→  vector-effect: non-scaling-stroke;
+  1709→  1709→}
+  1710→  1710→.chart-area {
+  1711→  1711→  fill: var(--lime-22);
+  1712→  1712→}
+  1713→  1713→.danger-line {
+  1714→  1714→  fill: none;
+  1715→  1715→  stroke: var(--red);
+  1716→  1716→  stroke-width: 2.5;
+  1717→  1717→  vector-effect: non-scaling-stroke;
+  1718→  1718→}
+  1719→  1719→.danger-area {
+  1720→  1720→  fill: rgba(198, 40, 40, 0.09);
+  1721→  1721→}
+  1722→  1722→.chart-axis {
+  1723→  1723→  display: flex;
+  1724→  1724→  justify-content: space-between;
+  1725→  1725→  font-size: var(--text-2xs);
+  1726→  1726→  color: var(--faint);
+  1727→  1727→}
+  1728→  1728→.insight {
+  1729→  1729→  min-height: 31px;
+  1730→  1730→  display: flex;
+  1731→  1731→  align-items: center;
+  1732→  1732→  gap: 7px;
+  1733→  1733→  background: var(--cream);
+  1734→  1734→  border-radius: var(--r-md);
+  1735→  1735→  padding: 6px 9px;
+  1736→  1736→  margin-top: 11px;
+  1737→  1737→  font-size: var(--text-2xs);
+  1738→  1738→}
+  1739→  1739→.insight span {
+  1740→  1740→  width: 18px;
+  1741→  1741→  height: 18px;
+  1742→  1742→  background: var(--lime);
+  1743→  1743→  border-radius: var(--r-full);
+  1744→  1744→  display: grid;
+  1745→  1745→  place-items: center;
+  1746→  1746→  flex: none;
+  1747→  1747→}
+  1748→  1748→.heart-card {
+  1749→  1749→  padding-bottom: 12px;
+  1750→  1750→}
+  1751→  1751→.vitals-tip {
+  1752→  1752→  min-height: 57px;
+  1753→  1753→  border: 1px solid var(--line);
+  1754→  1754→  border-radius: var(--r-lg);
+  1755→  1755→  display: flex;
+  1756→  1756→  align-items: center;
+  1757→  1757→  gap: 11px;
+  1758→  1758→  padding: 10px 13px;
+  1759→  1759→}
+  1760→  1760→.vitals-tip > svg {
+  1761→  1761→  color: var(--lime-deep);
+  1762→  1762→  flex: none;
+  1763→  1763→}
+  1764→  1764→.vitals-tip p {
+  1765→  1765→  display: flex;
+  1766→  1766→  flex-direction: column;
+  1767→  1767→}
+  1768→  1768→.vitals-tip b {
+  1769→  1769→  font-size: var(--text-sm);
+  1770→  1770→}
+  1771→  1771→.vitals-tip small {
+  1772→  1772→  font-size: var(--text-2xs);
+  1773→  1773→  color: var(--muted);
+  1774→  1774→  margin-top: 3px;
+  1775→  1775→}
+  1776→  1776→.vitals-emergency {
+  1777→  1777→  margin-top: 11px;
+  1778→  1778→}
+  1779→  1779→
+  1780→  1780→/* ==========================================================================
+  1781→  1781→   07 — CHW dashboard
+  1782→  1782→   ========================================================================== */
+  1783→  1783→
+  1784→  1784→.chw-head {
+  1785→  1785→  align-items: flex-start;
+  1786→  1786→  margin-top: 8px;
+  1787→  1787→}
+  1788→  1788→.chw-head p {
+  1789→  1789→  font-size: var(--text-2xs);
+  1790→  1790→  color: var(--muted);
+  1791→  1791→  letter-spacing: var(--tracking-label);
+  1792→  1792→  font-weight: var(--weight-extrabold);
+  1793→  1793→}
+  1794→  1794→.chw-head h1 {
+  1795→  1795→  margin-top: 5px;
+  1796→  1796→  font-size: var(--text-6xl);
+  1797→  1797→  line-height: var(--leading-tight);
+  1798→  1798→  letter-spacing: var(--tracking-display);
+  1799→  1799→}
+  1800→  1800→.alert-banner {
+  1801→  1801→  width: 100%;
+  1802→  1802→  min-height: 102px;
+  1803→  1803→  border: 0;
+  1804→  1804→  background: var(--red);
+  1805→  1805→  color: #ffffff;
+  1806→  1806→  border-radius: var(--r-2xl);
+  1807→  1807→  padding: 15px;
+  1808→  1808→  display: flex;
+  1809→  1809→  align-items: center;
+  1810→  1810→  text-align: left;
+  1811→  1811→  box-shadow: var(--shadow-red-lg);
+  1812→  1812→  transition: transform var(--dur-fast) var(--ease-out);
+  1813→  1813→}
+  1814→  1814→.alert-banner:active {
+  1815→  1815→  transform: scale(0.985);
+  1816→  1816→}
+  1817→  1817→.alert-icon {
+  1818→  1818→  width: 48px;
+  1819→  1819→  height: 48px;
+  1820→  1820→  flex: none;
+  1821→  1821→  background: var(--white-overlay-soft);
+  1822→  1822→  border-radius: var(--r-lg);
+  1823→  1823→  display: grid;
+  1824→  1824→  place-items: center;
+  1825→  1825→  margin-right: 11px;
+  1826→  1826→}
+  1827→  1827→.alert-banner .alert-copy {
+  1828→  1828→  flex: 1;
+  1829→  1829→  min-width: 0;
+  1830→  1830→}
+  1831→  1831→.alert-banner small {
+  1832→  1832→  font-size: var(--text-2xs);
+  1833→  1833→  letter-spacing: var(--tracking-label);
+  1834→  1834→  opacity: 0.75;
+  1835→  1835→}
+  1836→  1836→.alert-banner b {
+  1837→  1837→  display: block;
+  1838→  1838→  font-size: 12px;
+  1839→  1839→  margin: 4px 0 5px;
+  1840→  1840→}
+  1841→  1841→.alert-banner p {
+  1842→  1842→  font-size: var(--text-2xs);
+  1843→  1843→  display: flex;
+  1844→  1844→  align-items: center;
+  1845→  1845→  gap: 3px;
+  1846→  1846→  opacity: 0.8;
+  1847→  1847→}
+  1848→  1848→.stats-row {
+  1849→  1849→  min-height: 70px;
+  1850→  1850→  background: var(--card);
+  1851→  1851→  margin-top: var(--s-3);
+  1852→  1852→  border-radius: var(--r-xl);
+  1853→  1853→  display: grid;
+  1854→  1854→  grid-template-columns: repeat(3, 1fr);
+  1855→  1855→}
+  1856→  1856→.stats-row div {
+  1857→  1857→  display: flex;
+  1858→  1858→  flex-direction: column;
+  1859→  1859→  align-items: center;
+  1860→  1860→  justify-content: center;
+  1861→  1861→  position: relative;
+  1862→  1862→}
+  1863→  1863→.stats-row div:not(:last-child)::after {
+  1864→  1864→  content: "";
+  1865→  1865→  position: absolute;
+  1866→  1866→  right: 0;
+  1867→  1867→  width: 1px;
+  1868→  1868→  height: 30px;
+  1869→  1869→  background: var(--line-strong);
+  1870→  1870→}
+  1871→  1871→.stats-row b {
+  1872→  1872→  font-size: var(--text-5xl);
+  1873→  1873→  letter-spacing: -0.05em;
+  1874→  1874→}
+  1875→  1875→.stats-row span {
+  1876→  1876→  font-size: var(--text-2xs);
+  1877→  1877→  color: var(--muted);
+  1878→  1878→  margin-top: 2px;
+  1879→  1879→}
+  1880→  1880→.red-text {
+  1881→  1881→  color: var(--red) !important;
+  1882→  1882→}
+  1883→  1883→.patients-title {
+  1884→  1884→  margin-top: 18px;
+  1885→  1885→}
+  1886→  1886→.search-box {
+  1887→  1887→  height: 44px;
+  1888→  1888→  border-radius: var(--r-lg);
+  1889→  1889→  background: var(--surface);
+  1890→  1890→  display: flex;
+  1891→  1891→  align-items: center;
+  1892→  1892→  padding: 0 var(--s-3);
+  1893→  1893→  gap: 9px;
+  1894→  1894→}
+  1895→  1895→.search-box > svg {
+  1896→  1896→  color: var(--faint);
+  1897→  1897→  flex: none;
+  1898→  1898→}
+  1899→  1899→.search-box input {
+  1900→  1900→  flex: 1;
+  1901→  1901→  min-width: 0;
+  1902→  1902→  border: 0;
+  1903→  1903→  outline: 0;
+  1904→  1904→  font-size: var(--text-base);
+  1905→  1905→  background: transparent;
+  1906→  1906→  color: var(--ink);
+  1907→  1907→}
+  1908→  1908→.search-box input::placeholder {
+  1909→  1909→  color: var(--faint-2);
+  1910→  1910→}
+  1911→  1911→.search-box button {
+  1912→  1912→  width: 30px;
+  1913→  1913→  height: 30px;
+  1914→  1914→  border: 0;
+  1915→  1915→  background: var(--card);
+  1916→  1916→  display: grid;
+  1917→  1917→  place-items: center;
+  1918→  1918→  border-radius: var(--r-sm);
+  1919→  1919→  flex: none;
+  1920→  1920→}
+  1921→  1921→.patient-list {
+  1922→  1922→  margin-top: var(--s-2);
+  1923→  1923→}
+  1924→  1924→.patient-row {
+  1925→  1925→  width: 100%;
+  1926→  1926→  min-height: 70px;
+  1927→  1927→  border: 0;
+  1928→  1928→  background: transparent;
+  1929→  1929→  display: flex;
+  1930→  1930→  align-items: center;
+  1931→  1931→  text-align: left;
+  1932→  1932→  border-bottom: 1px solid var(--line-soft);
+  1933→  1933→  gap: var(--s-25);
+  1934→  1934→  padding: 6px 0;
+  1935→  1935→  transition: background var(--dur-fast) var(--ease-out);
+  1936→  1936→}
+  1937→  1937→.patient-row:active {
+  1938→  1938→  background: var(--card);
+  1939→  1939→}
+  1940→  1940→.patient-avatar {
+  1941→  1941→  width: var(--avatar-row);
+  1942→  1942→  height: var(--avatar-row);
+  1943→  1943→  flex: none;
+  1944→  1944→  border-radius: var(--r-full);
+  1945→  1945→  color: #ffffff;
+  1946→  1946→  display: grid;
+  1947→  1947→  place-items: center;
+  1948→  1948→  font-size: var(--text-sm);
+  1949→  1949→  font-weight: var(--weight-bold);
+  1950→  1950→}
+  1951→  1951→.patient-info {
+  1952→  1952→  flex: 1;
+  1953→  1953→  min-width: 0;
+  1954→  1954→}
+  1955→  1955→.patient-info h3 {
+  1956→  1956→  font-size: var(--text-base);
+  1957→  1957→}
+  1958→  1958→.patient-info p {
+  1959→  1959→  margin-top: 5px;
+  1960→  1960→  font-size: var(--text-2xs);
+  1961→  1961→  color: var(--muted);
+  1962→  1962→  display: flex;
+  1963→  1963→  align-items: center;
+  1964→  1964→  gap: 5px;
+  1965→  1965→}
+  1966→  1966→.patient-info p i {
+  1967→  1967→  width: 3px;
+  1968→  1968→  height: 3px;
+  1969→  1969→  border-radius: var(--r-full);
+  1970→  1970→  background: var(--faint);
+  1971→  1971→}
+  1972→  1972→.patient-info p b {
+  1973→  1973→  color: var(--ink-soft);
+  1974→  1974→  font-weight: var(--weight-bold);
+  1975→  1975→}
+  1976→  1976→.risk {
+  1977→  1977→  padding: 5px 7px;
+  1978→  1978→  border-radius: var(--r-sm);
+  1979→  1979→  background: var(--lime);
+  1980→  1980→  font-size: var(--text-2xs);
+  1981→  1981→  font-weight: var(--weight-extrabold);
+  1982→  1982→  white-space: nowrap;
+  1983→  1983→  flex: none;
+  1984→  1984→}
+  1985→  1985→.risk.high {
+  1986→  1986→  color: var(--red-deep);
+  1987→  1987→  background: var(--red-tint);
+  1988→  1988→}
+  1989→  1989→.risk.watch {
+  1990→  1990→  background: var(--watch-bg);
+  1991→  1991→  color: var(--watch-ink);
+  1992→  1992→}
+  1993→  1993→.chw-nav .add-patient {
+  1994→  1994→  width: var(--add-btn);
+  1995→  1995→  height: var(--add-btn);
+  1996→  1996→  border: 0;
+  1997→  1997→  border-radius: var(--r-full);
+  1998→  1998→  background: var(--lime);
+  1999→  1999→  justify-self: center;
+  2000→  2000→  transform: translateY(-15px);
+
+[showing lines 1-2000 of 2002; use offset=2001 with limit to continue reading]

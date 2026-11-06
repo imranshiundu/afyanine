@@ -4,41 +4,77 @@ import { useState } from "react";
 import { Icon } from "../Icon";
 import { Logo } from "../Logo";
 import { BRAND, LOGIN_COPY, type Role } from "../data";
+import { stagger } from "../useMotion";
 
 export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
   const [role, setRole] = useState<Role>("mother");
   const [language, setLanguage] = useState<"EN" | "SW">("EN");
   const [phone, setPhone] = useState("");
+  const [shake, setShake] = useState(false);
   const t = LOGIN_COPY[language];
+
+  const digits = phone.replace(/\s/g, "");
+  const valid = digits.length >= 9;
+
+  const submit = () => {
+    if (!valid) {
+      setShake(true);
+      window.setTimeout(() => setShake(false), 500);
+      return;
+    }
+    onEnter(role);
+  };
 
   return (
     <main className="screen login-screen">
-      <div className="login-top">
-        <div className="language-toggle" role="group" aria-label="Language">
-          {(["EN", "SW"] as const).map((l) => (
-            <button
-              key={l}
-              type="button"
-              onClick={() => setLanguage(l)}
-              className={language === l ? "active" : ""}
-              aria-pressed={language === l}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-        <Logo />
-        <p className="brand-tagline">{BRAND.tagline}</p>
-        <p className="eyebrow">{t.eyebrow}</p>
-        <h1>{t.welcome}</h1>
-        <p className="lead">{t.lead}</p>
+      {/* Ambient art — soft lime shapes drifting behind the content */}
+      <div className="login-art" aria-hidden="true">
+        <span className="blob blob-a" />
+        <span className="blob blob-b" />
+        <span className="dotty" />
+        <Icon name="sparkles" className="floaty floaty-1" size={18} />
+        <Icon name="heart" className="floaty floaty-2" size={15} />
       </div>
 
-      <section>
-        <label className="field-label" id="role-label">
+      <div className="login-top stagger">
+        <div className="login-top-row" style={stagger(0)}>
+          <Logo />
+          <div className="language-toggle" role="group" aria-label="Language">
+            {(["EN", "SW"] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLanguage(l)}
+                className={language === l ? "active" : ""}
+                aria-pressed={language === l}
+              >
+                {l}
+              </button>
+            ))}
+            <span
+              className="lang-thumb"
+              aria-hidden="true"
+              data-pos={language === "EN" ? 0 : 1}
+            />
+          </div>
+        </div>
+        <p className="brand-tagline" style={stagger(1)}>
+          {BRAND.tagline}
+        </p>
+        <p className="eyebrow" style={stagger(2)}>
+          {t.eyebrow}
+        </p>
+        <h1 style={stagger(3)}>{t.welcome}</h1>
+        <p className="lead" style={stagger(4)}>
+          {t.lead}
+        </p>
+      </div>
+
+      <section className="stagger">
+        <label className="field-label" id="role-label" style={stagger(5)}>
           {t.signInAs}
         </label>
-        <div className="role-grid" role="radiogroup" aria-labelledby="role-label">
+        <div className="role-grid" role="radiogroup" aria-labelledby="role-label" style={stagger(6)}>
           <button
             type="button"
             role="radio"
@@ -81,10 +117,13 @@ export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
           </button>
         </div>
 
-        <label className="field-label" htmlFor="phone">
+        <label className="field-label" htmlFor="phone" style={stagger(7)}>
           {t.phone}
         </label>
-        <div className="phone-field">
+        <div
+          className={`phone-field${shake ? " shake" : ""}${digits && !valid ? " invalid" : ""}`}
+          style={stagger(8)}
+        >
           <span>+254</span>
           <input
             id="phone"
@@ -92,15 +131,31 @@ export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
             inputMode="numeric"
             autoComplete="tel-national"
             value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, ""))}
+            onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, "").slice(0, 11))}
             placeholder="712 345 678"
           />
+          {valid && (
+            <span className="field-ok" aria-hidden="true">
+              <Icon name="check" size={15} strokeWidth={3} />
+            </span>
+          )}
         </div>
+        <p className="phone-hint" style={stagger(9)}>
+          {valid ? t.otpSent(digits) : t.phoneHint}
+        </p>
 
-        <button type="button" className="primary-button" onClick={() => onEnter(role)}>
+        <button
+          type="button"
+          className={`primary-button${valid ? "" : " disabled"}`}
+          style={stagger(10)}
+          onClick={submit}
+          disabled={!valid}
+        >
           {t.cta} <Icon name="arrow" />
         </button>
-        <p className="privacy">{t.privacy}</p>
+        <p className="privacy" style={stagger(11)}>
+          {t.privacy}
+        </p>
       </section>
     </main>
   );

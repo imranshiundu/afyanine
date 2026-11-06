@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Icon } from "../Icon";
 import { Header } from "../chrome";
-import { LineChart } from "../charts";
+import { ChartAxis, Sparkline } from "../charts";
 import { AI_ALERT, BP_TREND, FLAGGED, type Screen } from "../data";
+import { stagger } from "../useMotion";
 
 export function PatientDetail({
   navigate,
@@ -14,14 +15,19 @@ export function PatientDetail({
   notify: (msg: string) => void;
 }) {
   const [note, setNote] = useState("");
+  const [saved, setSaved] = useState(false);
 
   const saveNote = () => {
     if (!note.trim()) {
       notify("Add a note before saving");
       return;
     }
+    setSaved(true);
     notify("Note saved to patient record");
-    setNote("");
+    window.setTimeout(() => {
+      setSaved(false);
+      setNote("");
+    }, 1400);
   };
 
   return (
@@ -30,13 +36,18 @@ export function PatientDetail({
         title="Patient details"
         onBack={() => navigate("chw")}
         action={
-          <button type="button" className="icon-button" aria-label="More options">
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Patient history"
+            onClick={() => notify("Opening full history")}
+          >
             <Icon name="more" />
           </button>
         }
       />
 
-      <section className="patient-profile">
+      <section className="patient-profile stagger" style={stagger(0)}>
         <span className="patient-avatar large" style={{ background: FLAGGED.color }} aria-hidden="true">
           {FLAGGED.initials}
         </span>
@@ -53,9 +64,9 @@ export function PatientDetail({
         </button>
       </section>
 
-      <section className="ai-alert" aria-live="polite">
+      <section className="ai-alert stagger" aria-live="polite" style={stagger(1)}>
         <div className="ai-title">
-          <span>
+          <span className="ai-pulse">
             <Icon name="warning" size={22} stroke="#FFFFFF" />
           </span>
           <div>
@@ -75,12 +86,19 @@ export function PatientDetail({
             <small>{AI_ALERT.trendLabel}</small>
           </span>
         </div>
-        <button type="button" onClick={() => notify("Alert marked for urgent follow-up")}>
+        <button
+          type="button"
+          onClick={() => notify("Alert marked for urgent follow-up")}
+        >
           Mark for urgent follow-up <Icon name="arrow" size={17} />
         </button>
       </section>
 
-      <section className="bp-card" aria-label="Blood pressure trend">
+      <section
+        className="bp-card"
+        aria-label="Blood pressure trend"
+        style={stagger(2)}
+      >
         <div className="card-title">
           <div>
             <p>{BP_TREND.label}</p>
@@ -88,30 +106,28 @@ export function PatientDetail({
           </div>
           <span className="status high">{BP_TREND.status}</span>
         </div>
-        <div className="bp-chart-wrap">
-          <div className="bp-labels" aria-hidden="true">
-            {BP_TREND.yLabels.map((y) => (
-              <span key={y}>{y}</span>
-            ))}
-          </div>
-          <LineChart danger label="Blood pressure trend rising from 128 over 84 to 148 over 96 over seven days" />
-        </div>
-        <div className="chart-axis detail-axis" aria-hidden="true">
-          {BP_TREND.axis.map((x) => (
-            <span key={x}>{x}</span>
-          ))}
-        </div>
+        <Sparkline
+          data={[...BP_TREND.series]}
+          labels={["12 Jun", "13 Jun", "14 Jun", "15 Jun", "16 Jun", "17 Jun", "Today"]}
+          min={100}
+          max={160}
+          danger
+          threshold={BP_TREND.threshold}
+          thresholdLabel="140 danger line"
+          ariaLabel="Blood pressure trend rising from 128 over 84 to 148 over 96 over seven days, above the 140 danger line"
+        />
+        <ChartAxis labels={BP_TREND.axis} indent />
         <div className="legend" aria-hidden="true">
           <span>
-            <i /> Systolic
+            <i className="legend-sys" /> Systolic
           </span>
           <span>
-            <i /> Healthy threshold
+            <i className="legend-th" /> Danger line
           </span>
         </div>
       </section>
 
-      <section className="notes-card" aria-label="Visit notes">
+      <section className="notes-card" aria-label="Visit notes" style={stagger(3)}>
         <div className="card-title">
           <div>
             <p>VISIT NOTES</p>
@@ -125,12 +141,29 @@ export function PatientDetail({
           placeholder="Add symptoms, observations or follow-up actions..."
           aria-label="Visit note"
         />
-        <button type="button" className="primary-button" onClick={saveNote}>
-          Save note <Icon name="check" />
+        <button
+          type="button"
+          className={`primary-button save-note${saved ? " saved" : ""}`}
+          onClick={saveNote}
+        >
+          {saved ? (
+            <>
+              <Icon name="check" strokeWidth={3} /> Saved
+            </>
+          ) : (
+            <>
+              Save note <Icon name="check" />
+            </>
+          )}
         </button>
       </section>
 
-      <button type="button" className="outline-call" onClick={() => notify(`Calling ${FLAGGED.name}`)}>
+      <button
+        type="button"
+        className="outline-call"
+        style={stagger(4)}
+        onClick={() => notify(`Calling ${FLAGGED.name}`)}
+      >
         <Icon name="phone" /> Call patient
       </button>
     </main>

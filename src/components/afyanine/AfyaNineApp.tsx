@@ -12,37 +12,35 @@ import { ChwDashboard } from "./screens/ChwDashboard";
 import { PatientDetail } from "./screens/PatientDetail";
 import type { Role, Screen } from "./data";
 
-const NAV_SCREENS: Screen[] = ["home", "care"];
+const NAV_SCREENS: Screen[] = ["home", "care", "vitals"];
 
 export function AfyaNine() {
   const [screen, setScreen] = useState<Screen>("login");
   const [stack, setStack] = useState<Screen[]>([]);
   const [role, setRole] = useState<Role>("mother");
+  const [dir, setDir] = useState<"fwd" | "back">("fwd");
+  const [emergencyType, setEmergencyType] = useState("");
   const [toast, setToast] = useState("");
-  const shellRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef<number | null>(null);
-
-  const scrollTop = () => {
-    shellRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   /* Forward navigation: remember where we came from */
   const navigate = (next: Screen) => {
+    setDir("fwd");
     setStack((s) => (screen === "login" ? s : [...s, screen]));
     setScreen(next);
-    scrollTop();
   };
 
   /* Entry points (login) reset the whole journey */
   const enter = (chosen: Role) => {
+    setDir("fwd");
     setRole(chosen);
     setStack([]);
     setScreen(chosen === "mother" ? "home" : "chw");
-    scrollTop();
   };
 
   /* Back pops history, falling back to the signed-in role's home */
   const goBack = () => {
+    setDir("back");
     const prev = stack[stack.length - 1];
     if (prev) {
       setStack(stack.slice(0, -1));
@@ -50,12 +48,13 @@ export function AfyaNine() {
     } else {
       setScreen(role === "chw" ? "chw" : "home");
     }
-    scrollTop();
   };
 
   const notify = (message: string) => {
     if (toastTimer.current) window.clearTimeout(toastTimer.current);
-    setToast(message);
+    setToast("");
+    /* retrigger the toast animation even when the message repeats */
+    window.requestAnimationFrame(() => setToast(message));
     toastTimer.current = window.setTimeout(() => setToast(""), 2400);
   };
 
@@ -67,32 +66,46 @@ export function AfyaNine() {
 
   return (
     <div className="page">
-      <div className="app-shell" ref={shellRef}>
-        {screen === "login" && <Login onEnter={enter} />}
-        {screen === "home" && (
-          <Home navigate={navigate} notify={notify} onProfile={() => notify("Signed in as Wanjiku · Mother")} />
-        )}
-        {screen === "care" && (
-          <FindCare navigate={navigate} notify={notify} onProfile={() => notify("Signed in as Wanjiku · Mother")} />
-        )}
-        {screen === "sos" && <Sos goBack={goBack} navigate={navigate} />}
-        {screen === "tracking" && <Tracking goBack={goBack} notify={notify} />}
-        {screen === "vitals" && <Vitals navigate={navigate} />}
-        {screen === "chw" && (
-          <ChwDashboard
-            navigate={navigate}
-            notify={notify}
-            onLogout={() => {
-              setStack([]);
-              setScreen("login");
-              scrollTop();
-            }}
-          />
-        )}
-        {screen === "patient" && <PatientDetail navigate={navigate} notify={notify} />}
+      <div className="app-shell">
+        <div key={screen} className={`view ${dir}`}>
+          {screen === "login" && <Login onEnter={enter} />}
+          {screen === "home" && (
+            <Home navigate={navigate} notify={notify} onProfile={() => notify("Signed in as Wanjiku · Mother")} />
+          )}
+          {screen === "care" && (
+            <FindCare navigate={navigate} notify={notify} onProfile={() => notify("Signed in as Wanjiku · Mother")} />
+          )}
+          {screen === "sos" && (
+            <Sos
+              goBack={goBack}
+              navigate={navigate}
+              onEmergencyPicked={(title) => setEmergencyType(title)}
+            />
+          )}
+          {screen === "tracking" && (
+            <Tracking goBack={goBack} notify={notify} emergencyType={emergencyType} />
+          )}
+          {screen === "vitals" && <Vitals navigate={navigate} notify={notify} />}
+          {screen === "chw" && (
+            <ChwDashboard
+              navigate={navigate}
+              notify={notify}
+              onLogout={() => {
+                setDir("back");
+                setStack([]);
+                setScreen("login");
+              }}
+            />
+          )}
+          {screen === "patient" && <PatientDetail navigate={navigate} notify={notify} />}
+        </div>
 
         {toast && (
-          <div className={`toast${NAV_SCREENS.includes(screen) ? " raised" : ""}`} role="status" aria-live="polite">
+          <div
+            className={`toast${NAV_SCREENS.includes(screen) ? " raised" : ""}`}
+            role="status"
+            aria-live="polite"
+          >
             <Icon name="check" size={17} strokeWidth={3} />
             {toast}
           </div>

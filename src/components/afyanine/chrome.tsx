@@ -43,12 +43,6 @@ export function BottomNav({
   navigate: (s: Screen) => void;
   onProfile: () => void;
 }) {
-  const items: Array<{ key: Screen; icon: "home" | "pin" | "activity" | "user"; label: string }> = [
-    { key: "home", icon: "home", label: "Home" },
-    { key: "care", icon: "pin", label: "Care" },
-    { key: "vitals", icon: "activity", label: "Vitals" },
-    { key: "login", icon: "user", label: "Profile" },
-  ];
   return (
     <nav className="bottom-nav" aria-label="Primary">
       <button

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { CHW, PATIENTS, type Patient, type Screen } from "../data";
+import { useCountUp, stagger } from "../useMotion";
 
 function riskClass(risk: Patient["risk"]) {
   if (risk === "High Risk") return "high";
@@ -23,10 +24,14 @@ export function ChwDashboard({
   const searchRef = useRef<HTMLInputElement>(null);
   const filtered = PATIENTS.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
 
+  const patients = useCountUp(CHW.stats.patients, 900);
+  const attention = useCountUp(CHW.stats.attention, 900);
+  const visits = useCountUp(CHW.stats.visits, 900);
+
   return (
     <main className="screen chw-screen">
-      <div className="chw-head">
-        <div>
+      <div className="chw-head stagger">
+        <div style={stagger(0)}>
           <p>{CHW.date}</p>
           <h1>
             Good morning,
@@ -34,18 +39,31 @@ export function ChwDashboard({
             {CHW.firstName}
           </h1>
         </div>
-        <button type="button" className="notification" aria-label="Notifications, 1 unread">
+        <button
+          type="button"
+          className="notification"
+          aria-label="Notifications, 1 unread"
+          onClick={() => notify("1 active emergency · 2 new messages")}
+          style={stagger(1)}
+        >
           <Icon name="bell" />
           <i />
         </button>
       </div>
 
-      <button type="button" className="alert-banner" onClick={() => navigate("tracking")}>
+      <button
+        type="button"
+        className="alert-banner"
+        onClick={() => navigate("tracking")}
+        style={stagger(2)}
+      >
         <span className="alert-icon">
           <Icon name="ambulance" size={25} stroke="#FFFFFF" />
         </span>
         <span className="alert-copy">
-          <small>{CHW.emergency.label}</small>
+          <small>
+            <i className="alert-live" aria-hidden="true" /> {CHW.emergency.label}
+          </small>
           <b>{CHW.emergency.who}</b>
           <p>
             <Icon name="pin" size={14} /> {CHW.emergency.where}
@@ -54,24 +72,26 @@ export function ChwDashboard({
         <Icon name="chevron" stroke="#FFFFFF" />
       </button>
 
-      <div className="stats-row" aria-label="Practice summary">
+      <div className="stats-row" aria-label="Practice summary" style={stagger(3)}>
         <div>
-          <b>{CHW.stats.patients}</b>
+          <b>{patients}</b>
           <span>Patients</span>
         </div>
         <div>
-          <b className="red-text">{CHW.stats.attention}</b>
+          <b className="red-text">{attention}</b>
           <span>Need attention</span>
         </div>
         <div>
-          <b>{CHW.stats.visits}</b>
+          <b>{visits}</b>
           <span>Visits today</span>
         </div>
       </div>
 
       <div className="section-title patients-title">
         <h2>My patients</h2>
-        <button type="button">View all</button>
+        <button type="button" onClick={() => notify("Showing all 24 patients")}>
+          View all
+        </button>
       </div>
 
       <div className="search-box">
@@ -83,21 +103,34 @@ export function ChwDashboard({
           placeholder="Search patients"
           aria-label="Search patients"
         />
-        <button type="button" aria-label="Filter list">
-          <Icon name="sliders" size={18} />
-        </button>
+        {query ? (
+          <button type="button" aria-label="Clear search" onClick={() => setQuery("")}>
+            <Icon name="x" size={16} />
+          </button>
+        ) : (
+          <button type="button" aria-label="Filter list">
+            <Icon name="sliders" size={18} />
+          </button>
+        )}
       </div>
 
-      <div className="patient-list">
-        {filtered.map((p) => (
-          <button className="patient-row" key={p.id} type="button" onClick={() => navigate("patient")}>
+      <div className="patient-list stagger" key={query}>
+        {filtered.map((p, i) => (
+          <button
+            className="patient-row"
+            key={p.id}
+            type="button"
+            style={stagger(i)}
+            onClick={() => navigate("patient")}
+          >
             <span className="patient-avatar" style={{ background: p.color }} aria-hidden="true">
               {p.initials}
             </span>
             <span className="patient-info">
               <h3>{p.name}</h3>
               <p>
-                {p.week} <i /> BP <b className={p.risk === "High Risk" ? "red-text" : ""}>{p.bp}</b>
+                {p.week} <i /> BP{" "}
+                <b className={p.risk === "High Risk" ? "red-text" : ""}>{p.bp}</b>
               </p>
             </span>
             <span className={`risk ${riskClass(p.risk)}`}>{p.risk}</span>
@@ -105,9 +138,13 @@ export function ChwDashboard({
           </button>
         ))}
         {filtered.length === 0 && (
-          <p className="tracking-note" style={{ textAlign: "left", padding: "12px 2px" }}>
-            No patients match “{query}”.
-          </p>
+          <div className="empty-state" style={stagger(0)}>
+            <span className="empty-art">
+              <Icon name="search" size={26} />
+            </span>
+            <b>No patients match “{query}”</b>
+            <p>Check the spelling or search by clinic ID.</p>
+          </div>
         )}
       </div>
 

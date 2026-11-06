@@ -27,7 +27,13 @@ type IconName =
   | "more"
   | "edit"
   | "droplet"
-  | "zap";
+  | "zap"
+  | "moon"
+  | "scale"
+  | "baby"
+  | "x"
+  | "sparkles"
+  | "route";
 
 const PATHS: Record<IconName, ReactNode> = {
   heart: (
@@ -173,6 +179,43 @@ const PATHS: Record<IconName, ReactNode> = {
   ),
   droplet: <path d="M12 2.7s6.5 7.1 6.5 11.3a6.5 6.5 0 0 1-13 0C5.5 9.8 12 2.7 12 2.7Z" />,
   zap: <path d="M13 2 3 14h7l-1 8 11-13h-8l1-7Z" />,
+  moon: <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />,
+  scale: (
+    <>
+      <rect x="3.5" y="4" width="17" height="16" rx="3" />
+      <path d="M7.5 9a4.5 4.5 0 0 1 9 0" />
+      <path d="m12 9 2.4 3.2" />
+    </>
+  ),
+  baby: (
+    <>
+      <circle cx="12" cy="5.4" r="2.4" />
+      <path d="M12 7.8v4.4" />
+      <path d="M8.8 10.6h6.4" />
+      <path d="M10.4 12.2 9.2 20" />
+      <path d="M13.6 12.2l1.2 7.8" />
+      <path d="M9.2 20h3" />
+    </>
+  ),
+  x: (
+    <>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </>
+  ),
+  sparkles: (
+    <>
+      <path d="M12 4.5 13.6 9 18 10.6 13.6 12.2 12 16.7 10.4 12.2 6 10.6 10.4 9Z" />
+      <path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7Z" />
+    </>
+  ),
+  route: (
+    <>
+      <circle cx="6" cy="19" r="2.2" />
+      <circle cx="18" cy="5" r="2.2" />
+      <path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.8" />
+    </>
+  ),
 };
 
 export function Icon({
