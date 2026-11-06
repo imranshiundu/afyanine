@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="540" viewBox="0 0 920 540" role="img" aria-label="Afyanine consent and data flow draft">
+  <title>Afyanine — consent &amp; data flow (draft)</title>
+  <defs>
+    <marker id="pArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="920" height="540" fill="#f8fafc"/>
+  <text x="30" y="42" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#334155">Data consent journey — draft</text>
+  <text x="30" y="64" fill="#94a3b8" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13">Consent is the gate. Answers shape what is stored, seen, and kept.</text>
+
+  <!-- consent entry -->
+  <rect x="310" y="90" width="300" height="70" rx="12" fill="#0b5c53"/>
+  <text x="460" y="120" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff">First launch — consent screen</text>
+  <text x="460" y="142" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#bfeee6">plain language · per category · no dark patterns</text>
+
+  <!-- allow -->
+  <rect x="110" y="220" width="280" height="110" rx="12" fill="#ffffff" stroke="#16a34a" stroke-width="2"/>
+  <text x="250" y="248" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#16a34a">Granted categories</text>
+  <text x="126" y="274" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">vitals · symptoms · visits</text>
+  <text x="126" y="296" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">partner/CHW visibility: chosen per person</text>
+  <text x="126" y="318" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#64748b">withdrawn anytime → stops collection</text>
+
+  <!-- decline -->
+  <rect x="530" y="220" width="280" height="110" rx="12" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+  <text x="670" y="248" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#64748b">Declined — limited mode</text>
+  <text x="546" y="274" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">pure reminders (offline) only</text>
+  <text x="546" y="296" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">no server records of health events</text>
+  <text x="546" y="318" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#64748b">full features offered again at will</text>
+
+  <line x1="410" y1="160" x2="270" y2="214" stroke="#64748b" stroke-width="2" marker-end="url(#pArrow)"/>
+  <line x1="510" y1="160" x2="650" y2="214" stroke="#64748b" stroke-width="2" marker-end="url(#pArrow)"/>
+
+  <!-- retention -->
+  <g>
+    <rect x="60" y="380" width="250" height="90" rx="12" fill="#ffffff" stroke="#f59e0b" stroke-width="2"/>
+    <text x="185" y="406" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#b45309">Retention — TBD</text>
+    <text x="76" y="432" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">visit &amp; vitals data: keep window?</text>
+    <text x="76" y="454" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">post-partum archive? purge after?</text>
+  </g>
+  <g>
+    <rect x="335" y="380" width="250" height="90" rx="12" fill="#ffffff" stroke="#16a34a" stroke-width="2"/>
+    <text x="460" y="406" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#16a34a">Aggregates</text>
+    <text x="351" y="432" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">anonymized · small-group shielded</text>
+    <text x="351" y="454" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">never sold, never ad-fueled</text>
+  </g>
+  <g>
+    <rect x="610" y="380" width="250" height="90" rx="12" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+    <text x="735" y="406" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">Deletion right</text>
+    <text x="626" y="432" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">self-serve purge on request</text>
+    <text x="626" y="454" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">confirmatory receipt to user</text>
+  </g>
+
+  <text x="30" y="512" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13.5" fill="#64748b">Wherever consent changes, history of that change is logged (who/when/what) — but the underlying data shows first to the mother.</text>
+</svg>
