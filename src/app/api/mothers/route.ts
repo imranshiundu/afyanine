@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const mothers = await db.mother.findMany({
+      where: { simulated: true },
       include: { readings: { orderBy: { takenAt: "desc" }, take: 1 } },
       orderBy: { code: "asc" },
     });

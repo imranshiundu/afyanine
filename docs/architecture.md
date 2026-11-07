@@ -66,3 +66,26 @@ Open technical unknowns carried forward from the draft:
 - [ ] Retention mechanics (none today)
 - [ ] Lowest supported device floor (untested)
 
+## Account and care expansion
+
+See [accounts-care.md](accounts-care.md) for the implementation decision and
+updated account/demo/public-map flow diagram. Supabase email/password identity
+is separate from fictional Test Ward sessions; authenticated accounts do not
+inherit a mother's records or a clinician role. Clinical data remains demo-only
+behind `simulated=true` server filters. Profile metadata is owned and authorized
+by Supabase Auth. Real-record consent, deletion and clinician assignment remain
+unimplemented release gates. Local auth verification is blocked by missing
+Supabase configuration, not replaced by a pretend sign-in.
+
+```mermaid
+flowchart LR
+  Browser -->|Email/password| SupabaseAuth[Supabase Auth]
+  SupabaseAuth --> Profile[Own account/profile, no clinical link]
+  Browser -->|Explicit fictional selection| TestWard[Test Ward session]
+  TestWard --> DemoAPI[simulated=true API guards]
+  DemoAPI --> DemoDB[Fictional Postgres records]
+  Profile --> Care[Public care map]
+  TestWard --> Care
+  Care --> PublicOSM[OpenStreetMap / Overpass]
+```
+

@@ -17,7 +17,7 @@ export async function POST(
     }
 
     const mother = await db.mother.findUnique({ where: { code: id } });
-    if (!mother) {
+    if (!mother?.simulated) {
       return NextResponse.json({ error: `No patient found for ${id}` }, { status: 404 });
     }
 

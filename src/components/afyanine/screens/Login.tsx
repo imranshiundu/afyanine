@@ -6,20 +6,13 @@ import { Logo } from "../Logo";
 import { ThemeToggle } from "../chrome";
 import { BRAND, LOGIN_COPY, type Role } from "../data";
 import { TestWard } from "./TestWard";
-import { stagger } from "../useMotion";
+import { AccountForm } from "../AccountForm";
 
 export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Promise<void> }) {
-  const [role, setRole] = useState<Role>("mother");
   const [language, setLanguage] = useState<"EN" | "SW">("EN");
-  const [phone, setPhone] = useState("");
-  const [shake, setShake] = useState(false);
   const [mode, setMode] = useState<"signin" | "testward">("signin");
+  const [error, setError] = useState("");
   const t = LOGIN_COPY[language];
-
-  const digits = phone.replace(/\s/g, "");
-  const valid = digits.length >= 9;
-  const ready = valid;
-
   const changeTab = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
@@ -27,187 +20,32 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Pro
     setMode(next);
     document.getElementById(`login-tab-${next}`)?.focus();
   };
-
-  const submit = () => {
-    if (!ready) {
-      setShake(true);
-      window.setTimeout(() => setShake(false), 500);
-      return;
-    }
-    void onEnter(role);
-  };
-
   return (
     <main className={`screen login-screen${mode === "testward" ? " ward-mode" : ""}`}>
-      {/* Ambient art — soft lime shapes drifting behind the content */}
-      <div className="login-art" aria-hidden="true">
-        <span className="blob blob-a" />
-        <span className="blob blob-b" />
-        <span className="dotty" />
-        <Icon name="sparkles" className="floaty floaty-1" size={18} />
-        <Icon name="heart" className="floaty floaty-2" size={15} />
-      </div>
-
-      <div className="login-top stagger">
-        <div className="login-top-row" style={stagger(0)}>
+      <div className="login-art" aria-hidden="true"><span className="blob blob-a" /><span className="blob blob-b" /><span className="dotty" /></div>
+      <div className="login-top">
+        <div className="login-top-row">
           <Logo />
           <div className="login-top-actions">
             <ThemeToggle className="theme-toggle" />
             <div className="language-toggle" role="group" aria-label="Language">
-            {(["EN", "SW"] as const).map((l) => (
-              <button
-                key={l}
-                type="button"
-                onClick={() => setLanguage(l)}
-                className={language === l ? "active" : ""}
-                aria-pressed={language === l}
-              >
-                {l}
-              </button>
-            ))}
-            <span
-              className="lang-thumb"
-              aria-hidden="true"
-              data-pos={language === "EN" ? 0 : 1}
-            />
+              {(["EN", "SW"] as const).map(l => <button key={l} type="button" onClick={() => setLanguage(l)} className={language === l ? "active" : ""} aria-pressed={language === l}>{l}</button>)}
+              <span className="lang-thumb" aria-hidden="true" data-pos={language === "EN" ? 0 : 1} />
             </div>
           </div>
         </div>
-        <p className="brand-tagline" style={stagger(1)}>
-          {BRAND.tagline}
-        </p>
+        <p className="brand-tagline">{BRAND.tagline}</p>
         <div className="mode-tabs" role="tablist" aria-label="Sign-in options">
-          {(["signin", "testward"] as const).map((tab) => (
-            <button
-              key={tab}
-              id={`login-tab-${tab}`}
-              type="button"
-              role="tab"
-              aria-selected={mode === tab}
-              aria-controls={`login-panel-${tab}`}
-              tabIndex={mode === tab ? 0 : -1}
-              className={mode === tab ? "active" : ""}
-              onClick={() => setMode(tab)}
-              onKeyDown={changeTab}
-            >
-              <Icon name={tab === "signin" ? "user" : "people"} size={16} />
-              {tab === "signin" ? t.tabSignIn : t.tabTest}
-            </button>
-          ))}
+          {(["signin", "testward"] as const).map(tab => <button key={tab} id={`login-tab-${tab}`} type="button" role="tab" aria-selected={mode === tab} aria-controls={`login-panel-${tab}`} tabIndex={mode === tab ? 0 : -1} className={mode === tab ? "active" : ""} onClick={() => setMode(tab)} onKeyDown={changeTab}><Icon name={tab === "signin" ? "user" : "people"} size={16} />{tab === "signin" ? t.tabSignIn : t.tabTest}</button>)}
           <span className="mode-thumb" aria-hidden="true" data-pos={mode === "signin" ? 0 : 1} />
         </div>
-        {mode === "signin" && (
-          <>
-            <p className="eyebrow" style={stagger(2)}>
-              {t.eyebrow}
-            </p>
-            <h1 style={stagger(3)}>{t.welcome}</h1>
-            <p className="lead" style={stagger(4)}>
-              {t.lead}
-            </p>
-          </>
-        )}
+        {mode === "signin" && <><p className="eyebrow">{t.eyebrow}</p><h1>{t.welcome}</h1><p className="lead">{t.lead}</p></>}
       </div>
-
-      <section
-        id="login-panel-testward"
-        role="tabpanel"
-        aria-labelledby="login-tab-testward"
-        hidden={mode !== "testward"}
-      >
-        {mode === "testward" && <TestWard language={language} onEnter={onEnter} />}
+      <section id="login-panel-testward" role="tabpanel" aria-labelledby="login-tab-testward" hidden={mode !== "testward"}>
+        {mode === "testward" && <><TestWard language={language} onEnter={onEnter} /><button className="secondary-button" type="button" onClick={() => void onEnter("chw").catch(() => setError("Demo ward could not be opened. Please retry."))}>Open fictional CHW dashboard</button>{error && <p role="alert">{error}</p>}</>}
       </section>
-      <section
-        className="stagger"
-        id="login-panel-signin"
-        role="tabpanel"
-        aria-labelledby="login-tab-signin"
-        hidden={mode !== "signin"}
-      >
-        <label className="field-label" id="role-label" style={stagger(5)}>
-          {t.signInAs}
-        </label>
-        <div className="role-grid" role="radiogroup" aria-labelledby="role-label" style={stagger(6)}>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={role === "mother"}
-            className={`role-card${role === "mother" ? " selected" : ""}`}
-            onClick={() => setRole("mother")}
-          >
-            <span className="role-icon">
-              <Icon name="mother" size={28} />
-            </span>
-            <span className="role-copy">
-              <b>{t.mother}</b>
-              <small>{t.motherSub}</small>
-            </span>
-            {role === "mother" && (
-              <i aria-hidden="true">
-                <Icon name="check" size={15} strokeWidth={3} />
-              </i>
-            )}
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={role === "chw"}
-            className={`role-card${role === "chw" ? " selected" : ""}`}
-            onClick={() => setRole("chw")}
-          >
-            <span className="role-icon">
-              <Icon name="people" size={28} />
-            </span>
-            <span className="role-copy">
-              <b>{t.chw}</b>
-              <small>{t.chwSub}</small>
-            </span>
-            {role === "chw" && (
-              <i aria-hidden="true">
-                <Icon name="check" size={15} strokeWidth={3} />
-              </i>
-            )}
-          </button>
-        </div>
-
-        <label className="field-label" htmlFor="phone" style={stagger(8)}>
-          {t.phone}
-        </label>
-        <div
-          className={`phone-field${shake ? " shake" : ""}${digits && !valid ? " invalid" : ""}`}
-          style={stagger(9)}
-        >
-          <span>+254</span>
-          <input
-            id="phone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, "").slice(0, 11))}
-            placeholder="712 345 678"
-          />
-          {valid && (
-            <span className="field-ok" aria-hidden="true">
-              <Icon name="check" size={15} strokeWidth={3} />
-            </span>
-          )}
-        </div>
-        <p className="phone-hint" style={stagger(10)}>
-          {valid ? t.otpSent(digits) : t.phoneHint}
-        </p>
-        <button
-          type="button"
-          className={`primary-button${ready ? "" : " disabled"}`}
-          style={stagger(11)}
-          onClick={submit}
-          disabled={!ready}
-        >
-          {t.cta} <Icon name="arrow" />
-        </button>
-        <p className="privacy" style={stagger(12)}>
-          {t.privacy}
-        </p>
+      <section id="login-panel-signin" role="tabpanel" aria-labelledby="login-tab-signin" hidden={mode !== "signin"}>
+        <AccountForm language={language} />
       </section>
     </main>
   );

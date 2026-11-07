@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const emergency = await db.emergency.findFirst({
-      where: { status: "active" },
+      where: { status: "active", mother: { simulated: true } },
       orderBy: { createdAt: "desc" },
       include: { mother: true },
     });
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const motherCode = body.motherCode ?? FLAGGED_CODE;
 
     const mother = await db.mother.findUnique({ where: { code: motherCode } });
-    if (!mother) {
+    if (!mother?.simulated) {
       return NextResponse.json({ error: `No mother found for ${motherCode}` }, { status: 404 });
     }
 

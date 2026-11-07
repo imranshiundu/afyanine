@@ -23,10 +23,12 @@ export function Vitals({
   snapshot,
   navigate,
   notify,
+  stale = false,
 }: {
   snapshot: MotherSnapshot | null;
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
+  stale?: boolean;
 }) {
   const [range, setRange] = useState<VitalsRange>("Hourly");
 
@@ -66,11 +68,12 @@ export function Vitals({
         }
       />
 
+      {stale && <p className="account-notice" role="status">Refresh unavailable. Showing the last loaded fictional record.</p>}
       <div className="sync-state stagger" style={stagger(0)}>
         <span className="live-dot" aria-hidden="true" />
         <p>
-          <b>{current.device} connected</b>
-          <small>Last synced {current.synced}</small>
+          <b>{current.device} · fictional feed</b>
+          <small>Last reading {snapshot?.current.takenAt ? new Date(snapshot.current.takenAt).toLocaleString("en-KE", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : current.synced}</small>
         </p>
         <span className="sync-badge">
           <Icon name="check" size={15} strokeWidth={3} />
@@ -149,7 +152,7 @@ export function Vitals({
         <div className="vital-card-head plain">
           <div>
             <small>
-              <Icon name="heart" size={13} fill="var(--lime)" /> HEART RATE · LIVE
+              <Icon name="heart" size={13} fill="var(--lime)" /> HEART RATE · SIMULATED
             </small>
             <p className="hr-value">
               <b>{current.heartRate}</b>
@@ -225,7 +228,7 @@ export function Vitals({
       <BottomNav
         active="vitals"
         navigate={navigate}
-        onProfile={() => notify(`Signed in as ${snapshot?.mother.firstName ?? "Mother"} · Mother`)}
+        onProfile={() => navigate("profile")}
       />
     </main>
   );

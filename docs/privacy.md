@@ -58,7 +58,7 @@ and HANDOFF echoes that honestly. Per-commitment status:
 
 | Commitment | Prototype status |
 |---|---|
-| 1. Consent before data | ❌ **Not implemented.** No auth layer (API.md says so), no consent service in code; demo data flows directly under the shared `afyanine` Postgres role. |
+| 1. Consent before data | ❌ **Not implemented.** Supabase account identity is separate from health records; no clinical consent service exists. Demo-only APIs use `simulated=true` guards under the shared database role. |
 | 2. Contextual, not blanket | ❌ Not implemented (nothing to gate yet) |
 | 3. Sensitive by default / no marketing | ✅ Honored trivially — demo data only, no ad/analytics SDKs in the tree |
 | 4. Minimize and bound | 🔶 Schema is small and purposeful, but no retention windows exist yet |
@@ -67,6 +67,14 @@ and HANDOFF echoes that honestly. Per-commitment status:
 **Operating rule while in prototype:** the demo must never hold real maternal data.
 Real-data acceptance is blocked until commitments 1 and 5 exist in code — pre-production
 mandate, not nice-to-have.
+
+**Account expansion:** Supabase account identity/profile metadata and browser
+session handling are implemented separately from clinical records; see
+[accounts-care.md](accounts-care.md). This does not implement health-data consent
+or deletion and does not lift the operating rule above. Real sign-in is disabled
+where Supabase configuration is absent. Public care lookup uses third-party map
+services; only an explicit location action requests browser permission, and an
+approximate query centre is sent without durable location storage.
 
 **Secrets hygiene (verified 2026-11-07):** `.env*` and `tokens.txt` are git-ignored;
 Supabase management token and keys live outside the repo (per the secrets policy in

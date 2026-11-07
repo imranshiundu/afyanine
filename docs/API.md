@@ -4,12 +4,33 @@
 > Base URL (dev): `http://localhost:3001` (port 3000 is held by another project on this machine) · prod URL: set on deploy
 >
 > Conventions for this prototype:
-> - No auth layer; the Supabase Postgres role `afyanine` is the app identity.
-> - Mother sessions identify themselves by clinic code (`MW-####`).
+> - Supabase Auth owns account identity/profile operations; it does not yet
+>   grant clinical access. See [accounts-care.md](accounts-care.md).
+> - Public demo clinical endpoints only read/write mothers with `simulated=true`.
+>   A clinic code is a fictional persona selector, never an authorization token.
 > - All times are ISO-8601 UTC; UI renders them with `en-KE` locale.
 > - Errors: JSON `{ "error": string }` with a sensible 4xx/5xx; missing entity → 404.
 
 ---
+
+## Account/care expansion
+
+- `POST /api/care` with numeric `{ "lat": ..., "lng": ... }`: public bounded Overpass directory,
+  rounded coordinates, five-minute memory cache, at most 100 results within
+  8km. Returns `facilities`, `fetchedAt`, `source`, `radiusKm`; 400 invalid area,
+  503 provider unavailable. Unknown hours/services stay unknown. Not a verified
+  clinical availability feed.
+- `POST /api/demo/reading` with `{ "code": "MW-####" }`: selected fictional
+  mother only; returns the updated snapshot, including `current.takenAt`.
+  At most one generated reading per persona/30s using a transaction advisory
+  lock; no SOS creation. 400 invalid selector, 404 absent/non-simulated mother,
+  503 unavailable database.
+- Sign-up/sign-in/reset/profile/sign-out use Supabase Auth SDK directly.
+  The app never stores passwords or maps a new account to a demo mother.
+- All lists, snapshots, notes, emergency reads/writes/resolution now reject or
+  exclude non-simulated mothers. Existing Supabase database RLS/publication
+  policies are **not audited or changed** by these API guards; do not put real
+  health records in this prototype.
 
 ## 1 · `GET /api` — health probe
 - **Auth:** none
