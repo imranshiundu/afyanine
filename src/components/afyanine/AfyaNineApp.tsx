@@ -45,7 +45,13 @@ export function AfyaNine() {
   };
 
   useEffect(() => {
-    api.mother(motherCode).then(setSnapshot);
+    let active = true;
+    api.mother(motherCode).then((result) => {
+      if (active) setSnapshot(result);
+    });
+    return () => {
+      active = false;
+    };
   }, [motherCode]);
   useEffect(() => {
     loadPatients();
@@ -100,8 +106,13 @@ export function AfyaNine() {
   };
 
   /* Entry points (login) reset the whole journey */
-  const enter = (chosen: Role, code?: string) => {
-    if (code) setMotherCode(code);
+  const enter = async (chosen: Role, code?: string) => {
+    if (chosen === "mother" && code) {
+      const selected = await api.mother(code);
+      if (!selected) throw new Error("Test account unavailable");
+      setSnapshot(selected);
+      setMotherCode(code);
+    }
     setDir("fwd");
     setRole(chosen);
     setStack([]);
@@ -123,7 +134,7 @@ export function AfyaNine() {
   /* SOS pick → persist the emergency so the CHW banner lights up */
   const raiseEmergency = (title: string) => {
     setEmergencyType(title);
-    api.raiseEmergency(title).then(() => loadPatients());
+    api.raiseEmergency(title, motherCode).then(() => loadPatients());
   };
 
   /* CHW clears the active SOS → banner drops on both sides in realtime */
@@ -155,11 +166,11 @@ export function AfyaNine() {
               snapshot={snapshot}
               navigate={navigate}
               notify={notify}
-              onProfile={() => notify("Signed in as Wanjiku · Mother")}
+              onProfile={() => notify(`Signed in as ${snapshot?.mother.firstName ?? "Mother"} · Mother`)}
             />
           )}
           {screen === "care" && (
-            <FindCare navigate={navigate} notify={notify} onProfile={() => notify("Signed in as Wanjiku · Mother")} />
+            <FindCare navigate={navigate} notify={notify} onProfile={() => notify(`Signed in as ${snapshot?.mother.firstName ?? "Mother"} · Mother`)} />
           )}
           {screen === "sos" && (
             <Sos goBack={goBack} navigate={navigate} onEmergencyPicked={raiseEmergency} />
