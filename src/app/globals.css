@@ -350,7 +350,7 @@ h1, h2, h3, p {
   width: var(--logo-size);
   height: var(--logo-size);
   flex: none;
-  background: var(--ink);
+  background: var(--chip);
   border-radius: var(--r-tile);
   display: grid;
   place-items: center;
@@ -762,7 +762,7 @@ h1, h2, h3, p {
   width: 21px;
   height: 21px;
   border-radius: var(--r-full);
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -957,7 +957,7 @@ h1, h2, h3, p {
   min-height: 182px;
   padding: 20px 15px;
   border-radius: var(--r-3xl);
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1105,7 +1105,7 @@ h1, h2, h3, p {
   transform: scale(0.96);
 }
 .appointment-actions button:first-child {
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   display: flex;
   gap: 6px;
@@ -1290,7 +1290,7 @@ h1, h2, h3, p {
   transform: scale(0.95);
 }
 .care-tabs button.active {
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   border-color: var(--ink);
 }
@@ -1362,7 +1362,7 @@ h1, h2, h3, p {
   border: 0;
   border-radius: 50% 50% 50% 4px;
   transform: rotate(-45deg);
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -1408,7 +1408,7 @@ h1, h2, h3, p {
   top: 118px;
   width: 17px;
   height: 17px;
-  background: var(--ink);
+  background: var(--chip);
   border-radius: var(--r-full);
   border: 4px solid #ffffff;
   box-shadow: 0 0 0 5px var(--lime-50);
@@ -1452,7 +1452,7 @@ h1, h2, h3, p {
   transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 .view-toggle button.active {
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
 }
 .filter-row {
@@ -1491,7 +1491,7 @@ h1, h2, h3, p {
 .filter-badge {
   font-style: normal;
   font-size: var(--text-2xs);
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   min-width: 15px;
   height: 15px;
@@ -1501,7 +1501,7 @@ h1, h2, h3, p {
   padding: 0 3px;
 }
 .filter-row button.chip-on {
-  background: var(--ink);
+  background: var(--chip);
   color: var(--lime);
 }
 .result-count {
@@ -1675,7 +1675,7 @@ h1, h2, h3, p {
   transition: transform var(--dur-med) var(--ease-spring);
 }
 .switch.on {
-  background: var(--ink);
+  background: var(--chip);
 }
 .switch.on i {
   transform: translateX(18px);
@@ -1952,7 +1952,7 @@ h1, h2, h3, p {
   display: flex;
   align-items: center;
   gap: 9px;
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   border-radius: var(--r-2xl);
   padding: 5px 17px 5px 6px;
@@ -2191,7 +2191,7 @@ h1, h2, h3, p {
   background: var(--line-strong);
 }
 .timeline > div.done:not(:last-child)::before {
-  background: var(--ink);
+  background: var(--chip);
 }
 .timeline > div > span {
   width: 21px;
@@ -2206,7 +2206,7 @@ h1, h2, h3, p {
   flex: none;
 }
 .timeline > div.done > span {
-  background: var(--ink);
+  background: var(--chip);
   color: var(--lime);
   border-color: var(--ink);
 }
@@ -2310,7 +2310,7 @@ h1, h2, h3, p {
   left: 4px;
   width: calc((100% - 8px) / 3);
   border-radius: calc(var(--r-lg) - 4px);
-  background: var(--ink);
+  background: var(--chip);
   box-shadow: var(--shadow-1);
   transition: transform var(--dur-med) var(--ease-spring);
 }
@@ -2338,7 +2338,7 @@ h1, h2, h3, p {
 
 /* HERO — blood pressure on ink */
 .bp-hero {
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   border-radius: var(--r-3xl);
   padding: 18px 16px 14px;
@@ -2478,7 +2478,7 @@ h1, h2, h3, p {
   width: 7px;
   height: 7px;
   border-radius: var(--r-full);
-  background: var(--ink);
+  background: var(--chip);
   border: 2px solid #ffffff;
   transform: translate(-50%, -50%) scale(0);
   animation: dot-pop 320ms var(--ease-spring) forwards;
@@ -2518,7 +2518,7 @@ h1, h2, h3, p {
 .spark-tip {
   position: absolute;
   transform: translate(-50%, -130%);
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   border-radius: var(--r-md);
   padding: 5px 9px;
@@ -2698,7 +2698,7 @@ h1, h2, h3, p {
 }
 .bp-marker b {
   font-size: var(--text-sm);
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   padding: 2px 6px;
   border-radius: var(--r-xs);
@@ -2707,7 +2707,7 @@ h1, h2, h3, p {
 .bp-marker i {
   width: 2.5px;
   height: 14px;
-  background: var(--ink);
+  background: var(--chip);
   border-radius: 2px;
   margin-top: 2px;
 }
@@ -3385,7 +3385,7 @@ h1, h2, h3, p {
   transition: background var(--dur-fast) var(--ease-out);
 }
 .save-note.saved {
-  background: var(--ink);
+  background: var(--chip);
   color: var(--lime);
   animation: note-saved 300ms var(--ease-spring);
 }
@@ -3410,7 +3410,7 @@ h1, h2, h3, p {
   transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 .outline-call:hover {
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
 }
 .outline-call:active {
@@ -3555,7 +3555,7 @@ h1, h2, h3, p {
   min-height: 46px;
   padding: 10px 15px;
   border-radius: var(--r-lg);
-  background: var(--ink);
+  background: var(--chip);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -3625,5 +3625,247 @@ h1, h2, h3, p {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Dark mode — the same token sheet, re-inked for night shifts.
+   Warm charcoal (never pure black), lime keeps its glow, ink surfaces
+   elevate one step above the canvas so cards still read as cards.
+   ========================================================================== */
+
+:root {
+  --chip: #1a1a1a;             /* ink surfaces: dark pills, hero cards, pins */
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* ---- Surfaces ---- */
+  --paper: #0d0d0b;            /* page behind the phone shell */
+  --bg: #161613;               /* app background — dark, never pure black */
+  --surface: #1e1e1a;          /* cards on the dark canvas */
+  --surface-soft: #272722;     /* icon wells, chips, tab tracks */
+  --surface-deep: #2d2d27;     /* map canvas, pressed wells */
+
+  /* ---- Ink & text ramp (flipped) ---- */
+  --ink: #f0efe9;
+  --ink-soft: #d7d5cc;
+  --muted: #a5a29a;
+  --muted-deep: #b1aea6;
+  --faint: #8b8880;
+  --faint-2: #828078;
+  --ghost: #a7a49c;            /* labels on ink surfaces (chips stay dark) */
+
+  /* ---- Hairlines ---- */
+  --line-soft: #262622;
+  --line: #31312a;
+  --line-strong: #3d3d34;
+  --nav-line: #262622;
+
+  /* ---- Lime accent (unchanged — it glows at night) ---- */
+  --lime-deep: #d8f03a;        /* lime-toned text now reads directly */
+  --lime-btn-shadow: rgba(0, 0, 0, 0.4);
+  --lime-tile-shadow: rgba(0, 0, 0, 0.45);
+
+  /* ---- Emergency red ---- */
+  --red-deep: #b03030;
+  --red-tint: rgba(198, 40, 40, 0.2);
+  --red-wash: rgba(198, 40, 40, 0.14);
+
+  /* ---- Meter amber ---- */
+  --amber-deep: #e9c85a;
+
+  /* ---- Chips ---- */
+  --watch-bg: rgba(233, 200, 90, 0.16);
+  --watch-ink: #ecd27a;
+
+  /* ---- Map & chart ---- */
+  --map-road: #34342c;
+  --chart-grid: #2a2a25;
+
+  /* ---- Ink surfaces elevate one step instead of flipping ---- */
+  --chip: #242420;
+
+  /* ---- Overlays ---- */
+  --ink-scrim: rgba(0, 0, 0, 0.55);
+
+  /* ---- Elevation (deepened for night) ---- */
+  --shadow-shell: 0 18px 70px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 12px 28px rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.3), 0 10px 26px rgba(0, 0, 0, 0.35);
+  --shadow-role: 0 7px 15px rgba(0, 0, 0, 0.35);
+  --shadow-field: 0 4px 13px rgba(0, 0, 0, 0.3);
+  --shadow-nav: 0 -8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-pin: 0 5px 12px rgba(0, 0, 0, 0.5);
+  --shadow-float: 0 5px 13px rgba(0, 0, 0, 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   Theme toggle & header action cluster
+   -------------------------------------------------------------------------- */
+
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.theme-toggle {
+  width: 35px;
+  height: 35px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-1);
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-spring);
+}
+
+.theme-toggle:hover {
+  background: var(--surface-soft);
+}
+
+.theme-toggle:active {
+  transform: scale(0.88);
+}
+
+/* Login variant sits beside the language pill */
+.login-top-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.login-top-actions .theme-toggle {
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Visit-note history (live records from the clinic DB)
+   -------------------------------------------------------------------------- */
+
+.note-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+}
+
+.note-item {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+  padding: var(--s-25) var(--s-3);
+  background: var(--surface-soft);
+  border-radius: var(--r-md);
+  animation: note-in var(--dur-med) var(--ease-spring) both;
+}
+
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.note-avatar {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-full);
+  background: var(--chip);
+  color: var(--bg);
+  font-size: 8.5px;
+  font-weight: var(--weight-bold);
+  display: grid;
+  place-items: center;
+  letter-spacing: 0.04em;
+}
+
+.note-item div {
+  min-width: 0;
+  flex: 1;
+}
+
+.note-item header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.note-item header b {
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+}
+
+.note-item header small {
+  font-size: var(--text-2xs);
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-chip);
+  flex: none;
+}
+
+.note-item p {
+  margin-top: 2px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--ink-soft);
+}
+
+/* --------------------------------------------------------------------------
+   Theme switching polish — smooth morph + a lime pulse on toggle
+   -------------------------------------------------------------------------- */
+
+body,
+.page,
+.app-shell,
+.screen,
+.bottom-nav,
+.chw-nav,
+.vital-card,
+.bp-hero,
+.appointment-card,
+.notes-card,
+.bp-card,
+.search-box,
+.sheet-panel,
+.toast,
+.patient-row,
+.sos-option,
+.pregnancy-card,
+.stats-row,
+.sync-state,
+.mini-tile,
+.vitals-tip,
+.tracking-sheet,
+.emergency-call {
+  transition:
+    background-color 260ms var(--ease-out),
+    border-color 260ms var(--ease-out),
+    color 200ms var(--ease-out),
+    box-shadow 260ms var(--ease-out);
+}
+
+html.theme-pop .app-shell {
+  animation: theme-glow 560ms var(--ease-out);
+}
+
+@keyframes theme-glow {
+  0% {
+    box-shadow: var(--shadow-shell), 0 0 0 0 rgba(216, 240, 58, 0.45);
+  }
+  100% {
+    box-shadow: var(--shadow-shell), 0 0 0 16px rgba(216, 240, 58, 0);
   }
 }

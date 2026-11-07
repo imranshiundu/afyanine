@@ -1,8 +1,47 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useCallback, useSyncExternalStore, type ReactNode } from "react";
 import { Icon } from "./Icon";
+import {
+  getThemeServerSnapshot,
+  getThemeSnapshot,
+  setTheme,
+  subscribeTheme,
+} from "./theme";
 import type { Screen } from "./data";
+
+/* ------------------------------------------------------------------ */
+/* Theme toggle — flips the token sheet on <html> and persists it      */
+/* ------------------------------------------------------------------ */
+
+export function ThemeToggle({ className = "icon-button" }: { className?: string }) {
+  const dark = useSyncExternalStore(
+    subscribeTheme,
+    getThemeSnapshot,
+    getThemeServerSnapshot,
+  ) === "dark";
+
+  const toggle = useCallback(() => {
+    const root = document.documentElement;
+    setTheme(getThemeSnapshot() === "dark" ? "light" : "dark");
+    root.classList.remove("theme-pop");
+    /* retrigger the switch animation */
+    void root.offsetWidth;
+    root.classList.add("theme-pop");
+  }, []);
+
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={toggle}
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-pressed={dark}
+    >
+      <Icon name={dark ? "sun" : "moon"} size={20} />
+    </button>
+  );
+}
 
 export function Header({
   title,

@@ -30,13 +30,19 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+/* Applies the saved theme before first paint so there is no flash. */
+const THEME_INIT = `try{var t=localStorage.getItem("afyanine-theme");if(t!=="dark"&&t!=="light"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="light";}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+      </head>
       <body className={`${inter.variable}`}>{children}</body>
     </html>
   );

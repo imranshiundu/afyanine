@@ -1,33 +1,81 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "../Icon";
 import { Header } from "../chrome";
 import { ChartAxis, Sparkline } from "../charts";
 import { AI_ALERT, BP_TREND, FLAGGED, type Screen } from "../data";
+import { api, type PatientDetailPayload } from "../api";
 import { stagger } from "../useMotion";
 
+const timeOf = (iso: string) =>
+  new Date(iso).toLocaleString("en-KE", {
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
 export function PatientDetail({
+  patientId,
   navigate,
   notify,
 }: {
+  patientId: string;
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
 }) {
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const saveNote = () => {
+  /* Live record from the API; bundled demo case as instant fallback */
+  const [detail, setDetail] = useState<PatientDetailPayload | null>(null);
+  const [notes, setNotes] = useState<PatientDetailPayload["notes"]>([]);
+
+  useEffect(() => {
+    let alive = true;
+    api.patient(patientId).then((data) => {
+      if (!alive || !data) return;
+      setDetail(data);
+      setNotes(data.notes);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [patientId]);
+
+  const patient = detail?.patient ?? FLAGGED;
+  const alert = detail?.alert ?? AI_ALERT;
+  const trend = detail
+    ? {
+        label: "BLOOD PRESSURE TREND",
+        headline: detail.trend.headline,
+        status: detail.trend.status,
+        axis: detail.trend.axis,
+        series: detail.trend.series,
+        threshold: detail.trend.threshold,
+      }
+    : BP_TREND;
+
+  const saveNote = async () => {
     if (!note.trim()) {
       notify("Add a note before saving");
       return;
     }
-    setSaved(true);
-    notify("Note saved to patient record");
-    window.setTimeout(() => {
-      setSaved(false);
+    setSaving(true);
+    const res = await api.saveNote(patientId, note.trim(), "Grace Wanjiru");
+    setSaving(false);
+    if (res?.note) {
+      setNotes((n) => [res.note, ...n]);
+      notify("Note saved to patient record");
       setNote("");
-    }, 1400);
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 1400);
+    } else {
+      notify("Could not reach the clinic record — try again");
+    }
   };
 
   return (
@@ -48,51 +96,53 @@ export function PatientDetail({
       />
 
       <section className="patient-profile stagger" style={stagger(0)}>
-        <span className="patient-avatar large" style={{ background: FLAGGED.color }} aria-hidden="true">
-          {FLAGGED.initials}
+        <span className="patient-avatar large" style={{ background: patient.color }} aria-hidden="true">
+          {patient.initials}
         </span>
         <span className="profile-copy">
-          <h1>{FLAGGED.name}</h1>
+          <h1>{patient.name}</h1>
           <p>
-            {FLAGGED.week} pregnant · Age {FLAGGED.age}
+            {patient.week} pregnant · Age {patient.age}
           </p>
-          <span className="patient-id">ID {FLAGGED.id}</span>
+          <span className="patient-id">ID {patient.id}</span>
         </span>
-        <button type="button" onClick={() => notify(`Calling ${FLAGGED.name}`)}>
+        <button type="button" onClick={() => notify(`Calling ${patient.name}`)}>
           <Icon name="phone" size={19} />
           <span>Call</span>
         </button>
       </section>
 
-      <section className="ai-alert stagger" aria-live="polite" style={stagger(1)}>
-        <div className="ai-title">
-          <span className="ai-pulse">
-            <Icon name="warning" size={22} stroke="#FFFFFF" />
-          </span>
-          <div>
-            <small>{AI_ALERT.label}</small>
-            <h2>{AI_ALERT.title}</h2>
+      {alert && (
+        <section className="ai-alert stagger" aria-live="polite" style={stagger(1)}>
+          <div className="ai-title">
+            <span className="ai-pulse">
+              <Icon name="warning" size={22} stroke="#FFFFFF" />
+            </span>
+            <div>
+              <small>{alert.label}</small>
+              <h2>{alert.title}</h2>
+            </div>
           </div>
-        </div>
-        <p>{AI_ALERT.reason}</p>
-        <div className="ai-metrics">
-          <span>
-            <b>{AI_ALERT.latestBp}</b>
-            <small>Latest BP</small>
-          </span>
-          <i aria-hidden="true" />
-          <span>
-            <b>{AI_ALERT.trend}</b>
-            <small>{AI_ALERT.trendLabel}</small>
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={() => notify("Alert marked for urgent follow-up")}
-        >
-          Mark for urgent follow-up <Icon name="arrow" size={17} />
-        </button>
-      </section>
+          <p>{alert.reason}</p>
+          <div className="ai-metrics">
+            <span>
+              <b>{alert.latestBp}</b>
+              <small>Latest BP</small>
+            </span>
+            <i aria-hidden="true" />
+            <span>
+              <b>{alert.trend}</b>
+              <small>{alert.trendLabel}</small>
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => notify("Alert marked for urgent follow-up")}
+          >
+            Mark for urgent follow-up <Icon name="arrow" size={17} />
+          </button>
+        </section>
+      )}
 
       <section
         className="bp-card"
@@ -101,22 +151,22 @@ export function PatientDetail({
       >
         <div className="card-title">
           <div>
-            <p>{BP_TREND.label}</p>
-            <h2>{BP_TREND.headline}</h2>
+            <p>{trend.label ?? "BLOOD PRESSURE TREND"}</p>
+            <h2>{trend.headline}</h2>
           </div>
-          <span className="status high">{BP_TREND.status}</span>
+          <span className={`status ${trend.status === "High" ? "high" : ""}`}>{trend.status}</span>
         </div>
         <Sparkline
-          data={[...BP_TREND.series]}
-          labels={["12 Jun", "13 Jun", "14 Jun", "15 Jun", "16 Jun", "17 Jun", "Today"]}
+          data={[...trend.series]}
+          labels={[...trend.axis]}
           min={100}
           max={160}
           danger
-          threshold={BP_TREND.threshold}
+          threshold={trend.threshold}
           thresholdLabel="140 danger line"
-          ariaLabel="Blood pressure trend rising from 128 over 84 to 148 over 96 over seven days, above the 140 danger line"
+          ariaLabel={`Blood pressure trend, ${trend.headline.toLowerCase()}, latest ${patient.bp}`}
         />
-        <ChartAxis labels={BP_TREND.axis} indent />
+        <ChartAxis labels={trend.axis} indent />
         <div className="legend" aria-hidden="true">
           <span>
             <i className="legend-sys" /> Systolic
@@ -145,6 +195,7 @@ export function PatientDetail({
           type="button"
           className={`primary-button save-note${saved ? " saved" : ""}`}
           onClick={saveNote}
+          disabled={saving}
         >
           {saved ? (
             <>
@@ -156,13 +207,36 @@ export function PatientDetail({
             </>
           )}
         </button>
+
+        {notes.length > 0 && (
+          <div className="note-history">
+            {notes.map((n) => (
+              <article key={n.id} className="note-item">
+                <span className="note-avatar" aria-hidden="true">
+                  {n.author
+                    .split(" ")
+                    .map((p) => p[0])
+                    .slice(0, 2)
+                    .join("")}
+                </span>
+                <div>
+                  <header>
+                    <b>{n.author}</b>
+                    <small>{timeOf(n.createdAt)}</small>
+                  </header>
+                  <p>{n.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <button
         type="button"
         className="outline-call"
         style={stagger(4)}
-        onClick={() => notify(`Calling ${FLAGGED.name}`)}
+        onClick={() => notify(`Calling ${patient.name}`)}
       >
         <Icon name="phone" /> Call patient
       </button>

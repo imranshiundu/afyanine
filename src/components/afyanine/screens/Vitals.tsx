@@ -14,21 +14,40 @@ import {
   type Screen,
   type VitalsRange,
 } from "../data";
+import type { MotherSnapshot } from "../api";
 import { stagger } from "../useMotion";
 
 const RANGES: VitalsRange[] = ["Hourly", "Daily", "Weekly"];
 
 export function Vitals({
+  snapshot,
   navigate,
   notify,
 }: {
+  snapshot: MotherSnapshot | null;
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
 }) {
   const [range, setRange] = useState<VitalsRange>("Hourly");
-  const series = VITALS[range];
-  const cat = bpCategory(VITALS_CURRENT.systolic);
+
+  /* Live series when the API responded; bundled demo data otherwise */
+  const series = snapshot?.series[range] ?? VITALS[range];
+  const current = snapshot
+    ? {
+        ...snapshot.current,
+        weightKg: VITALS_CURRENT.weightKg,
+        weightDelta: VITALS_CURRENT.weightDelta,
+        sleep: VITALS_CURRENT.sleep,
+        sleepDeep: VITALS_CURRENT.sleepDeep,
+        kicks: VITALS_CURRENT.kicks,
+        kicksSince: VITALS_CURRENT.kicksSince,
+      }
+    : VITALS_CURRENT;
+
+  const cat = bpCategory(current.systolic);
+  const hrCat = current.heartRate > 0 && current.heartRate < 100 ? "normal" : "high";
   const rangeIndex = RANGES.indexOf(range);
+  const catLabel = BP_CATEGORIES.find((c) => c.key === cat)?.label ?? "Normal";
 
   return (
     <main className="screen vitals-screen">
@@ -50,8 +69,8 @@ export function Vitals({
       <div className="sync-state stagger" style={stagger(0)}>
         <span className="live-dot" aria-hidden="true" />
         <p>
-          <b>{VITALS_CURRENT.device} connected</b>
-          <small>Last synced {VITALS_CURRENT.synced}</small>
+          <b>{current.device} connected</b>
+          <small>Last synced {current.synced}</small>
         </p>
         <span className="sync-badge">
           <Icon name="check" size={15} strokeWidth={3} />
@@ -81,13 +100,13 @@ export function Vitals({
           <div>
             <small>BLOOD PRESSURE</small>
             <p className="bp-hero-value">
-              <b>{VITALS_CURRENT.systolic}</b>
-              <em>/{VITALS_CURRENT.diastolic}</em>
+              <b>{current.systolic}</b>
+              <em>/{current.diastolic}</em>
               <span>mmHg</span>
             </p>
           </div>
-          <span className={`status ${cat === "normal" ? "normal" : "high"}`}>
-            {BP_CATEGORIES.find((c) => c.key === cat)?.label}
+          <span className={`status ${cat === "normal" || cat === "low" ? "normal" : "high"}`}>
+            {catLabel}
           </span>
         </div>
 
@@ -97,8 +116,8 @@ export function Vitals({
           secondary={[...series.diastolic]}
           labels={[...series.labels]}
           min={90}
-          max={150}
-          ariaLabel={`Blood pressure trend by ${range.toLowerCase()} — latest reading ${VITALS_CURRENT.systolic} over ${VITALS_CURRENT.diastolic}`}
+          max={160}
+          ariaLabel={`Blood pressure trend by ${range.toLowerCase()} — latest reading ${current.systolic} over ${current.diastolic}`}
         />
         <ChartAxis labels={series.labels} />
 
@@ -115,11 +134,11 @@ export function Vitals({
         <div className="vital-card-head plain">
           <div>
             <small>WHERE YOUR READING SITS</small>
-            <b>Today · {VITALS_CURRENT.systolic}/{VITALS_CURRENT.diastolic}</b>
+            <b>Today · {current.systolic}/{current.diastolic}</b>
           </div>
           <Icon name="route" size={20} />
         </div>
-        <BpMeter systolic={VITALS_CURRENT.systolic} scale={BP_SCALE} categories={BP_CATEGORIES} />
+        <BpMeter systolic={current.systolic} scale={BP_SCALE} categories={BP_CATEGORIES} />
         <p className="meter-note">
           Danger zone starts at 140/90 — the point where we check for preeclampsia.
         </p>
@@ -133,19 +152,21 @@ export function Vitals({
               <Icon name="heart" size={13} fill="var(--lime)" /> HEART RATE · LIVE
             </small>
             <p className="hr-value">
-              <b>{VITALS_CURRENT.heartRate}</b>
+              <b>{current.heartRate}</b>
               <span>bpm</span>
             </p>
           </div>
-          <span className="status normal">Normal</span>
+          <span className={`status ${hrCat === "normal" ? "normal" : "high"}`}>
+            {hrCat === "normal" ? "Normal" : "Check"}
+          </span>
         </div>
         <EcgWave />
         <div className="hr-chips">
           <span>
-            <i className="dot low" /> Low {VITALS_CURRENT.heartLow}
+            <i className="dot low" /> Low {current.heartLow}
           </span>
           <span>
-            <i className="dot high" /> High {VITALS_CURRENT.heartHigh}
+            <i className="dot high" /> High {current.heartHigh}
           </span>
           <span className="hr-summary">{series.hrSummary}</span>
         </div>
@@ -174,8 +195,16 @@ export function Vitals({
       <div className="vitals-tip" style={stagger(0)}>
         <Icon name="sparkles" />
         <p>
-          <b>Today’s readings look good</b>
-          <small>Keep wearing your AfyaBand throughout the day.</small>
+          <b>
+            {cat === "normal" || cat === "low"
+              ? "Today's readings look good"
+              : "Your BP is elevated today"}
+          </b>
+          <small>
+            {cat === "normal" || cat === "low"
+              ? "Keep wearing your AfyaBand throughout the day."
+              : "Rest, avoid salt, and tap SOS if you feel unwell — Grace has been alerted."}
+          </small>
         </p>
       </div>
 

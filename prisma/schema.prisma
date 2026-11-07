@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,20 +7,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ------------------------------------------------------------------
+// AfyaNine domain models
+// ------------------------------------------------------------------
+
+model Mother {
+  id           String         @id @default(cuid())
+  code         String         @unique // e.g. MW-1048 (clinic ID)
+  fullName     String
+  firstName    String
+  age          Int
+  phone        String
+  color        String // avatar colour token
+  dueDate      DateTime // pregnancy week is derived from this
+  device       String         @default("AfyaBand")
+  sizeNote     String         @default("About the size of an eggplant")
+  readings     VitalReading[]
+  notes        VisitNote[]
+  appointments Appointment[]
+  emergencies  Emergency[]
 }
 
-model Post {
+model VitalReading {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  motherId  String
+  mother    Mother   @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  takenAt   DateTime
+  systolic  Int
+  diastolic Int
+  heartRate Int
+  source    String   @default("AfyaBand")
+
+  @@index([motherId, takenAt])
+}
+
+model VisitNote {
+  id        String   @id @default(cuid())
+  motherId  String
+  mother    Mother   @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  author    String // CHW name
+  body      String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@index([motherId, createdAt])
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  motherId    String
+  mother      Mother   @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  label       String // e.g. "NEXT ANC VISIT"
+  place       String
+  scheduledAt DateTime
+
+  @@index([motherId, scheduledAt])
+}
+
+model Emergency {
+  id        String   @id @default(cuid())
+  motherId  String
+  mother    Mother   @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  kind      String // "Bleeding", "Labour", ...
+  status    String   @default("active") // active | resolved
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Icon } from "../Icon";
 import { Logo } from "../Logo";
+import { ThemeToggle } from "../chrome";
 import { BRAND, LOGIN_COPY, type Role } from "../data";
 import { stagger } from "../useMotion";
 
@@ -39,7 +40,9 @@ export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
       <div className="login-top stagger">
         <div className="login-top-row" style={stagger(0)}>
           <Logo />
-          <div className="language-toggle" role="group" aria-label="Language">
+          <div className="login-top-actions">
+            <ThemeToggle className="theme-toggle" />
+            <div className="language-toggle" role="group" aria-label="Language">
             {(["EN", "SW"] as const).map((l) => (
               <button
                 key={l}
@@ -56,6 +59,7 @@ export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
               aria-hidden="true"
               data-pos={language === "EN" ? 0 : 1}
             />
+            </div>
           </div>
         </div>
         <p className="brand-tagline" style={stagger(1)}>

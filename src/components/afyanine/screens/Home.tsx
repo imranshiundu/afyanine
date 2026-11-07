@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "../Icon";
-import { BottomNav } from "../chrome";
+import { BottomNav, ThemeToggle } from "../chrome";
 import { WeekRing } from "../charts";
 import { Sheet } from "../Sheet";
 import {
@@ -13,13 +13,30 @@ import {
   QUICK_ACTIONS,
   type Screen,
 } from "../data";
+import type { MotherSnapshot } from "../api";
 import { stagger } from "../useMotion";
 
+const DAY_MONTH = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-KE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+const TIME_OF_DAY = () => {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning,";
+  if (h < 17) return "Good afternoon,";
+  return "Good evening,";
+};
+
 export function Home({
+  snapshot,
   navigate,
   notify,
   onProfile,
 }: {
+  snapshot: MotherSnapshot | null;
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
   onProfile: () => void;
@@ -27,6 +44,26 @@ export function Home({
   const [chpOpen, setChpOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifRead, setNotifRead] = useState(false);
+
+  const live = snapshot; // null → bundled demo data below
+  const pregnancy = live
+    ? {
+        week: live.mother.week,
+        totalWeeks: live.mother.totalWeeks,
+        trimester: live.mother.trimester,
+        size: live.mother.sizeNote,
+        daysLeft: live.mother.daysLeft,
+        headline: live.mother.week >= 28 ? "Your baby is growing beautifully." : "Your baby is on track.",
+      }
+    : PREGNANCY;
+  const visit = live?.appointment
+    ? {
+        label: live.appointment.label,
+        date: DAY_MONTH(live.appointment.scheduledAt),
+        detail: `${new Date(live.appointment.scheduledAt).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })} · ${live.appointment.place}`,
+        place: live.appointment.place,
+      }
+    : ANC_VISIT;
 
   const openNotifs = () => {
     setNotifOpen(true);
@@ -37,30 +74,33 @@ export function Home({
     <main className="screen with-nav">
       <div className="home-head stagger">
         <div style={stagger(0)}>
-          <p>Good morning,</p>
-          <h1>Wanjiku</h1>
+          <p>{TIME_OF_DAY()}</p>
+          <h1>{live?.mother.firstName ?? "Wanjiku"}</h1>
         </div>
-        <button
-          type="button"
-          className="notification"
-          aria-label={notifRead ? "Notifications" : "Notifications, 1 unread"}
-          onClick={openNotifs}
-          style={stagger(1)}
-        >
-          <Icon name="bell" />
-          {!notifRead && <i />}
-        </button>
+        <div className="head-actions">
+          <ThemeToggle className="theme-toggle" />
+          <button
+            type="button"
+            className="notification"
+            aria-label={notifRead ? "Notifications" : "Notifications, 1 unread"}
+            onClick={openNotifs}
+            style={stagger(1)}
+          >
+            <Icon name="bell" />
+            {!notifRead && <i />}
+          </button>
+        </div>
       </div>
 
       <section className="stagger">
         <section className="pregnancy-card" aria-label="Pregnancy overview" style={stagger(2)}>
           <span className="card-rings" aria-hidden="true" />
-          <WeekRing week={PREGNANCY.week} totalWeeks={PREGNANCY.totalWeeks} />
+          <WeekRing week={pregnancy.week} totalWeeks={pregnancy.totalWeeks} />
           <div className="pregnancy-copy">
-            <span className="tag">{PREGNANCY.trimester}</span>
-            <h2>{PREGNANCY.headline}</h2>
+            <span className="tag">{pregnancy.trimester}</span>
+            <h2>{pregnancy.headline}</h2>
             <p>
-              {PREGNANCY.size} · <b>{PREGNANCY.daysLeft} days to go</b>
+              {pregnancy.size} · <b>{pregnancy.daysLeft} days to go</b>
             </p>
           </div>
         </section>
@@ -71,15 +111,15 @@ export function Home({
               <Icon name="calendar" />
             </span>
             <div>
-              <small>{ANC_VISIT.label}</small>
-              <h3>{ANC_VISIT.date}</h3>
-              <p>{ANC_VISIT.detail}</p>
+              <small>{visit.label}</small>
+              <h3>{visit.date}</h3>
+              <p>{visit.detail}</p>
             </div>
           </div>
           <div className="appointment-actions">
             <button
               type="button"
-              onClick={() => notify(`Opening directions to ${ANC_VISIT.place}`)}
+              onClick={() => notify(`Opening directions to ${visit.place}`)}
             >
               <Icon name="direction" size={17} /> Directions
             </button>
