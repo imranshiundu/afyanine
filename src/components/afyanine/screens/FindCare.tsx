@@ -6,11 +6,14 @@ import { Icon } from "../Icon";
 import { BottomNav, Header } from "../chrome";
 import { directionsUrl, distanceKm, type CareFacility, type CareCategory } from "@/lib/care-data";
 import type { Screen } from "../data";
+import { useLanguage } from "../language";
 
-const CareMap = dynamic(() => import("../CareMap"), { ssr: false, loading: () => <p className="care-loading">Loading interactive map…</p> });
+function MapLoading() { const { t } = useLanguage(); return <p className="care-loading">{t("Loading interactive map…")}</p>; }
+const CareMap = dynamic(() => import("../CareMap"), { ssr: false, loading: MapLoading });
 const NAIROBI: [number, number] = [-1.2921, 36.8219];
 const CATEGORIES = ["All", "Hospital", "Clinic", "Pharmacy", "Ambulance"] as const;
-export function FindCare({ navigate, onProfile, chw = false }: { navigate: (screen: Screen) => void; onProfile: () => void; chw?: boolean }) {
+export function FindCare({ navigate, onProfile, chw = false, embedded = false }: { navigate: (screen: Screen) => void; onProfile: () => void; chw?: boolean; embedded?: boolean }) {
+  const { t, locale } = useLanguage();
   const [centre, setCentre] = useState<[number, number]>(NAIROBI);
   const [mapCentre, setMapCentre] = useState<[number, number]>(NAIROBI);
   const [locationLabel, setLocationLabel] = useState("Nairobi centre · not your location");
@@ -63,33 +66,33 @@ export function FindCare({ navigate, onProfile, chw = false }: { navigate: (scre
     }, { timeout: 10_000, maximumAge: 60_000, enableHighAccuracy: false });
   };
   const details = (facility: CareFacility) => <div className="care-selected-details">
-    <span className="eyebrow">{facility.category} · {(distanceKm(centre, [facility.lat, facility.lng])).toFixed(1)} km straight-line</span>
-    <h3>{facility.name}</h3><p>{facility.address || "Address not listed"}</p>
-    <p>{facility.hours ? `Hours listed: ${facility.hours}` : "Opening hours unknown · call ahead"}</p>
-    <div className="care-detail-actions"><a className="care-directions" href={directionsUrl(facility)} target="_blank" rel="noopener noreferrer"><Icon name="direction" size={16} />Directions</a>
-      {facility.phone && /^[+\d\s()-]+$/.test(facility.phone) && <a href={`tel:${facility.phone.replace(/[^\d+]/g, "")}`}><Icon name="phone" size={16} />Call</a>}
-      <a href={facility.sourceUrl} target="_blank" rel="noopener noreferrer">Source</a>
+    <span className="eyebrow">{t(facility.category)} · {(distanceKm(centre, [facility.lat, facility.lng])).toFixed(1)} {t("km straight-line")}</span>
+    <h3>{facility.name}</h3><p>{facility.address || t("Address not listed")}</p>
+    <p>{facility.hours ? `${t("Hours listed")}: ${facility.hours}` : t("Opening hours unknown · call ahead")}</p>
+    <div className="care-detail-actions"><a className="care-directions" href={directionsUrl(facility)} target="_blank" rel="noopener noreferrer"><Icon name="direction" size={16} />{t("Directions")}</a>
+      {facility.phone && /^[+\d\s()-]+$/.test(facility.phone) && <a href={`tel:${facility.phone.replace(/[^\d+]/g, "")}`}><Icon name="phone" size={16} />{t("Call")}</a>}
+      <a href={facility.sourceUrl} target="_blank" rel="noopener noreferrer">{t("Source")}</a>
     </div>
   </div>;
   return <main className="screen with-nav care-screen care-discovery">
     <Header title="Find care" onBack={() => navigate(chw ? "chw" : "home")} />
-    <div className="care-location-row"><p><b>Care around you</b><small>{locationLabel}</small></p><button className="icon-button" onClick={locate} disabled={locating} aria-label="Use my location"><Icon name="pin" />{locating && <span className="sr-only">Locating</span>}</button></div>
-    <p className="care-privacy">Use my location shares an approximate area with map providers to find care. It is not saved to your profile.</p>
-    {locationError && <p className="account-error" role="status">{locationError}</p>}
-    <label className="care-search"><Icon name="search" size={18} /><input aria-label="Search facilities" value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter names in these results" /></label>
-    <div className="care-category-tabs" role="group" aria-label="Facility type">{CATEGORIES.map(item => <button key={item} aria-pressed={category === item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{item}</button>)}</div>
-    <div className="care-view-controls"><div role="group" aria-label="Map or list view">{(["Map", "List"] as const).map(item => <button aria-pressed={view === item} className={view === item ? "active" : ""} key={item} onClick={() => setView(item)}>{item}</button>)}</div>{view === "Map" && <button onClick={() => setLarge(!large)} aria-pressed={large}>{large ? "Compact map" : "Larger map"}</button>}</div>
+    <div className="care-location-row"><p><b>{t("Care around you")}</b><small>{t(locationLabel)}</small></p><button className="icon-button" onClick={locate} disabled={locating} aria-label={t("Use my location")}><Icon name="pin" />{locating && <span className="sr-only">{t("Locating")}</span>}</button></div>
+    <p className="care-privacy">{t("Use my location shares an approximate area with map providers to find care. It is not saved to your profile.")}</p>
+    {locationError && <p className="account-error" role="status">{t(locationError)}</p>}
+    <label className="care-search"><Icon name="search" size={18} /><input aria-label={t("Search facilities")} value={search} onChange={e => setSearch(e.target.value)} placeholder={t("Filter names in these results")} /></label>
+    <div className="care-category-tabs" role="group" aria-label={t("Facility type")}>{CATEGORIES.map(item => <button key={item} aria-pressed={category === item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{t(item)}</button>)}</div>
+    <div className="care-view-controls"><div role="group" aria-label={t("Map or list view")}>{(["Map", "List"] as const).map(item => <button aria-pressed={view === item} className={view === item ? "active" : ""} key={item} onClick={() => setView(item)}>{t(item)}</button>)}</div>{view === "Map" && <button onClick={() => setLarge(!large)} aria-pressed={large}>{t(large ? "Compact map" : "Larger map")}</button>}</div>
     {view === "Map" && <div className={`care-map-frame${large ? " expanded" : ""}`}><CareMap centre={centre} facilities={facilities} selected={selected?.id ?? null} onSelect={setSelectedId} onMove={setMapCentre} />
-      {distanceKm(centre, mapCentre) > .3 && <button className="search-map-area" onClick={() => loadArea(mapCentre, "Selected map area")}>Search this area</button>}
+      {distanceKm(centre, mapCentre) > .3 && <button className="search-map-area" onClick={() => loadArea(mapCentre, "Selected map area")}>{t("Search this area")}</button>}
     </div>}
-    <div className="care-filter-checks"><label><input type="checkbox" checked={maternity} onChange={e => setMaternity(e.target.checked)} />Maternity listed</label><label><input type="checkbox" checked={always} onChange={e => setAlways(e.target.checked)} />24/7 listed</label></div>
-    {loading ? <p className="care-loading" role="status">Looking up public facility data…</p> : error ? <section className="care-provider-error" role="status"><b>Directory connection unavailable</b><p>{error}</p><button className="secondary-button" onClick={() => loadArea(centre, locationLabel)}>Retry directory</button></section> : <>
-      <p className="care-result-count">{facilities.length} mapped places · within 8 km of search centre</p>
-      {selected && view === "Map" && <section className="care-selected-card" aria-label="Selected facility">{details(selected)}</section>}
-      {view === "List" && <div className="care-real-list">{facilities.map((facility, index) => <section key={facility.id} className="care-selected-card"><button className="facility-select" onClick={() => { setSelectedId(facility.id); setView("Map"); }} aria-label={`Show ${facility.name} on map`}><span>{index + 1}</span><Icon name="pin" size={18} />Show on map</button>{details(facility)}</section>)}</div>}
-      {!facilities.length && <div className="empty-state"><b>No mapped places match</b><p>Try another area or remove a filter. This directory is not complete.</p><button onClick={() => { setMaternity(false); setAlways(false); setSearch(""); setCategory("All"); }}>Clear filters</button></div>}
+    <div className="care-filter-checks"><label><input type="checkbox" checked={maternity} onChange={e => setMaternity(e.target.checked)} />{t("Maternity listed")}</label><label><input type="checkbox" checked={always} onChange={e => setAlways(e.target.checked)} />{t("24/7 listed")}</label></div>
+    {loading ? <p className="care-loading" role="status">{t("Looking up public facility data…")}</p> : error ? <section className="care-provider-error" role="status"><b>{t("Directory connection unavailable")}</b><p>{t("Please try again shortly.")}</p><button className="secondary-button" onClick={() => loadArea(centre, locationLabel)}>{t("Retry directory")}</button></section> : <>
+      <p className="care-result-count">{facilities.length} {t("mapped places · within 8 km of search centre")}</p>
+      {selected && view === "Map" && <section className="care-selected-card" aria-label={t("Selected facility")}>{details(selected)}</section>}
+      {view === "List" && <div className="care-real-list">{facilities.map((facility, index) => <section key={facility.id} className="care-selected-card"><button className="facility-select" onClick={() => { setSelectedId(facility.id); setView("Map"); }} aria-label={`${t("Show on map")}: ${facility.name}`}><span>{index + 1}</span><Icon name="pin" size={18} />{t("Show on map")}</button>{details(facility)}</section>)}</div>}
+      {!facilities.length && <div className="empty-state"><b>{t("No mapped places match")}</b><p>{t("Try another area or remove a filter. This directory is not complete.")}</p><button onClick={() => { setMaternity(false); setAlways(false); setSearch(""); setCategory("All"); }}>{t("Clear filters")}</button></div>}
     </>}
-    <p className="care-source-note">OpenStreetMap community data{fetchedAt ? ` · fetched ${new Date(fetchedAt).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" })}` : ""}. Availability and services are unverified; call ahead. No travel times or ambulance availability are implied. In an emergency, contact emergency services directly.</p>
-    <BottomNav active="care" navigate={navigate} onProfile={onProfile} chw={chw} />
+    <p className="care-source-note">{t("OpenStreetMap community data")}{fetchedAt ? ` · ${new Date(fetchedAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}` : ""}. {t("Availability and services are unverified; call ahead. No travel times or ambulance availability are implied. In an emergency, contact emergency services directly.")}</p>
+    {!embedded && <BottomNav active="care" navigate={navigate} onProfile={onProfile} chw={chw} />}
   </main>;
 }

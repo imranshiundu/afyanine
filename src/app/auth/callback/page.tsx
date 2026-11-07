@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { exchangeAuthCode } from "@/lib/supabase";
+import { useLanguage } from "@/components/afyanine/language";
 
 export default function Callback() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [message, setMessage] = useState("Confirming your account…");
   const codeRef = useRef<string | null>(null);
@@ -22,5 +24,5 @@ export default function Callback() {
     }).catch(() => { if (active) setMessage("That link could not be verified. It may have expired or been opened in another browser. Please return to sign in and try again."); });
     return () => { active = false; };
   }, [router]);
-  return <div className="page"><div className="app-shell"><main className="screen standalone-screen"><section className="profile-card"><h1>Account confirmation</h1><p role="status">{message}</p><Link className="secondary-button" href="/">Back to sign in</Link></section></main></div></div>;
+  return <div className="page"><div className="app-shell"><main className="screen standalone-screen"><section className="profile-card"><h1>{t("Account confirmation")}</h1><p role="status">{t(message)}</p><Link className="secondary-button" href="/">{t("Back to sign in")}</Link></section></main></div></div>;
 }

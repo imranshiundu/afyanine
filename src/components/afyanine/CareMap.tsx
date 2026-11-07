@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import type { CareFacility } from "@/lib/care-data";
+import { useLanguage } from "./language";
 
 export default function CareMap({ centre, facilities, selected, onSelect, onMove }: {
   centre: [number, number]; facilities: CareFacility[]; selected: string | null;
   onSelect: (id: string) => void; onMove: (centre: [number, number]) => void;
 }) {
+  const { t } = useLanguage();
   const node = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const pins = useRef<L.LayerGroup | null>(null);
@@ -44,5 +46,5 @@ export default function CareMap({ centre, facilities, selected, onSelect, onMove
     const target = facilities.find(f => f.id === selected);
     if (target && map.current && !map.current.getBounds().contains([target.lat, target.lng])) map.current.panTo([target.lat, target.lng]);
   }, [facilities, selected]);
-  return <><div ref={node} className="care-leaflet-map" role="region" aria-label="Interactive care map. Drag to pan; use plus and minus to zoom." />{tileError && <p className="map-network-note" role="status">Some map tiles could not load. Facility results remain available below.</p>}</>;
+  return <><div ref={node} className="care-leaflet-map" role="region" aria-label={t("Interactive care map. Drag to pan; use plus and minus to zoom.")} />{tileError && <p className="map-network-note" role="status">{t("Some map tiles could not load. Facility results remain available below.")}</p>}</>;
 }

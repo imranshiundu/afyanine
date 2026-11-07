@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useCountUp, useMounted } from "./useMotion";
+import { useLanguage } from "./language";
 
 /* ------------------------------------------------------------------ */
 /* Path helpers                                                        */
@@ -217,6 +218,7 @@ export function EcgWave() {
 /* ------------------------------------------------------------------ */
 
 export function WeekRing({ week, totalWeeks }: { week: number; totalWeeks: number }) {
+  const { t } = useLanguage();
   const radius = 52;
   const circumference = 2 * Math.PI * radius;
   const progress = Math.min(week / totalWeeks, 1);
@@ -238,9 +240,9 @@ export function WeekRing({ week, totalWeeks }: { week: number; totalWeeks: numbe
         />
       </svg>
       <div>
-        <small>WEEK</small>
+        <small>{t("WEEK")}</small>
         <b>{shown}</b>
-        <span>of {totalWeeks}</span>
+        <span>{t("of")} {totalWeeks}</span>
       </div>
     </div>
   );
@@ -259,6 +261,7 @@ export function BpMeter({
   scale: { min: number; max: number };
   categories: Array<{ key: string; label: string; from: number; to: number }>;
 }) {
+  const { t } = useLanguage();
   const span = scale.max - scale.min;
   const mounted = useMounted();
   const pct = (v: number) => (Math.min(Math.max(v, scale.min), scale.max) - scale.min) / span;
@@ -268,7 +271,7 @@ export function BpMeter({
       <div className="bp-meter-track">
         {categories.map((c) => (
           <div key={c.key} className={`bp-seg ${c.key}`} style={{ width: `${(pct(c.to + 1) - pct(c.from)) * 100}%` }}>
-            <span>{c.label}</span>
+            <span>{t(c.label)}</span>
           </div>
         ))}
         <div

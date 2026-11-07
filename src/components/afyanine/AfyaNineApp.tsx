@@ -24,6 +24,8 @@ import { AccountHome } from "./screens/AccountHome";
 import { useAccount } from "./useAccount";
 import { emptyDemoSession, parseDemoSession, readDemoSession, subscribeDemoSession, writeDemoSession, type DemoSession } from "./account-session";
 import { getInstalledOnboardingSnapshot, getOnboardingServerSnapshot, subscribeInstalledOnboarding } from "./installed-onboarding";
+import { CareWorkspace } from "./CareWorkspace";
+import { useLanguage } from "./language";
 
 const NAV_SCREENS: Screen[] = ["home", "care", "vitals", "profile"];
 
@@ -37,11 +39,13 @@ export function AfyaNine() {
 }
 
 function AccountGate() {
+  const { t } = useLanguage();
   const { user, loading, error } = useAccount();
   const raw = useSyncExternalStore(subscribeDemoSession, readDemoSession, emptyDemoSession);
   const demo = user ? null : parseDemoSession(raw);
-  if (loading) return <div className="page"><div className="app-shell"><main className="screen standalone-screen"><p role="status">Restoring your session…</p></main></div></div>;
-  return <AfyaNineExperience key={user?.id ?? raw ?? "guest"} user={user} demo={demo} sessionError={error} />;
+  if (loading) return <div className="page"><div className="app-shell"><main className="screen standalone-screen"><p role="status">{t("Restoring your session…")}</p></main></div></div>;
+  if (user) return <CareWorkspace key={user.id} user={user} />;
+  return <AfyaNineExperience key={raw ?? "guest"} user={null} demo={demo} sessionError={error} />;
 }
 
 function AfyaNineExperience({ user, demo, sessionError }: { user: User | null; demo: DemoSession | null; sessionError: string }) {

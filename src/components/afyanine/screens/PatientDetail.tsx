@@ -7,6 +7,7 @@ import { ChartAxis, Sparkline } from "../charts";
 import { AI_ALERT, BP_TREND, FLAGGED, type Screen } from "../data";
 import { api, type PatientDetailPayload } from "../api";
 import { stagger } from "../useMotion";
+import { useLanguage } from "../language";
 
 const timeOf = (iso: string) =>
   new Date(iso).toLocaleString("en-KE", {
@@ -26,6 +27,7 @@ export function PatientDetail({
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
 }) {
+  const { t } = useLanguage();
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -102,13 +104,13 @@ export function PatientDetail({
         <span className="profile-copy">
           <h1>{patient.name}</h1>
           <p>
-            {patient.week} pregnant · Age {patient.age}
+            {patient.week} {t("pregnant")} · {t("Age")} {patient.age}
           </p>
           <span className="patient-id">ID {patient.id}</span>
         </span>
         <button type="button" onClick={() => notify(`Calling ${patient.name}`)}>
           <Icon name="phone" size={19} />
-          <span>Call</span>
+          <span>{t("Call")}</span>
         </button>
       </section>
 
@@ -119,27 +121,27 @@ export function PatientDetail({
               <Icon name="warning" size={22} stroke="#FFFFFF" />
             </span>
             <div>
-              <small>{alert.label}</small>
-              <h2>{alert.title}</h2>
+              <small>{t(alert.label)}</small>
+              <h2>{t(alert.title)}</h2>
             </div>
           </div>
-          <p>{alert.reason}</p>
+          <p>{t(alert.reason)}</p>
           <div className="ai-metrics">
             <span>
               <b>{alert.latestBp}</b>
-              <small>Latest BP</small>
+              <small>{t("Latest BP")}</small>
             </span>
             <i aria-hidden="true" />
             <span>
               <b>{alert.trend}</b>
-              <small>{alert.trendLabel}</small>
+              <small>{t(alert.trendLabel)}</small>
             </span>
           </div>
           <button
             type="button"
             onClick={() => notify("Alert marked for urgent follow-up")}
           >
-            Mark for urgent follow-up <Icon name="arrow" size={17} />
+            {t("Mark for urgent follow-up")} <Icon name="arrow" size={17} />
           </button>
         </section>
       )}
@@ -151,10 +153,10 @@ export function PatientDetail({
       >
         <div className="card-title">
           <div>
-            <p>{trend.label ?? "BLOOD PRESSURE TREND"}</p>
-            <h2>{trend.headline}</h2>
+            <p>{t(trend.label ?? "BLOOD PRESSURE TREND")}</p>
+            <h2>{t(trend.headline)}</h2>
           </div>
-          <span className={`status ${trend.status === "High" ? "high" : ""}`}>{trend.status}</span>
+          <span className={`status ${trend.status === "High" ? "high" : ""}`}>{t(trend.status)}</span>
         </div>
         <Sparkline
           data={[...trend.series]}
@@ -169,10 +171,10 @@ export function PatientDetail({
         <ChartAxis labels={trend.axis} indent />
         <div className="legend" aria-hidden="true">
           <span>
-            <i className="legend-sys" /> Systolic
+            <i className="legend-sys" /> {t("Systolic")}
           </span>
           <span>
-            <i className="legend-th" /> Danger line
+            <i className="legend-th" /> {t("Danger line")}
           </span>
         </div>
       </section>
@@ -180,16 +182,16 @@ export function PatientDetail({
       <section className="notes-card" aria-label="Visit notes" style={stagger(3)}>
         <div className="card-title">
           <div>
-            <p>VISIT NOTES</p>
-            <h2>Add a note</h2>
+            <p>{t("VISIT NOTES")}</p>
+            <h2>{t("Add a note")}</h2>
           </div>
           <Icon name="edit" />
         </div>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Add symptoms, observations or follow-up actions..."
-          aria-label="Visit note"
+          placeholder={t("Add symptoms, observations or follow-up actions...")}
+          aria-label={t("Visit note")}
         />
         <button
           type="button"
@@ -199,11 +201,11 @@ export function PatientDetail({
         >
           {saved ? (
             <>
-              <Icon name="check" strokeWidth={3} /> Saved
+              <Icon name="check" strokeWidth={3} /> {t("Saved")}
             </>
           ) : (
             <>
-              Save note <Icon name="check" />
+              {t("Save note")} <Icon name="check" />
             </>
           )}
         </button>
@@ -238,7 +240,7 @@ export function PatientDetail({
         style={stagger(4)}
         onClick={() => notify(`Calling ${patient.name}`)}
       >
-        <Icon name="phone" /> Call patient
+        <Icon name="phone" /> {t("Call patient")}
       </button>
     </main>
   );

@@ -6,6 +6,8 @@ import { ThemeToggle } from "../chrome";
 import { CHW, PATIENTS, type Patient, type Screen } from "../data";
 import type { PatientsPayload } from "../api";
 import { useCountUp, stagger } from "../useMotion";
+import { useLanguage } from "../language";
+import Link from "next/link";
 
 function riskClass(risk: Patient["risk"]) {
   if (risk === "High Risk") return "high";
@@ -35,6 +37,7 @@ export function ChwDashboard({
   onResolve: () => void;
   onLogout: () => void;
 }) {
+  const { t, locale } = useLanguage();
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -55,10 +58,10 @@ export function ChwDashboard({
       <div className="chw-head stagger">
         <div style={stagger(0)}>
           <p>
-            {new Date().toLocaleDateString("en-KE", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()}
+            {new Date().toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" }).toUpperCase()}
           </p>
           <h1>
-            {TIME_OF_DAY()}
+            {t(TIME_OF_DAY())}
             <br />
             {chw.firstName}
           </h1>
@@ -98,7 +101,7 @@ export function ChwDashboard({
           </span>
           <span className="alert-copy">
             <small>
-              <i className="alert-live" aria-hidden="true" /> ACTIVE EMERGENCY
+              <i className="alert-live" aria-hidden="true" /> {t("ACTIVE EMERGENCY")}
             </small>
             <b>{emergency.who}</b>
             <p>
@@ -123,22 +126,22 @@ export function ChwDashboard({
       <div className="stats-row" aria-label="Practice summary" style={stagger(3)}>
         <div>
           <b>{patients}</b>
-          <span>Patients</span>
+          <span>{t("Patients")}</span>
         </div>
         <div>
           <b className="red-text">{attention}</b>
-          <span>Need attention</span>
+          <span>{t("Need attention")}</span>
         </div>
         <div>
           <b>{visits}</b>
-          <span>Visits today</span>
+          <span>{t("Visits today")}</span>
         </div>
       </div>
 
       <div className="section-title patients-title">
-        <h2>My patients</h2>
+        <h2>{t("My patients")}</h2>
         <button type="button" onClick={() => notify(`Showing all ${chw.stats.patients} patients`)}>
-          View all
+          {t("View all")}
         </button>
       </div>
 
@@ -148,8 +151,8 @@ export function ChwDashboard({
           ref={searchRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search patients"
-          aria-label="Search patients"
+          placeholder={t("Search patients")}
+          aria-label={t("Search patients")}
         />
         {query ? (
           <button type="button" aria-label="Clear search" onClick={() => setQuery("")}>
@@ -181,7 +184,7 @@ export function ChwDashboard({
                 <b className={p.risk === "High Risk" ? "red-text" : ""}>{p.bp}</b>
               </p>
             </span>
-            <span className={`risk ${riskClass(p.risk)}`}>{p.risk}</span>
+            <span className={`risk ${riskClass(p.risk)}`}>{t(p.risk)}</span>
             <Icon name="chevron" size={17} />
           </button>
         ))}
@@ -191,7 +194,7 @@ export function ChwDashboard({
               <Icon name="search" size={26} />
             </span>
             <b>No patients match “{query}”</b>
-            <p>Check the spelling or search by clinic ID.</p>
+            <p>{t("Check the spelling or search by clinic ID.")}</p>
           </div>
         )}
       </div>
@@ -199,7 +202,7 @@ export function ChwDashboard({
       <nav className="chw-nav" aria-label="CHW navigation">
         <button type="button" className="active" aria-current="page">
           <Icon name="home" />
-          <span>Dashboard</span>
+          <span>{t("Dashboard")}</span>
         </button>
         <button
           type="button"
@@ -209,7 +212,7 @@ export function ChwDashboard({
           }}
         >
           <Icon name="people" />
-          <span>Patients</span>
+          <span>{t("Patients")}</span>
         </button>
         <button
           type="button"
@@ -219,13 +222,13 @@ export function ChwDashboard({
         >
           <Icon name="plus" strokeWidth={2.5} />
         </button>
-        <button type="button" onClick={() => notify(`${chw.stats.visits} visits scheduled today`)}>
+        <Link href="/care-team-demo?actor=chw&tab=visits">
           <Icon name="calendar" />
-          <span>Visits</span>
-        </button>
+          <span>{t("Visits")}</span>
+        </Link>
         <button type="button" onClick={onLogout}>
           <Icon name="user" />
-          <span>Profile</span>
+          <span>{t("Profile")}</span>
         </button>
       </nav>
     </main>

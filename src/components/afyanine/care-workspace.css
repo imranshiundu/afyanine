@@ -1,0 +1,39 @@
+.app-shell.care-workspace-shell { display: flex; flex-direction: column; }
+.screen.team-main { padding: 0 22px calc(110px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; display: block; }
+.team-main .screen-header { padding-left: 0; padding-right: 0; }
+.team-main h1 { font-size: 30px; margin: 8px 0; }
+.team-main h2 { font-size: 21px; margin: 18px 0 10px; }
+.team-main h3 { font-size: 17px; margin: 8px 0; }
+.team-workspace-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.team-workspace-fields:disabled { opacity: .7; }
+.team-workspace-fields input, .team-workspace-fields select, .team-workspace-fields textarea { width: 100%; min-width: 0; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; }
+.team-workspace-fields input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--lime-deep); flex-shrink: 0; }
+.team-workspace-fields textarea { min-height: 110px; resize: vertical; }
+.team-categories { border: 0; padding: 8px 0; display: grid; gap: 10px; }
+.team-categories legend { font-weight: 700; margin-bottom: 4px; }
+.team-categories label { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.team-main .profile-card { margin: 16px 0; overflow-wrap: anywhere; }
+.team-actions { display: grid; gap: 9px; margin-top: 14px; }
+.team-status { position: sticky; top: 0; z-index: 10; background: var(--bg); font-weight: 600; }
+.team-status:not(:empty) { padding: 12px; border-radius: 12px; border: 1px solid var(--line); }
+.team-meta { display: block; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.team-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0; }
+.team-stats div { background: var(--lime-16); border-radius: 16px; padding: 14px 9px; }
+.team-stats strong { display: block; font-size: 27px; }
+.team-stats span { font-size: 12px; }
+.team-stats p { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+.bottom-nav.team-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.team-nav button { min-width: 0; }
+.team-nav span { font-size: 10px; white-space: normal; overflow-wrap: anywhere; }
+.team-patient-list { display: grid; gap: 8px; }
+.team-patient-list button { text-align: left; border: 1px solid var(--line); }
+.team-patient-list .selected { border: 2px solid var(--lime-deep); }
+.team-patient-list small, .team-patient-list span { display: block; margin-top: 8px; }
+.team-visit-summary { display: block; width: 100%; text-align: left; border: 1px solid var(--line); }
+.team-review { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
+.team-audit { font-size: 13px; border-bottom: 1px solid var(--line); padding: 8px 0; }
+.team-audit small { display: block; color: var(--muted); }
+.team-demo-banner { background: var(--lime-16); border-bottom: 1px solid var(--line); padding: 12px 18px; font-size: 12px; flex-shrink: 0; }
+.team-demo-banner p { margin: 4px 0 8px; }
+.team-demo-banner label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.team-demo-banner select { max-width: 70%; padding: 8px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; font: inherit; }

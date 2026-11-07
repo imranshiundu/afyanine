@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { exchangeAuthCode, getSupabase } from "@/lib/supabase";
+import { useLanguage } from "@/components/afyanine/language";
 
 export default function ResetPassword() {
+  const { t } = useLanguage();
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -41,5 +43,5 @@ export default function ResetPassword() {
     } catch { setMessage("Could not update your password. Please retry or request a fresh link."); }
     finally { setBusy(false); }
   }
-  return <div className="page"><div className="app-shell"><main className="screen standalone-screen"><section className="profile-card"><h1>New password</h1><p role="status">{message}</p>{ready && <form className="account-form" onSubmit={submit}><label>New password<input type="password" minLength={8} autoComplete="new-password" required value={password} onChange={e => setPassword(e.target.value)} /></label><button className="primary-button" disabled={busy}>{busy ? "Saving…" : "Update password"}</button></form>}<Link className="secondary-button" href="/">Return to AfyaNine</Link></section></main></div></div>;
+  return <div className="page"><div className="app-shell"><main className="screen standalone-screen"><section className="profile-card"><h1>{t("New password")}</h1><p role="status">{t(message)}</p>{ready && <form className="account-form" onSubmit={submit}><label>{t("New password")}<input type="password" minLength={8} autoComplete="new-password" required value={password} onChange={e => setPassword(e.target.value)} /></label><button className="primary-button" disabled={busy}>{t(busy ? "Saving…" : "Update password")}</button></form>}<Link className="secondary-button" href="/">{t("Return to AfyaNine")}</Link></section></main></div></div>;
 }

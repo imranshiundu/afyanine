@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { Icon } from "./Icon";
+import { useLanguage } from "./language";
 
 /**
  * Bottom sheet overlay pinned to the phone shell (not the scroll).
@@ -20,6 +21,7 @@ export function Sheet({
   children: ReactNode;
   label: string;
 }) {
+  const { t } = useLanguage();
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -39,10 +41,10 @@ export function Sheet({
         aria-label="Close"
         onClick={onClose}
       />
-      <section className="sheet-panel" role="dialog" aria-modal="true" aria-label={label}>
+      <section className="sheet-panel" role="dialog" aria-modal="true" aria-label={t(label)}>
         <span className="grabber" aria-hidden="true" />
         <div className="sheet-head">
-          <h2>{title}</h2>
+          <h2>{t(title)}</h2>
           <button type="button" className="sheet-close" onClick={onClose} aria-label="Close">
             <Icon name="x" size={17} strokeWidth={2.2} />
           </button>

@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
 import { INITIAL_REMINDER_STATE, InstallReminderController } from "./install-reminder";
+import { useLanguage } from "./language";
 
 export function InstallReminder({ raised, suppressed }: { raised: boolean; suppressed: boolean }) {
+  const { t } = useLanguage();
   const [state, setState] = useState(INITIAL_REMINDER_STATE);
   const controller = useRef<InstallReminderController | null>(null);
 
@@ -22,20 +24,20 @@ export function InstallReminder({ raised, suppressed }: { raised: boolean; suppr
 
   if (!state.visible || suppressed) return null;
   return (
-    <aside className={`install-reminder${raised ? " raised" : ""}`} aria-label="Install AfyaNine" aria-live="polite">
+    <aside className={`install-reminder${raised ? " raised" : ""}`} aria-label={t("Install AfyaNine")} aria-live="polite">
       <div className="install-reminder-head">
         <img src="/icons/icon-192.png" width={44} height={44} alt="" />
         <div>
-          <h2>Keep AfyaNine close</h2>
-          <p>Add the app to your home screen for quick access.</p>
+          <h2>{t("Keep AfyaNine close")}</h2>
+          <p>{t("Add the app to your home screen for quick access.")}</p>
         </div>
       </div>
       {state.instructions && (
         <div id="install-instructions" className="install-instructions">
           {state.ios ? (
-            <p>In Safari, tap <b>Share</b>, then <b>Add to Home Screen</b> and <b>Add</b>. If you opened this inside another app, open it in Safari first.</p>
+            <p>{t("In Safari, tap Share, then Add to Home Screen and Add. If you opened this inside another app, open it in Safari first.")}</p>
           ) : (
-            <p>Open your browser menu and look for <b>Install app</b> or <b>Add to Home Screen</b>. On desktop, you can also look for an install icon in the address bar. If these options are missing, try a browser that supports installation.</p>
+            <p>{t("Open your browser menu and look for Install app or Add to Home Screen. On desktop, look for the install icon in the address bar.")}</p>
           )}
         </div>
       )}
@@ -48,11 +50,11 @@ export function InstallReminder({ raised, suppressed }: { raised: boolean; suppr
           aria-controls={state.instructions ? "install-instructions" : undefined}
           onClick={() => void controller.current?.install()}
         >
-          <Icon name="plus" size={18} />{state.busy ? "Opening…" : state.canPrompt ? "Install app" : "How to install"}
+          <Icon name="plus" size={18} />{t(state.busy ? "Opening…" : state.canPrompt ? "Install app" : "How to install")}
         </button>
-        <button type="button" className="install-later" onClick={() => controller.current?.snooze()}>Not now</button>
+        <button type="button" className="install-later" onClick={() => controller.current?.snooze()}>{t("Not now")}</button>
       </div>
-      <small>“Not now” reminds you again in 10 minutes.</small>
+      <small>{t("“Not now” reminds you again in 10 minutes.")}</small>
     </aside>
   );
 }

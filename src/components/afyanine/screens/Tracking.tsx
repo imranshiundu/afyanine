@@ -3,6 +3,7 @@
 import { Icon } from "../Icon";
 import { AMBULANCE, TIMELINE, TRACKING_STAGES, type Screen } from "../data";
 import { useStageProgress, stagger } from "../useMotion";
+import { useLanguage } from "../language";
 
 export function Tracking({
   goBack,
@@ -13,12 +14,14 @@ export function Tracking({
   notify: (msg: string) => void;
   emergencyType: string;
 }) {
+  const { t } = useLanguage();
   const stage = useStageProgress(TRACKING_STAGES.length, 5000, true);
   const now = TRACKING_STAGES[stage];
   const arrived = stage >= 2;
 
   return (
     <main className="screen tracking-screen">
+      <p className="demo-feed-label">{t("Fictional SOS demo. No emergency services are dispatched.")}</p>
       <div className="tracking-map">
         <div className="map-label l1">KIBERA</div>
         <div className="map-label l2">JAMHURI</div>
@@ -58,8 +61,8 @@ export function Tracking({
             <Icon name="ambulance" size={20} />
           </span>
           <div>
-            <small>ESTIMATED ARRIVAL</small>
-            <b>{now.eta}</b>
+            <small>{t("ESTIMATED ARRIVAL")}</small>
+            <b>{t(now.eta)}</b>
           </div>
         </div>
         <span className="destination-pin" aria-hidden="true">
@@ -76,10 +79,10 @@ export function Tracking({
         <div className="grabber" aria-hidden="true" />
         <div className="tracking-status" style={stagger(0)}>
           <span className="live-dot" aria-hidden="true" />
-          <b key={stage}>{now.status}</b>
-          <small>{now.note}</small>
+          <b key={stage}>{t(now.status)}</b>
+          <small>{t(now.note)}</small>
           <span className="emergency-chip">
-            <Icon name="warning" size={13} /> {emergencyType || "Emergency"} · Wanjiku
+            <Icon name="warning" size={13} /> {t(emergencyType || "Emergency")} · Wanjiku
           </span>
         </div>
 
@@ -88,11 +91,11 @@ export function Tracking({
           <div>
             <small>{AMBULANCE.service}</small>
             <h3>{AMBULANCE.plate}</h3>
-            <p>Driver · {AMBULANCE.driver}</p>
+            <p>{t("Driver")} · {AMBULANCE.driver}</p>
           </div>
           <button type="button" onClick={() => notify(`Calling driver ${AMBULANCE.driver}`)}>
             <Icon name="phone" size={20} />
-            <span>Call</span>
+            <span>{t("Call")}</span>
           </button>
         </div>
 
@@ -110,18 +113,18 @@ export function Tracking({
                   {done && <Icon name="check" size={12} strokeWidth={3} />}
                   {live && <i className="step-live" aria-hidden="true" />}
                 </span>
-                <b>{step.label}</b>
+                <b>{t(step.label)}</b>
                 {step.meta && !live ? <small>{step.meta}</small> : null}
-                {live && <em>Now</em>}
+                {live && <em>{t("Now")}</em>}
               </div>
             );
           })}
         </ol>
 
         <p className="tracking-note">
-          {arrived
+          {t(arrived
             ? "Help has arrived. Open the door if it is safe."
-            : "Stay where you are if it is safe. Keep your phone nearby."}
+            : "Stay where you are if it is safe. Keep your phone nearby.")}
         </p>
       </section>
     </main>

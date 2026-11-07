@@ -7,11 +7,12 @@ import { ThemeToggle } from "../chrome";
 import { BRAND, LOGIN_COPY, type Role } from "../data";
 import { TestWard } from "./TestWard";
 import { AccountForm } from "../AccountForm";
+import { useLanguage } from "../language";
+import Link from "next/link";
 
 export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Promise<void> }) {
-  const [language, setLanguage] = useState<"EN" | "SW">("EN");
+  const { language, setLanguage, t: tr } = useLanguage();
   const [mode, setMode] = useState<"signin" | "testward">("signin");
-  const [error, setError] = useState("");
   const t = LOGIN_COPY[language];
   const changeTab = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
@@ -42,7 +43,8 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Pro
         {mode === "signin" && <><p className="eyebrow">{t.eyebrow}</p><h1>{t.welcome}</h1><p className="lead">{t.lead}</p></>}
       </div>
       <section id="login-panel-testward" role="tabpanel" aria-labelledby="login-tab-testward" hidden={mode !== "testward"}>
-        {mode === "testward" && <><TestWard language={language} onEnter={onEnter} /><button className="secondary-button" type="button" onClick={() => void onEnter("chw").catch(() => setError("Demo ward could not be opened. Please retry."))}>Open fictional CHW dashboard</button>{error && <p role="alert">{error}</p>}</>}
+        {mode === "testward" && <Link href="/care-team-demo" className="primary-button">{tr("Open care-team demo")}<Icon name="people" /></Link>}
+        {mode === "testward" && <><TestWard language={language} onEnter={onEnter} /><Link className="secondary-button" href="/care-team-demo?actor=chw">{tr("Open fictional CHW dashboard")}</Link></>}
       </section>
       <section id="login-panel-signin" role="tabpanel" aria-labelledby="login-tab-signin" hidden={mode !== "signin"}>
         <AccountForm language={language} />

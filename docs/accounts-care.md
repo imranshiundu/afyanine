@@ -1,5 +1,11 @@
 # Accounts, sessions and public care discovery
 
+This is the PR #5 baseline decision. Its successor is
+[care-team.md](care-team.md), with new private profile/consent/visit tables.
+The user confirms Vercel already has Supabase public auth settings. The missing
+configuration described below is specific to the isolated local sandbox, not a
+claim that Vercel lacks it.
+
 ## Decision before implementation
 
 Supabase Auth owns email/password credentials, confirmation, password recovery,
