@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "../Icon";
-import { Header } from "../chrome";
+import { BottomNav, Header } from "../chrome";
 import { BpMeter, ChartAxis, EcgWave, Sparkline } from "../charts";
 import {
   BP_CATEGORIES,
@@ -50,7 +50,7 @@ export function Vitals({
   const catLabel = BP_CATEGORIES.find((c) => c.key === cat)?.label ?? "Normal";
 
   return (
-    <main className="screen vitals-screen">
+    <main className="screen vitals-screen with-nav">
       <Header
         title="My vitals"
         onBack={() => navigate("home")}
@@ -222,6 +222,11 @@ export function Vitals({
         </div>
         <Icon name="chevron" stroke="#FFFFFF" />
       </button>
+      <BottomNav
+        active="vitals"
+        navigate={navigate}
+        onProfile={() => notify(`Signed in as ${snapshot?.mother.firstName ?? "Mother"} · Mother`)}
+      />
     </main>
   );
 }
