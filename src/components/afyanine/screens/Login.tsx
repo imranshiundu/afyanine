@@ -9,7 +9,7 @@ import { AccountForm } from "../AccountForm";
 import { useLanguage } from "../language";
 import { rememberEntryRole } from "../entry-role";
 
-export function Login() {
+export function Login({ onFormChange }: { onFormChange?: (open: boolean) => void }) {
   const { language, setLanguage } = useLanguage();
   const [role, setRole] = useState<Role | null>(null);
   const copy = LOGIN_COPY[language];
@@ -30,12 +30,12 @@ export function Login() {
     </div>
     {!role ? <section className="entry-role-section" aria-label={copy.signInAs}>
       <h2>{language === "SW" ? "Chagua aina ya akaunti" : "Choose your account type"}</h2>
-      <div className="role-grid">{(["mother", "chw"] as const).map(value => <button key={value} type="button" className="role-card" onClick={() => { rememberEntryRole(value); setRole(value); }}>
+      <div className="role-grid">{(["mother", "chw"] as const).map(value => <button key={value} type="button" className="role-card" onClick={() => { rememberEntryRole(value); setRole(value); onFormChange?.(true); }}>
         <span className="role-icon"><Icon name={value === "mother" ? "heart" : "people"} size={28} /></span>
         <span className="role-copy"><b>{copy[value]}</b><small>{value === "mother" ? copy.motherSub : copy.chwSub}</small></span>
       </button>)}</div>
     </section> : <section className="entry-auth-section">
-      <button className="entry-back entry-back-icon" type="button" aria-label={language === "SW" ? "Badilisha aina ya akaunti" : "Change account type"} title={language === "SW" ? "Badilisha aina ya akaunti" : "Change account type"} onClick={() => setRole(null)}><Icon name="back" size={20} /></button>
+      <button className="entry-back entry-back-icon" type="button" aria-label={language === "SW" ? "Badilisha aina ya akaunti" : "Change account type"} title={language === "SW" ? "Badilisha aina ya akaunti" : "Change account type"} onClick={() => { setRole(null); onFormChange?.(false); }}><Icon name="back" size={20} /></button>
       <p className="eyebrow entry-role-label">{copy[role]}</p>
       <AccountForm key={role} language={language} role={role} />
     </section>}

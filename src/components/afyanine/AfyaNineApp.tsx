@@ -55,6 +55,7 @@ function AfyaNineExperience({ user, demo, sessionError }: { user: User | null; d
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [emergencyType, setEmergencyType] = useState("");
   const [toast, setToast] = useState("");
+  const [authFormOpen, setAuthFormOpen] = useState(false);
   const toastTimer = useRef<number | null>(null);
 
   /* ---- live backend data (null → screens fall back to demo data) ---- */
@@ -223,7 +224,7 @@ function AfyaNineExperience({ user, demo, sessionError }: { user: User | null; d
     <div className="page">
       <div className="app-shell">
         <div key={screen} className={`view ${dir}`}>
-          {screen === "login" && <>{sessionError && <p role="alert" className="account-error">{sessionError}</p>}<Login /></>}
+          {screen === "login" && <>{sessionError && <p role="alert" className="account-error">{sessionError}</p>}<Login onFormChange={setAuthFormOpen} /></>}
           {screen === "home" && user && <AccountHome user={user} navigate={navigate} />}
           {screen === "home" && !user && (snapshot ?
             <Home
@@ -266,7 +267,7 @@ function AfyaNineExperience({ user, demo, sessionError }: { user: User | null; d
           {screen === "logout" && <Logout account={Boolean(user)} onConfirm={signOut} onCancel={() => navigate("profile")} />}
         </div>
 
-        <InstallReminder raised={NAV_SCREENS.includes(screen) || screen === "chw"} suppressed={screen === "sos" || screen === "tracking" || screen === "logout"} />
+        <InstallReminder raised={NAV_SCREENS.includes(screen) || screen === "chw"} suppressed={screen === "sos" || screen === "tracking" || screen === "logout" || (screen === "login" && authFormOpen)} />
         {toast && (
           <div
             className={`toast${NAV_SCREENS.includes(screen) ? " raised" : ""}`}
