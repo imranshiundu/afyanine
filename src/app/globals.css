@@ -2984,6 +2984,25 @@ h1, h2, h3, p {
   gap: 3px;
   opacity: 0.8;
 }
+.alert-resolve {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--r-full);
+  background: var(--white-overlay-soft);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.alert-resolve:hover,
+.alert-resolve:focus-visible {
+  background: rgba(255, 255, 255, 0.35);
+  outline: none;
+}
+.alert-resolve:active {
+  transform: scale(0.92);
+}
 .stats-row {
   min-height: 70px;
   background: var(--surface);
@@ -3868,4 +3887,69 @@ html.theme-pop .app-shell {
   100% {
     box-shadow: var(--shadow-shell), 0 0 0 16px rgba(216, 240, 58, 0);
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Login test-ward account switcher                                     */
+/* ------------------------------------------------------------------ */
+.acct-field {
+  display: block;
+  margin-top: 2px;
+}
+.acct-field .field-label {
+  display: block;
+}
+.acct-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.acct-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 7px;
+  border-radius: var(--r-full);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.acct-chip:active {
+  transform: scale(0.97);
+}
+.acct-chip.selected {
+  border-color: var(--ink);
+  background: var(--line);
+}
+.acct-dot {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--r-full);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.acct-copy {
+  text-align: left;
+  min-width: 0;
+  display: block;
+}
+.acct-copy b {
+  display: block;
+  font-size: 12px;
+  line-height: 1.15;
+}
+.acct-copy small {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
 }

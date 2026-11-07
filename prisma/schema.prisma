@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -22,6 +22,7 @@ model Mother {
   dueDate      DateTime // pregnancy week is derived from this
   device       String         @default("AfyaBand")
   sizeNote     String         @default("About the size of an eggplant")
+  simulated    Boolean        @default(false) // bot-owned test account when true
   readings     VitalReading[]
   notes        VisitNote[]
   appointments Appointment[]

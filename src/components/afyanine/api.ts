@@ -78,6 +78,18 @@ export interface PatientDetailPayload {
   notes: Array<{ id: string; author: string; body: string; createdAt: string }>;
 }
 
+export interface MotherAccount {
+  code: string;
+  fullName: string;
+  firstName: string;
+  initials: string;
+  color: string;
+  age: number;
+  week: number;
+  risk: "Normal" | "Watch" | "High Risk";
+  simulated: boolean;
+}
+
 async function get<T>(url: string): Promise<T | null> {
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -104,10 +116,12 @@ async function post<T>(url: string, body: unknown): Promise<T | null> {
 
 export const api = {
   mother: (code = "MW-1048") => get<MotherSnapshot>(`/api/mother?code=${code}`),
+  mothers: () => get<{ mothers: MotherAccount[] }>("/api/mothers"),
   patients: () => get<PatientsPayload>("/api/patients"),
   patient: (code: string) => get<PatientDetailPayload>(`/api/patients/${code}`),
   saveNote: (code: string, body: string, author: string) =>
     post<{ note: PatientDetailPayload["notes"][number] }>(`/api/patients/${code}/notes`, { body, author }),
   raiseEmergency: (kind: string, motherCode = "MW-1048") =>
     post<{ emergency: { id: string } }>("/api/emergencies", { kind, motherCode }),
+  resolveEmergency: () => post<{ resolved: number }>("/api/emergencies/resolve", {}),
 };

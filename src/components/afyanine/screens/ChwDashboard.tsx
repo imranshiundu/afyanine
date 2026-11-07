@@ -25,21 +25,24 @@ export function ChwDashboard({
   navigate,
   openPatient,
   notify,
+  onResolve,
   onLogout,
 }: {
   payload: PatientsPayload | null;
   navigate: (s: Screen) => void;
   openPatient: (code: string) => void;
   notify: (msg: string) => void;
+  onResolve: () => void;
   onLogout: () => void;
 }) {
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
 
-  /* Live register from the API; bundled demo register as fallback */
-  const list = payload?.patients ?? PATIENTS;
-  const chw = payload?.chw ?? CHW;
-  const emergency = payload?.emergency ?? CHW.emergency;
+  /* Live register from the API; bundled demo register ONLY when the API is down */
+  const live = payload !== null;
+  const list = live ? (payload?.patients ?? []) : PATIENTS;
+  const chw = live ? (payload?.chw ?? CHW) : CHW;
+  const emergency = live ? payload?.emergency ?? null : CHW.emergency;
 
   const filtered = list.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
 
@@ -78,10 +81,16 @@ export function ChwDashboard({
       </div>
 
       {emergency && (
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           className="alert-banner"
           onClick={() => navigate("tracking")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !(e.target as HTMLElement).closest(".alert-resolve")) {
+              navigate("tracking");
+            }
+          }}
           style={stagger(2)}
         >
           <span className="alert-icon">
@@ -96,8 +105,19 @@ export function ChwDashboard({
               <Icon name="pin" size={14} /> {emergency.where}
             </p>
           </span>
-          <Icon name="chevron" stroke="#FFFFFF" />
-        </button>
+          <button
+            type="button"
+            className="alert-resolve"
+            aria-label="Mark SOS resolved"
+            onClick={(e) => {
+              e.stopPropagation();
+              onResolve();
+            }}
+          >
+            <Icon name="x" size={15} stroke="#FFFFFF" strokeWidth={3} />
+          </button>
+          <Icon name="chevron" stroke="#FFFFFF" size={17} />
+        </div>
       )}
 
       <div className="stats-row" aria-label="Practice summary" style={stagger(3)}>

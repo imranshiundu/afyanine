@@ -1,18 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "../Icon";
 import { Logo } from "../Logo";
 import { ThemeToggle } from "../chrome";
 import { BRAND, LOGIN_COPY, type Role } from "../data";
+import { api, type MotherAccount } from "../api";
 import { stagger } from "../useMotion";
 
-export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
+export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => void }) {
   const [role, setRole] = useState<Role>("mother");
   const [language, setLanguage] = useState<"EN" | "SW">("EN");
   const [phone, setPhone] = useState("");
+  const [account, setAccount] = useState<string>("MW-1048");
+  const [mothers, setMothers] = useState<MotherAccount[] | null>(null);
   const [shake, setShake] = useState(false);
   const t = LOGIN_COPY[language];
+
+  /* Live test-ward accounts for the mother switcher (falls back silently) */
+  useEffect(() => {
+    api.mothers().then((res) => {
+      if (res?.mothers?.length) setMothers(res.mothers);
+    });
+  }, []);
 
   const digits = phone.replace(/\s/g, "");
   const valid = digits.length >= 9;
@@ -23,7 +33,7 @@ export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
       window.setTimeout(() => setShake(false), 500);
       return;
     }
-    onEnter(role);
+    onEnter(role, role === "mother" ? account : undefined);
   };
 
   return (
@@ -121,12 +131,40 @@ export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
           </button>
         </div>
 
-        <label className="field-label" htmlFor="phone" style={stagger(7)}>
+        {role === "mother" && mothers && (
+          <div className="acct-field" style={stagger(7)}>
+            <label className="field-label">Test ward · account</label>
+            <div className="acct-row" role="listbox" aria-label="Test mother accounts">
+              {mothers.map((m) => (
+                <button
+                  key={m.code}
+                  type="button"
+                  role="option"
+                  aria-selected={account === m.code}
+                  className={`acct-chip${account === m.code ? " selected" : ""}`}
+                  onClick={() => setAccount(m.code)}
+                  title={`${m.fullName} · ${m.week} weeks · ${m.risk}`}
+                >
+                  <span className="acct-dot" style={{ background: m.color }} aria-hidden="true">
+                    {m.initials}
+                  </span>
+                  <span className="acct-copy">
+                    <b>{m.firstName}</b>
+                    <small>
+                      {m.code} · {m.risk}
+                    </small>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <label className="field-label" htmlFor="phone" style={stagger(8)}>
           {t.phone}
         </label>
         <div
           className={`phone-field${shake ? " shake" : ""}${digits && !valid ? " invalid" : ""}`}
-          style={stagger(8)}
+          style={stagger(9)}
         >
           <span>+254</span>
           <input
@@ -144,20 +182,20 @@ export function Login({ onEnter }: { onEnter: (role: Role) => void }) {
             </span>
           )}
         </div>
-        <p className="phone-hint" style={stagger(9)}>
+        <p className="phone-hint" style={stagger(10)}>
           {valid ? t.otpSent(digits) : t.phoneHint}
         </p>
 
         <button
           type="button"
           className={`primary-button${valid ? "" : " disabled"}`}
-          style={stagger(10)}
+          style={stagger(11)}
           onClick={submit}
           disabled={!valid}
         >
           {t.cta} <Icon name="arrow" />
         </button>
-        <p className="privacy" style={stagger(11)}>
+        <p className="privacy" style={stagger(12)}>
           {t.privacy}
         </p>
       </section>

@@ -27,7 +27,7 @@ export function riskOf(sys: number, dia: number): RiskLevel {
   return "Normal";
 }
 
-const initialsOf = (fullName: string) =>
+export const initialsOf = (fullName: string) =>
   fullName
     .split(" ")
     .map((p) => p[0])

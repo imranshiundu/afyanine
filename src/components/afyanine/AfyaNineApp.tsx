@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
 import { api, type MotherSnapshot, type PatientsPayload } from "./api";
+import { getSupabase, REALTIME_CHANNEL } from "@/lib/supabase";
 import { Login } from "./screens/Login";
 import { Home } from "./screens/Home";
 import { FindCare } from "./screens/FindCare";
@@ -20,6 +21,7 @@ export function AfyaNine() {
   const [screen, setScreen] = useState<Screen>("login");
   const [stack, setStack] = useState<Screen[]>([]);
   const [role, setRole] = useState<Role>("mother");
+  const [motherCode, setMotherCode] = useState<string>("MW-1048");
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [emergencyType, setEmergencyType] = useState("");
   const [toast, setToast] = useState("");
@@ -34,10 +36,60 @@ export function AfyaNine() {
     api.patients().then(setPatients);
   }, []);
 
+  const notify = (message: string) => {
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    setToast("");
+    /* retrigger the toast animation even when the message repeats */
+    window.requestAnimationFrame(() => setToast(message));
+    toastTimer.current = window.setTimeout(() => setToast(""), 2400);
+  };
+
   useEffect(() => {
-    api.mother().then(setSnapshot);
+    api.mother(motherCode).then(setSnapshot);
+  }, [motherCode]);
+  useEffect(() => {
     loadPatients();
   }, [loadPatients]);
+
+  /* Realtime: one channel refreshes whichever session is on screen.
+     INSERTs (vitals, SOS, notes) → refresh; SOS resolve → clear. */
+  useEffect(() => {
+    const sb = getSupabase();
+    if (!sb) return;
+    let pending = false;
+    let lastVitalsRefresh = 0;
+    const refreshSoon = () => {
+      if (pending) return;
+      pending = true;
+      window.setTimeout(() => {
+        pending = false;
+        api.mother(motherCode).then(setSnapshot);
+        loadPatients();
+      }, 700);
+    };
+    const channel = sb
+      .channel(REALTIME_CHANNEL)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "VitalReading" }, () => {
+        if (Date.now() - lastVitalsRefresh < 1500) return;
+        lastVitalsRefresh = Date.now();
+        refreshSoon();
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "Emergency" }, () => {
+        loadPatients();
+        if (role === "chw") notify("SOS received from the register");
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "Emergency" }, (payload) => {
+        loadPatients();
+        const status = (payload.new as { status?: string }).status;
+        if (status === "resolved") notify("SOS resolved");
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "VisitNote" }, refreshSoon)
+      .subscribe();
+    return () => {
+      sb.removeChannel(channel);
+    };
+    // notify stays stable (setState wrapper); re-fetch handler reads role live
+  }, [motherCode, role, loadPatients]);
 
   /* Forward navigation: remember where we came from */
   const navigate = (next: Screen) => {
@@ -48,7 +100,8 @@ export function AfyaNine() {
   };
 
   /* Entry points (login) reset the whole journey */
-  const enter = (chosen: Role) => {
+  const enter = (chosen: Role, code?: string) => {
+    if (code) setMotherCode(code);
     setDir("fwd");
     setRole(chosen);
     setStack([]);
@@ -67,18 +120,18 @@ export function AfyaNine() {
     }
   };
 
-  const notify = (message: string) => {
-    if (toastTimer.current) window.clearTimeout(toastTimer.current);
-    setToast("");
-    /* retrigger the toast animation even when the message repeats */
-    window.requestAnimationFrame(() => setToast(message));
-    toastTimer.current = window.setTimeout(() => setToast(""), 2400);
-  };
-
   /* SOS pick → persist the emergency so the CHW banner lights up */
   const raiseEmergency = (title: string) => {
     setEmergencyType(title);
     api.raiseEmergency(title).then(() => loadPatients());
+  };
+
+  /* CHW clears the active SOS → banner drops on both sides in realtime */
+  const resolveEmergency = () => {
+    api.resolveEmergency().then((res) => {
+      notify(res && res.resolved > 0 ? "Ambulance dispatched · SOS resolved" : "No active SOS");
+      loadPatients();
+    });
   };
 
   const openPatient = (code: string) => {
@@ -121,6 +174,7 @@ export function AfyaNine() {
               navigate={navigate}
               openPatient={openPatient}
               notify={notify}
+              onResolve={resolveEmergency}
               onLogout={() => {
                 setDir("back");
                 setStack([]);

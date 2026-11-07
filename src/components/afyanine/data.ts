@@ -321,6 +321,7 @@ export const MINI_METRICS: Array<{
   icon: IconName;
   label: string;
   value: string;
+  unit?: string;
   sub: string;
   toast: string;
 }> = [
