@@ -21,6 +21,9 @@
 
 ## Documentation
 
+For the tested local setup and reusable Replit environment, see
+[`docs/development.md`](docs/development.md).
+
 | Document | What it covers |
 |---|---|
 | [`docs/HANDOFF.md`](docs/HANDOFF.md) | Agent/developer hand-off: task ledger, stack snapshot, sim personas, realism rules |
