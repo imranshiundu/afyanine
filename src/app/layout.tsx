@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     "AfyaNine connects expectant mothers and Community Health Workers in Kenya with antenatal care scheduling, wearable vitals monitoring and 24/7 emergency response.",
   applicationName: "AfyaNine",
+  appleWebApp: { capable: true, title: "AfyaNine", statusBarStyle: "default" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
+  other: { "apple-mobile-web-app-capable": "yes" },
   keywords: [
     "AfyaNine",
     "maternal health",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Icon } from "./Icon";
 import { api, type MotherSnapshot, type PatientsPayload } from "./api";
 import { getSupabase, REALTIME_CHANNEL } from "@/lib/supabase";
@@ -14,10 +14,21 @@ import { ChwDashboard } from "./screens/ChwDashboard";
 import { PatientDetail } from "./screens/PatientDetail";
 import { FLAGGED } from "./data";
 import type { Role, Screen } from "./data";
+import { Onboarding } from "./screens/Onboarding";
+import { getInstalledOnboardingSnapshot, getOnboardingServerSnapshot, subscribeInstalledOnboarding } from "./installed-onboarding";
 
 const NAV_SCREENS: Screen[] = ["home", "care", "vitals"];
 
 export function AfyaNine() {
+  const needsOnboarding = useSyncExternalStore(
+    subscribeInstalledOnboarding,
+    getInstalledOnboardingSnapshot,
+    getOnboardingServerSnapshot,
+  );
+  return needsOnboarding ? <Onboarding /> : <AfyaNineExperience />;
+}
+
+function AfyaNineExperience() {
   const [screen, setScreen] = useState<Screen>("login");
   const [stack, setStack] = useState<Screen[]>([]);
   const [role, setRole] = useState<Role>("mother");

@@ -227,10 +227,10 @@ const PATHS: Record<IconName, ReactNode> = {
 
 export function Icon({
   name,
-  size = 22,
+  size = 24,
   fill = "none",
   stroke = "currentColor",
-  strokeWidth = 1.8,
+  strokeWidth = 2.1,
   label,
   className,
 }: {
@@ -249,7 +249,7 @@ export function Icon({
       aria-hidden={label ? undefined : true}
       aria-label={label}
       role={label ? "img" : undefined}
-      className={className}
+      className={`app-icon${className ? ` ${className}` : ""}`}
       width={size}
       height={size}
       viewBox="0 0 24 24"

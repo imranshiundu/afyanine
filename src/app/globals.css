@@ -230,16 +230,18 @@ h1, h2, h3, p {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  background: var(--paper);
+  background: var(--bg);
 }
 
 .app-shell {
-  width: min(var(--shell-w), 100vw);
-  height: min(var(--shell-h), 100dvh);
+  width: 100%;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
   background: var(--bg);
-  box-shadow: var(--shadow-shell);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* Keyed wrapper — direction-aware screen transition */
@@ -285,7 +287,10 @@ h1, h2, h3, p {
   overscroll-behavior: contain;
   scrollbar-width: none;
   background: var(--bg);
-  padding: 22px var(--gutter) 28px;
+  padding: calc(22px + env(safe-area-inset-top, 0px))
+    max(var(--gutter), env(safe-area-inset-right, 0px))
+    calc(28px + env(safe-area-inset-bottom, 0px))
+    max(var(--gutter), env(safe-area-inset-left, 0px));
   position: relative;
 }
 .screen::-webkit-scrollbar {
@@ -376,7 +381,7 @@ h1, h2, h3, p {
   48% { transform: scale(1); }
 }
 .logo-mark .logo-figure {
-  stroke: var(--bg);
+  stroke: #fafaf7;
   fill: none;
   stroke-width: 1.9;
   stroke-linecap: round;
@@ -392,7 +397,7 @@ h1, h2, h3, p {
   border: 0;
   border-radius: var(--r-lg);
   background: var(--lime);
-  color: var(--ink);
+  color: #1a1a1a;
   font-size: var(--text-xl);
   font-weight: var(--weight-extrabold);
   display: flex;
@@ -441,7 +446,7 @@ h1, h2, h3, p {
 }
 .status.normal {
   background: var(--lime);
-  color: var(--ink);
+  color: #1a1a1a;
 }
 .status.high {
   background: var(--red-tint);
@@ -589,7 +594,7 @@ h1, h2, h3, p {
 
 .login-screen {
   justify-content: space-between;
-  padding-top: 26px;
+  padding-top: calc(26px + env(safe-area-inset-top, 0px));
   overflow-y: auto;
 }
 .login-art {
@@ -684,7 +689,7 @@ h1, h2, h3, p {
   width: 34px;
 }
 .language-toggle button.active {
-  color: var(--ink);
+  color: #1a1a1a;
 }
 .lang-thumb {
   position: absolute;
@@ -754,6 +759,7 @@ h1, h2, h3, p {
   border-color: var(--ink);
   background: var(--lime);
   box-shadow: var(--shadow-role);
+  color: #1a1a1a;
 }
 .role-card i {
   position: absolute;
@@ -790,7 +796,9 @@ h1, h2, h3, p {
 }
 .role-card.selected .role-icon {
   background: var(--white-overlay-strong);
+  color: #1a1a1a;
 }
+.role-card.selected .role-copy small { color: #454b20; }
 .role-card .role-copy {
   display: flex;
   flex-direction: column;
@@ -1153,9 +1161,10 @@ h1, h2, h3, p {
   box-shadow: none;
 }
 .quick-grid button > span {
-  width: 34px;
-  height: 34px;
-  background: var(--surface-soft);
+  width: 44px;
+  height: 44px;
+  background: var(--lime-16);
+  color: var(--lime-deep);
   border-radius: var(--r-md);
   display: grid;
   place-items: center;
@@ -1204,8 +1213,9 @@ h1, h2, h3, p {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  font-size: var(--text-2xs);
-  color: var(--muted);
+  font-size: 11px;
+  color: var(--ink-soft);
+  min-height: 48px;
   transition: color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
 .bottom-nav button:active,
@@ -3614,34 +3624,20 @@ h1, h2, h3, p {
   }
 }
 
-/* Phones: full-screen — the app touches all four screen walls with no
-   device frame, no gutters. (Laptops keep the framed phone template.) */
-@media (max-width: 439px) {
-  .app-shell {
-    width: 100vw;
-    height: 100dvh;
-  }
-}
-
-/* Desktop / large tablets: present the app as a framed device */
-@media (min-width: 440px) and (min-height: 880px) {
+/* Full-screen is the default, including wide and landscape phones.
+   Only laptop/desktop-style displays opt into the device frame. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
   .page {
-    padding-top: var(--s-6);
-    padding-bottom: var(--s-6);
+    padding: var(--s-6);
     align-items: center;
+    background: var(--paper);
   }
   .app-shell {
+    width: var(--shell-w);
     height: min(var(--shell-h), calc(100dvh - 2 * var(--s-6)));
     border-radius: var(--r-4xl);
     border: var(--frame-w) solid var(--ink);
-  }
-}
-
-/* Landscape phones: fill height gracefully */
-@media (max-height: 500px) {
-  .app-shell {
-    width: 100vw;
-    height: 100dvh;
+    box-shadow: var(--shadow-shell);
   }
 }
 
@@ -3987,7 +3983,7 @@ html.theme-pop .app-shell {
   cursor: pointer;
 }
 .mode-tabs button.active {
-  color: var(--ink);
+  color: #1a1a1a;
 }
 .mode-thumb {
   position: absolute;
@@ -4009,4 +4005,80 @@ html.theme-pop .app-shell {
   font-size: var(--text-sm);
   color: var(--muted);
   margin-bottom: 2px;
+}
+
+/* Welcome — readable, touch-friendly and honest about the demo. */
+.app-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.bottom-nav .app-icon,
+.chw-nav .app-icon {
+  width: 26px;
+  height: 26px;
+  stroke-width: 2.2;
+}
+.bottom-nav button.active:not(.sos-nav) .app-icon {
+  background: var(--lime-25);
+  border-radius: 8px;
+  outline: 5px solid var(--lime-25);
+}
+.quick-grid .app-icon,
+.role-icon .app-icon,
+.theme-toggle .app-icon {
+  stroke-width: 2.2;
+}
+.onboarding-screen {
+  height: 100%;
+  gap: 18px;
+  background: radial-gradient(ellipse at 50% 25%, var(--lime-16), transparent 60%), var(--bg);
+}
+.onboarding-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.onboarding-skip {
+  display: flex; align-items: center; gap: 6px; min-height: 44px;
+  background: transparent; border: 0; color: var(--ink-soft); font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.onboarding-tools { display: flex; align-items: center; gap: 8px; }
+.onboarding-tools > span { flex: 1; font-size: 9px; letter-spacing: .1em; color: var(--muted-deep); font-weight: 800; }
+.onboarding-tools > div { display: flex; padding: 3px; border-radius: var(--r-full); background: var(--surface-soft); }
+.onboarding-tools > div button { min-width: 37px; min-height: 38px; border: 0; border-radius: var(--r-full); color: var(--ink-soft); background: transparent; font-size: 12px; font-weight: 700; cursor: pointer; }
+.onboarding-tools > div button[aria-pressed="true"] { background: var(--lime); color: #1a1a1a; }
+.onboarding-step { animation: onboarding-enter 450ms var(--ease-out) both; }
+.onboarding-art { height: 225px; position: relative; }
+.onboarding-ring { position: absolute; width: 190px; height: 190px; border: 1px solid var(--line-strong); border-radius: 50%; left: calc(50% - 95px); top: 15px; }
+.onboarding-ring.outer { width: 222px; height: 222px; left: calc(50% - 111px); top: -1px; border-style: dashed; opacity: .6; }
+.onboarding-symbol { position: absolute; width: 124px; height: 124px; border-radius: 38px; background: var(--lime); color: #1a1a1a; display: grid; place-items: center; left: calc(50% - 62px); top: 49px; transform: rotate(-7deg); box-shadow: 0 14px 34px var(--lime-btn-shadow); }
+.onboarding-orbit { position: absolute; display: grid; place-items: center; width: 55px; height: 55px; border-radius: 19px; background: var(--surface); border: 1px solid var(--line-strong); color: var(--ink); box-shadow: var(--shadow-2); animation: onboarding-bob 5s ease-in-out infinite; }
+.onboarding-orbit.one { left: calc(50% - 121px); top: 24px; }
+.onboarding-orbit.two { left: calc(50% + 60px); top: 150px; animation-delay: -2.5s; }
+.onboarding-spark { position: absolute; left: calc(50% + 75px); top: 24px; color: var(--lime-deep); }
+.onboarding-eyebrow { color: var(--muted-deep); font-size: 10px; letter-spacing: .12em; font-weight: 800; margin-top: 12px; }
+.onboarding-step h1 { white-space: pre-line; font-size: clamp(34px, 9vw, 42px); line-height: 1.07; letter-spacing: -.05em; margin-top: 12px; }
+.onboarding-body { margin-top: 16px; font-size: 15px; line-height: 1.7; color: var(--muted-deep); }
+.onboarding-detail { margin-top: 22px; padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+.onboarding-detail > span { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.onboarding-detail > span .app-icon { color: var(--lime-deep); }
+.onboarding-detail > div { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.onboarding-detail > div span { padding: 7px 9px; background: var(--surface-soft); color: var(--ink-soft); border-radius: var(--r-full); font-size: 11px; }
+.onboarding-footer { margin-top: auto; padding-top: 12px; }
+.onboarding-progress { display: flex; align-items: center; margin-bottom: 12px; }
+.onboarding-progress button { display: grid; place-items: center; width: 42px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.onboarding-progress button > span { width: 8px; height: 8px; border-radius: 10px; background: var(--line-strong); transition: width 250ms ease, background 250ms ease; }
+.onboarding-progress button[aria-current] > span { width: 28px; background: var(--lime-deep); }
+.onboarding-progress > span { margin-left: auto; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.onboarding-footer .primary-button { font-size: 16px; cursor: pointer; }
+.onboarding-back { display: flex; justify-content: center; align-items: center; gap: 6px; width: 100%; min-height: 44px; border: 0; color: var(--ink-soft); background: transparent; font-size: 13px; cursor: pointer; }
+.onboarding-demo { margin-top: 14px; font-size: 10px; color: var(--muted-deep); text-align: center; line-height: 1.5; }
+@keyframes onboarding-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes onboarding-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-7px) rotate(3deg); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .role-card:hover { border-color: var(--lime-deep); }
+  .quick-grid button:hover { box-shadow: var(--shadow-2); }
 }
