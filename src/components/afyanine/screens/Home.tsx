@@ -35,11 +35,13 @@ export function Home({
   navigate,
   notify,
   onProfile,
+  stale = false,
 }: {
   snapshot: MotherSnapshot | null;
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
   onProfile: () => void;
+  stale?: boolean;
 }) {
   const [chpOpen, setChpOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -72,6 +74,8 @@ export function Home({
 
   return (
     <main className="screen with-nav">
+      <p className="demo-feed-label">Fictional Test Ward · data refreshes every 30 seconds · not a medical service</p>
+      {stale && <p className="account-notice" role="status">Refresh unavailable. Showing the last loaded fictional record.</p>}
       <div className="home-head stagger">
         <div style={stagger(0)}>
           <p>{TIME_OF_DAY()}</p>

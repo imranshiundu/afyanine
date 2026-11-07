@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const id: string | undefined = body?.id;
 
     if (id) {
-      const found = await db.emergency.findUnique({ where: { id } });
+      const found = await db.emergency.findFirst({ where: { id, mother: { simulated: true } } });
       if (!found) {
         return NextResponse.json({ error: "emergency record not found" }, { status: 404 });
       }
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     const active = await db.emergency.findFirst({
-      where: { status: "active" },
+      where: { status: "active", mother: { simulated: true } },
       orderBy: { createdAt: "desc" },
     });
     if (!active) return NextResponse.json({ resolved: 0, emergency: null });

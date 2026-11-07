@@ -89,7 +89,7 @@ export async function motherSnapshot(code: string) {
     where: { code },
     include: { readings: { orderBy: { takenAt: "desc" }, take: 120 }, appointments: { orderBy: { scheduledAt: "asc" } } },
   });
-  if (!mother) return null;
+  if (!mother?.simulated) return null;
 
   const preg = pregnancyOf(mother);
   const latest = mother.readings[0];
@@ -103,7 +103,7 @@ export async function motherSnapshot(code: string) {
   const peak = Math.max(...todays.map((r) => r.systolic), latest.systolic);
 
   const hourly = bucketSeries(
-    todays,
+    todays.length ? todays : [latest],
     (d) => hourLabel(d),
     8,
     (s) => {
@@ -168,7 +168,9 @@ export async function motherSnapshot(code: string) {
       heartLow: Math.min(...hrValues),
       heartHigh: Math.max(...hrValues),
       device: mother.device,
-      synced: "just now",
+      synced: Math.max(0, Math.floor((Date.now() - latest.takenAt.getTime()) / 60_000)) < 1
+        ? "just now" : `${Math.max(0, Math.floor((Date.now() - latest.takenAt.getTime()) / 60_000))} min ago`,
+      takenAt: latest.takenAt.toISOString(),
     },
     series: { Hourly: hourly, Daily: daily, Weekly: weekly },
   };
@@ -180,6 +182,7 @@ export async function motherSnapshot(code: string) {
 
 export async function patientsPayload() {
   const mothers = await db.mother.findMany({
+    where: { simulated: true },
     include: { readings: { orderBy: { takenAt: "desc" }, take: 1 } },
     orderBy: { code: "asc" },
   });
@@ -214,11 +217,11 @@ export async function patientsPayload() {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const visits = await db.appointment.count({
-    where: { scheduledAt: { gte: startOfToday, lt: new Date(startOfToday.getTime() + 86_400_000) } },
+    where: { mother: { simulated: true }, scheduledAt: { gte: startOfToday, lt: new Date(startOfToday.getTime() + 86_400_000) } },
   });
 
   const emergency = await db.emergency.findFirst({
-    where: { status: "active" },
+    where: { status: "active", mother: { simulated: true } },
     orderBy: { createdAt: "desc" },
     include: { mother: true },
   });
@@ -257,7 +260,7 @@ export async function patientDetail(code: string) {
       notes: { orderBy: { createdAt: "desc" }, take: 10 },
     },
   });
-  if (!mother) return null;
+  if (!mother?.simulated) return null;
 
   const latest = mother.readings[0];
   if (!latest) return null;

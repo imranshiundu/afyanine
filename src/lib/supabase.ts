@@ -1,9 +1,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Browser-only Supabase client used for realtime `postgres_changes`.
- * Returns null on the server (route handlers never need it) and when the
- * public keys are absent — the app silently poll-freezes to demo data.
+ * Browser identity + optional fictional-ward realtime. Missing configuration
+ * disables account actions; it never authenticates a user into a demo persona.
  */
 let client: SupabaseClient | null = null;
 
@@ -14,9 +13,21 @@ export function getSupabase(): SupabaseClient | null {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return null;
   client = createClient(url, key, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, flowType: "pkce" },
     realtime: { params: { eventsPerSecond: 5 } },
   });
   return client;
 }
 
 export const REALTIME_CHANNEL = "afyanine-live";
+
+export const isAuthConfigured = () => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+let codeExchange: { code: string; request: ReturnType<SupabaseClient["auth"]["exchangeCodeForSession"]> } | null = null;
+export function exchangeAuthCode(code: string) {
+  const sb = getSupabase();
+  if (!sb) throw new Error("Authentication is not configured.");
+  // Strict Mode can mount the callback twice; consume a one-use code once.
+  if (codeExchange?.code !== code) codeExchange = { code, request: sb.auth.exchangeCodeForSession(code) };
+  return codeExchange.request;
+}
