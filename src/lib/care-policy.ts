@@ -1,6 +1,6 @@
 export const SCOPES = ["VITALS", "PREGNANCY", "VISITS", "NOTES", "CONTACTS"] as const;
 export type Scope = typeof SCOPES[number];
-export type CareActor = { id: string; email: string; isDemo: boolean; admin: boolean };
+export type CareActor = { id: string; email: string; phone?: string; role?: "MOTHER" | "CHW" | "PARTNER"; isDemo: boolean; admin: boolean };
 export function normalizeEmail(email: string) { return email.trim().toLowerCase(); }
 export function trustedAdmin(user: { app_metadata?: Record<string, unknown> }) {
   return user.app_metadata?.afyanine_admin === true;

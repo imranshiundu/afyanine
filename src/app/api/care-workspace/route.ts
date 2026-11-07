@@ -1,6 +1,7 @@
 import { careActor } from "@/lib/care-auth";
 import { careCommand, careHttpError, careRecord, careWorkspace } from "@/lib/care-workspace";
 import { CareError } from "@/lib/care-policy";
+import { sameOrigin } from "@/lib/account-auth";
 
 export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
@@ -15,6 +16,7 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   try {
+    sameOrigin(request);
     const actor = await careActor(request);
     if (!request.headers.get("content-type")?.includes("application/json")) throw new CareError(400, "INVALID_INPUT");
     const text = await request.text();

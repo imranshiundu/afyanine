@@ -1,3 +1,9 @@
+# Current implementation
+
+See [live-accounts.md](live-accounts.md) for the database-backed email/password
+accounts, phone-based linking, live SSE, SOS and bound-band simulator. It
+supersedes the historical Supabase Auth workflow described below.
+
 # Accounts, sessions and public care discovery
 
 This is the PR #5 baseline decision. Its successor is
@@ -51,19 +57,19 @@ is implied.
 
 ```mermaid
 flowchart TD
-  Entry[Sign in / Test Ward] -->|Email and password| Auth[Supabase Auth]
-  Auth --> Session[Persisted SDK session]
-  Session --> Account[Account profile / unlinked health empty state]
-  Entry -->|Explicit fictional persona| Demo[Tab-scoped demo session]
-  Demo --> API[Simulated-only API + 30s visible refresh]
-  API --> Demo
+  Entry[Mother or CHW] -->|Register email + phone + password| Auth[PostgreSQL account identity]
+  Entry -->|Sign in email + password| Auth
+  Auth --> Session[HttpOnly cookie + DB session digest]
+  Session --> Account[Saved profile + consented care workspace]
+  Account -->|Registered phone or email request| Approval[Mother approves categories]
+  Approval --> Live[Authorized PostgreSQL LISTEN to SSE]
+  Account -->|Explicit simulated band binding| Band[Scheduled labeled band measurements]
+  Band --> Live
   Account --> Care[Find Care]
-  Demo --> Care
   Care -->|Public bounded query| OSM[Overpass / OpenStreetMap]
   Care -->|User click only| Location[Browser location permission]
   Location --> OSM
   Account --> Logout[Confirm sign out]
-  Demo --> Logout
   Logout --> SignedOut[Signed-out page]
 ```
 

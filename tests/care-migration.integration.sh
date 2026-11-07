@@ -18,11 +18,13 @@ TEST_DATABASE_URL="postgresql://root@localhost/$DB?host=/var/run/postgresql"
 awk '/^enum CareRole/{exit}{print}' prisma/schema.prisma > "$BASE"
 DATABASE_URL="$TEST_DATABASE_URL" npx prisma db push --schema "$BASE" --skip-generate >/dev/null
 psql -q -v ON_ERROR_STOP=1 -d "$DB" -f prisma/care-team.sql
+psql -q -v ON_ERROR_STOP=1 -d "$DB" -f prisma/password-accounts.sql
+psql -q -v ON_ERROR_STOP=1 -d "$DB" -f prisma/live-bands.sql
 npx prisma migrate diff --from-url "$TEST_DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
-test "$(psql -At -d "$DB" -c "SELECT count(*) FROM pg_class WHERE relname LIKE 'Care%' AND relkind='r' AND relrowsecurity")" = 8
+test "$(psql -At -d "$DB" -c "SELECT count(*) FROM pg_class WHERE (relname LIKE 'Care%' OR relname IN ('AccountIdentity','AccountSession','AuthThrottle')) AND relkind='r' AND relrowsecurity")" = 13
 test "$(psql -At -d "$DB" -c "SELECT count(*) FROM pg_indexes WHERE indexname='CareAccess_one_active_pair' AND indexdef LIKE 'CREATE UNIQUE%WHERE active%'")" = 1
 psql -q -d "$DB" -c "INSERT INTO \"CareAccount\"(id,email,\"displayName\",role,\"updatedAt\") VALUES('synthetic','fixture@example.test','Fictional RLS fixture','MOTHER',now())"
 runuser -u postgres -- psql -q -c "CREATE ROLE $ROLE NOLOGIN NOSUPERUSER NOBYPASSRLS"
 psql -q -d "$DB" -c "GRANT SELECT ON \"CareAccount\" TO $ROLE"
 test "$(runuser -u postgres -- psql -At -d "$DB" -c "SET ROLE $ROLE; SELECT count(*) FROM \"CareAccount\"" | tail -1)" = 0
-echo "PASS: additive schema, RLS on8tables, untrusted SELECT denied by RLS"
+echo "PASS: additive schema, RLS on 13 tables, untrusted SELECT denied by RLS"

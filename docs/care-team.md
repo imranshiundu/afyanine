@@ -1,5 +1,10 @@
 # Care-team relationships and operational records
 
+**Current account/live implementation:** see [live-accounts.md](live-accounts.md).
+It supersedes the Supabase Auth/email-verification assumptions below. Registration
+uses email/phone/password; login uses email/password. Phone-based linking, live
+database SSE, scoped SOS sound and opt-in bound-band simulation are now included.
+
 This builds on PR #5. Existing Vercel Supabase settings are reused; local missing
 settings are not evidence that production lacks them. No production database
 migration or clinical-data activation is authorized by this document.
@@ -86,9 +91,9 @@ afyanine-ops repository is not modified by this change.
 
 ```mermaid
 flowchart LR
-  Entry[Mother or CHW] --> Auth[Supabase sign in or create account]
+  Entry[Mother or CHW] --> Auth[Database email/password sign-in]
   Auth --> CHW[Registered CHW]
-  CHW -->|Request by confirmed email| Inbox[Mother's in-app inbox]
+  CHW -->|Request by registered phone or email| Inbox[Mother's in-app inbox]
   Inbox -->|Mother approves categories| Grant[Active scoped relationship]
   Mother -->|Invite partner with categories| PartnerInbox[Verified recipient inbox]
   PartnerInbox -->|Accept| ReadOnly[Read-only scoped relationship]
@@ -98,6 +103,10 @@ flowchart LR
   Grant --> Schedule[Conflict-checked visits and authored notes]
   Schedule --> Detail[Visit list to selected authorized visit]
   Mother -->|Revoke or confirmed purge| Deny[Access stops / selected data deleted]
+  Records --> Stream[Authenticated SSE from PostgreSQL notifications]
+  Mother -->|Bind simulated band + Vitals consent| Band[Scheduled labeled simulated readings]
+  Band --> Records
+  Mother -->|SOS| Alert[Scoped CHW alert and enabled browser sound]
 ```
 
 ## Deployment and operator handoff

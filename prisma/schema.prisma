@@ -133,6 +133,8 @@ model CareAccount {
   vitals             CareVital[]
   contacts           CareContact[]
   authoredNotes      CareNote[]
+  alerts             CareAlert[]
+  band               CareBand?
 
   @@index([isDemo, email])
 }
@@ -144,6 +146,7 @@ model CareInvite {
   motherId       String?
   mother         CareAccount? @relation("CareInviteMother", fields: [motherId], references: [id])
   targetEmail    String
+  targetPhone    String?
   kind           CareInviteKind
   scopes         CareScope[]
   status         CareInviteStatus @default(PENDING)
@@ -154,6 +157,7 @@ model CareInvite {
   access         CareAccess?
 
   @@index([targetEmail, isDemo, status])
+  @@index([targetPhone, isDemo, status])
   @@index([requesterId, createdAt])
 }
 
@@ -213,6 +217,7 @@ model CareVital {
   diastolic   Int
   heartRate   Int
   measuredAt  DateTime @default(now())
+  source      String @default("MANUAL")
 
   @@index([motherId, measuredAt])
 }
@@ -238,4 +243,53 @@ model CareAudit {
   createdAt DateTime @default(now())
 
   @@index([motherId, createdAt])
+}
+
+// Separate from the public workspace payload: hashes never leave the server.
+model AccountIdentity {
+  id           String @id
+  email        String @unique
+  phone        String @unique
+  passwordHash String
+  role         CareRole
+  displayName  String
+  failures     Int @default(0)
+  lockedUntil  DateTime?
+  createdAt    DateTime @default(now())
+  sessions     AccountSession[]
+}
+
+model AccountSession {
+  tokenHash  String @id
+  identityId String
+  identity   AccountIdentity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  @@index([identityId])
+  @@index([expiresAt])
+}
+
+model AuthThrottle {
+  key       String @id
+  attempts  Int
+  resetAt   DateTime
+}
+
+model CareAlert {
+  id        String @id @default(cuid())
+  motherId  String
+  mother    CareAccount @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  kind      String
+  active    Boolean @default(true)
+  createdAt DateTime @default(now())
+  resolvedAt DateTime?
+  @@index([motherId, active, createdAt])
+}
+
+model CareBand {
+  id            String @id @default(cuid())
+  motherId      String @unique
+  mother        CareAccount @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  serial        String @unique
+  boundAt       DateTime @default(now())
+  lastReadingAt DateTime?
 }

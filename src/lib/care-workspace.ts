@@ -2,6 +2,7 @@ import { z } from "zod";
 import { type CareAccount, type Prisma } from "@prisma/client";
 import { db } from "./db";
 import { CareError, requireCare, normalizeEmail, sharedScopes, SCOPES, type CareActor, type Scope } from "./care-policy";
+import { normalizePhone } from "./credential-policy";
 
 const scopes = z.array(z.enum(SCOPES)).max(5)
   .refine(value => !value.includes("NOTES") || value.includes("VISITS"))
@@ -10,7 +11,11 @@ const id = z.string().min(1).max(100);
 const phone = z.string().trim().max(40).regex(/^[+\d\s()\-]*$/);
 const commands = z.discriminatedUnion("action", [
   z.object({ action: z.literal("profile"), displayName: z.string().trim().min(2).max(80), phone: phone.optional(), locale: z.enum(["EN", "SW"]), role: z.enum(["MOTHER", "CHW", "PARTNER"]), institutionName: z.string().trim().max(150).optional(), registrationNumber: z.string().trim().max(80).optional(), institutionContact: z.string().trim().max(120).optional() }),
-  z.object({ action: z.literal("invite"), email: z.email().max(254), kind: z.enum(["CHW", "PARTNER"]), scopes }),
+  z.object({ action: z.literal("invite"), email: z.email().max(254).optional(), phone: z.string().min(9).max(25).optional(), kind: z.enum(["CHW", "PARTNER"]), scopes }).refine(value => !!value.email !== !!value.phone),
+  z.object({ action: z.literal("sos"), kind: z.enum(["Urgent help", "Bleeding", "Labour", "Severe headache", "Other emergency"]) }),
+  z.object({ action: z.literal("resolveAlert"), alertId: id }),
+  z.object({ action: z.literal("bindBand"), serial: z.string().trim().regex(/^SIM-[A-Z0-9-]{4,40}$/) }),
+  z.object({ action: z.literal("unbindBand") }),
   z.object({ action: z.literal("respond"), inviteId: id, accept: z.boolean(), scopes }),
   z.object({ action: z.literal("revoke"), accessId: id }),
   z.object({ action: z.literal("consent"), scopes, confirmDelete: z.boolean().default(false) }),
@@ -29,6 +34,7 @@ const publicProfile = (account: CareAccount) => ({
   institutionContact: account.institutionContact, verifiedAt: account.verifiedAt, createdAt: account.createdAt,
 });
 function enabled(actor: CareActor) { return actor.isDemo || process.env.CARE_RECORDS_ENABLED === "true"; }
+const recipient = (actor: CareActor) => ({ OR: [{ targetEmail: actor.email }, ...(actor.phone ? [{ targetPhone: actor.phone }] : [])] });
 async function account(actor: CareActor, tx: Tx = db) {
   const me = await tx.careAccount.findFirst({ where: { id: actor.id, isDemo: actor.isDemo } });
   requireCare(me, "SET_UP_PROFILE", 409);
@@ -76,6 +82,7 @@ export async function careRecord(actor: CareActor, motherId: string, visitId?: s
   return {
     mother: { id: owner.id, displayName: owner.displayName, ...(allowed.includes("CONTACTS") ? { phone: owner.phone, email: owner.email } : {}), ...(allowed.includes("PREGNANCY") ? { dueDate: owner.dueDate } : {}) },
     scopes: allowed,
+    band: allowed.includes("VITALS") ? await db.careBand.findUnique({ where: { motherId } }) : null,
     vitals: allowed.includes("VITALS") ? await db.careVital.findMany({ where: { motherId }, orderBy: { measuredAt: "desc" }, take: 50 }) : [],
     contacts: allowed.includes("CONTACTS") ? await db.careContact.findMany({ where: { motherId }, take: 30 }) : [],
     visits: visits.map(visit => ({ ...visit, notes: notes.filter(note => note.visitId === visit.id) })),
@@ -87,7 +94,7 @@ export async function careWorkspace(actor: CareActor) {
   if (!me) return { me: null, admin: actor.admin, clinicalEnabled: enabled(actor) };
   // Refresh contact identity from Auth; never use a stale profile email to bind.
   if (me.email !== actor.email) await db.careAccount.update({ where: { id: me.id }, data: { email: actor.email } });
-  const incoming = await db.careInvite.findMany({ where: { targetEmail: actor.email, isDemo: actor.isDemo, status: "PENDING", expiresAt: { gt: new Date() } }, include: { requester: true }, orderBy: { createdAt: "desc" }, take: 50 });
+  const incoming = await db.careInvite.findMany({ where: { ...recipient(actor), isDemo: actor.isDemo, status: "PENDING", expiresAt: { gt: new Date() } }, include: { requester: true }, orderBy: { createdAt: "desc" }, take: 50 });
   const allAccess = await db.careAccess.findMany({
     where: { isDemo: actor.isDemo, OR: [{ motherId: me.id }, { viewerId: me.id }] },
     include: { mother: true, viewer: true }, orderBy: [{ active: "desc" }, { createdAt: "desc" }], take: 100,
@@ -98,10 +105,16 @@ export async function careWorkspace(actor: CareActor) {
     ...(me.role === "MOTHER" && me.storageScopes.includes("VISITS") ? [me.id] : []),
     ...access.filter(item => item.viewerId === me.id && item.active && item.scopes.includes("VISITS") && item.mother.storageScopes.includes("VISITS")).map(item => item.motherId),
   ])] : [];
+  const alertMothers = enabled(actor) ? [
+    ...(me.role === "MOTHER" && me.storageScopes.includes("VITALS") ? [me.id] : []),
+    ...allAccess.filter(item => item.viewerId === me.id && me.role === "CHW" && item.kind === "CHW" && item.active && item.scopes.includes("VITALS") && item.mother.storageScopes.includes("VITALS")).map(item => item.motherId),
+  ] : [];
+  const alerts = await db.careAlert.findMany({ where: { motherId: { in: alertMothers }, active: true }, orderBy: { createdAt: "desc" }, take: 50 });
   return {
     me: { ...me, email: actor.email }, admin: actor.admin, clinicalEnabled: enabled(actor),
+    alerts: alerts.map(alert => ({ ...alert, motherName: alert.motherId === me.id ? me.displayName : allAccess.find(item => item.motherId === alert.motherId)?.mother.displayName ?? "" })),
     incoming: incoming.map(item => ({ id: item.id, kind: item.kind, scopes: item.scopes, requester: publicProfile(item.requester), createdAt: item.createdAt })),
-    sent: await db.careInvite.findMany({ where: { requesterId: me.id, isDemo: actor.isDemo }, select: { id: true, targetEmail: true, kind: true, status: true, expiresAt: true }, orderBy: { createdAt: "desc" }, take: 30 }),
+    sent: await db.careInvite.findMany({ where: { requesterId: me.id, isDemo: actor.isDemo }, select: { id: true, targetEmail: true, targetPhone: true, kind: true, status: true, expiresAt: true }, orderBy: { createdAt: "desc" }, take: 30 }),
     access: access.map(item => ({ id: item.id, motherId: item.motherId, viewerId: item.viewerId, kind: item.kind, scopes: item.scopes, active: item.active, createdAt: item.createdAt, mother: { id: item.mother.id, displayName: item.mother.displayName }, viewer: publicProfile(item.viewer) })),
     visits: await db.careVisit.findMany({ where: { isDemo: actor.isDemo, motherId: { in: visitMothers } }, select: { id: true, motherId: true, chwId: true, startsAt: true, endsAt: true, status: true, place: true, mother: { select: { displayName: true } }, chw: { select: { displayName: true } } }, orderBy: { startsAt: "desc" }, take: 100 }),
     stats: me.role === "CHW" ? {
@@ -134,14 +147,23 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       const visit = await tx.careVisit.findFirst({ where: { id: command.visitId, isDemo: actor.isDemo } });
       if (visit) extra.push(visit.motherId, visit.chwId);
     }
+    if (command.action === "resolveAlert") {
+      const alert = await tx.careAlert.findUnique({ where: { id: command.alertId } });
+      if (alert) extra.push(alert.motherId);
+    }
     await locks(tx, [actor.id, ...extra]);
     if (command.action === "profile") {
       const prior = await tx.careAccount.findUnique({ where: { id: actor.id } });
       requireCare(!prior || prior.isDemo === actor.isDemo);
       requireCare(!prior || prior.role === command.role, "ROLE_CHANGE_REQUIRES_ADMIN");
+      requireCare(!actor.role || actor.role === command.role, "ROLE_CHANGE_REQUIRES_ADMIN");
+      if (actor.phone) {
+        // Contact identity used for requests cannot be silently changed here.
+        requireCare(!command.phone || normalizePhone(command.phone) === actor.phone, "Use your registered phone number.", 400);
+      }
       if (command.role === "CHW") requireCare(command.institutionName && command.registrationNumber && command.institutionContact, "INSTITUTION_REQUIRED", 400);
       const changedInstitution = prior && (prior.displayName !== command.displayName || prior.institutionName !== (command.institutionName || null) || prior.registrationNumber !== (command.registrationNumber || null) || prior.institutionContact !== (command.institutionContact || null));
-      const data = { displayName: command.displayName, phone: command.phone || null, locale: command.locale, institutionName: command.role === "CHW" ? command.institutionName : null, registrationNumber: command.role === "CHW" ? command.registrationNumber : null, institutionContact: command.role === "CHW" ? command.institutionContact : null };
+      const data = { displayName: command.displayName, phone: actor.phone ?? (command.phone || null), locale: command.locale, institutionName: command.role === "CHW" ? command.institutionName : null, registrationNumber: command.role === "CHW" ? command.registrationNumber : null, institutionContact: command.role === "CHW" ? command.institutionContact : null };
       await tx.careAccount.upsert({ where: { id: actor.id }, create: { id: actor.id, email: actor.email, role: command.role, isDemo: actor.isDemo, ...data }, update: { ...data, ...(changedInstitution ? { verifiedAt: null, verifiedBy: null } : {}) } });
       if (changedInstitution && prior?.role === "CHW") {
         const priorGrants = await tx.careAccess.findMany({ where: { viewerId: actor.id, kind: "CHW", active: true, isDemo: actor.isDemo } });
@@ -157,22 +179,24 @@ export async function careCommand(actor: CareActor, raw: unknown) {
     }
     const me = await account(actor, tx);
     if (command.action === "invite") {
-      const targetEmail = normalizeEmail(command.email);
-      requireCare(targetEmail !== actor.email, "CANNOT_INVITE_SELF", 400);
+      const targetEmail = command.email ? normalizeEmail(command.email) : "";
+      let targetPhone: string | null = null;
+      if (command.phone) { try { targetPhone = normalizePhone(command.phone); } catch { throw new CareError(400, "INVALID_PHONE"); } }
+      requireCare(targetEmail !== actor.email && (!targetPhone || targetPhone !== actor.phone), "CANNOT_INVITE_SELF", 400);
       requireCare(command.scopes.length > 0, "CHOOSE_CATEGORIES", 400);
       requireCare(command.kind === "CHW" ? me.role === "CHW" : me.role === "MOTHER", "CHW_ACCOUNT_REQUIRED");
       if (command.kind === "PARTNER") requireCare(command.scopes.every(scope => me.storageScopes.includes(scope)), "CONSENT_REQUIRED");
       const count = await tx.careInvite.count({ where: { requesterId: actor.id, createdAt: { gt: new Date(Date.now() - 86400000) } } });
       requireCare(count < 10, "INVITE_LIMIT", 429);
-      const prior = await tx.careInvite.findFirst({ where: { requesterId: actor.id, targetEmail, kind: command.kind, isDemo: actor.isDemo }, include: { access: { select: { active: true, revokedAt: true } } }, orderBy: { createdAt: "desc" } });
+      const prior = await tx.careInvite.findFirst({ where: { requesterId: actor.id, targetEmail, targetPhone, kind: command.kind, isDemo: actor.isDemo }, include: { access: { select: { active: true, revokedAt: true } } }, orderBy: { createdAt: "desc" } });
       if (prior?.status === "PENDING" && prior.expiresAt > new Date()) return { ok: true };
       if (prior?.access?.active) return { ok: true };
       const changedAt = prior ? Math.max(+prior.createdAt, +(prior.respondedAt ?? 0), +(prior.access?.revokedAt ?? 0)) : 0;
       requireCare(changedAt < Date.now() - 7 * 86400000, "INVITE_COOLDOWN", 429);
-      await tx.careInvite.create({ data: { requesterId: actor.id, motherId: command.kind === "PARTNER" ? actor.id : null, targetEmail, kind: command.kind, scopes: command.scopes, isDemo: actor.isDemo, expiresAt: new Date(Date.now() + 14 * 86400000) } });
+      await tx.careInvite.create({ data: { requesterId: actor.id, motherId: command.kind === "PARTNER" ? actor.id : null, targetEmail, targetPhone, kind: command.kind, scopes: command.scopes, isDemo: actor.isDemo, expiresAt: new Date(Date.now() + 14 * 86400000) } });
       await audit(tx, actor, "INVITATION_SENT", me.role === "MOTHER" ? me.id : undefined, command.scopes);
     } else if (command.action === "respond") {
-      const invite = await tx.careInvite.findFirst({ where: { id: command.inviteId, targetEmail: actor.email, isDemo: actor.isDemo, status: "PENDING", expiresAt: { gt: new Date() } } });
+      const invite = await tx.careInvite.findFirst({ where: { id: command.inviteId, ...recipient(actor), isDemo: actor.isDemo, status: "PENDING", expiresAt: { gt: new Date() } } });
       requireCare(invite, "NOT_FOUND", 404);
       if (command.accept) {
         const ownerId = invite.kind === "CHW" ? actor.id : invite.motherId;
@@ -202,11 +226,13 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       const removed = me.storageScopes.filter(scope => !next.includes(scope));
       requireCare(!removed.length || command.confirmDelete, "CONFIRM_DELETION", 409);
       if (removed.includes("VITALS")) await tx.careVital.deleteMany({ where: { motherId: actor.id } });
+      if (removed.includes("VITALS") || command.action === "purge") await tx.careBand.deleteMany({ where: { motherId: actor.id } });
+      if (removed.includes("VITALS") || command.action === "purge") await tx.careAlert.deleteMany({ where: { motherId: actor.id } });
       if (removed.includes("CONTACTS")) await tx.careContact.deleteMany({ where: { motherId: actor.id } });
       if (removed.includes("NOTES")) await tx.careNote.deleteMany({ where: { visit: { motherId: actor.id } } });
       if (removed.includes("VISITS")) await tx.careVisit.deleteMany({ where: { motherId: actor.id } });
       if (removed.length || command.action === "purge") await tx.careInvite.updateMany({
-        where: { isDemo: actor.isDemo, status: "PENDING", OR: [{ motherId: actor.id }, { targetEmail: actor.email, kind: "CHW" }] },
+        where: { isDemo: actor.isDemo, status: "PENDING", OR: [{ motherId: actor.id }, { ...recipient(actor), kind: "CHW" }] },
         data: { status: "CANCELLED", respondedAt: new Date() },
       });
       await tx.careAccount.update({ where: { id: me.id }, data: { storageScopes: next, ...(removed.includes("PREGNANCY") ? { dueDate: null } : {}) } });
@@ -214,6 +240,32 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       const grants = await tx.careAccess.findMany({ where: { motherId: actor.id, active: true, isDemo: actor.isDemo } });
       for (const grant of grants) await tx.careAccess.update({ where: { id: grant.id }, data: { scopes: grant.scopes.filter(scope => next.includes(scope)), ...(command.action === "purge" ? { active: false, revokedAt: new Date() } : {}) } });
       await audit(tx, actor, command.action === "purge" ? "CARE_RECORD_PURGED" : "STORAGE_CONSENT_UPDATED", me.id, next);
+    } else if (command.action === "bindBand") {
+      await requireCategory(actor, actor.id, "VITALS", tx);
+      requireCare(me.role === "MOTHER");
+      const prior = await tx.careBand.findUnique({ where: { serial: command.serial } });
+      requireCare(!prior || prior.motherId === actor.id, "Band is unavailable.", 409);
+      requireCare(!await tx.careBand.findUnique({ where: { motherId: actor.id } }), "Unbind your current band first.", 409);
+      await tx.careBand.create({ data: { motherId: actor.id, serial: command.serial } });
+      await audit(tx, actor, "SIMULATED_BAND_BOUND", me.id, ["VITALS"]);
+    } else if (command.action === "unbindBand") {
+      requireCare(me.role === "MOTHER");
+      await tx.careBand.deleteMany({ where: { motherId: actor.id } });
+      await audit(tx, actor, "SIMULATED_BAND_UNBOUND", me.id, ["VITALS"]);
+    } else if (command.action === "sos") {
+      await requireCategory(actor, actor.id, "VITALS", tx);
+      requireCare(me.role === "MOTHER");
+      // One active SOS per mother; repeat taps/retries do not duplicate alarms.
+      if (!await tx.careAlert.findFirst({ where: { motherId: me.id, active: true } })) {
+        await tx.careAlert.create({ data: { motherId: me.id, kind: command.kind } });
+        await audit(tx, actor, "SOS_RAISED", me.id, ["VITALS"]);
+      }
+    } else if (command.action === "resolveAlert") {
+      const alert = await tx.careAlert.findUnique({ where: { id: command.alertId } });
+      requireCare(alert, "NOT_FOUND", 404);
+      await requireCategory(actor, alert.motherId, "VITALS", tx, true);
+      await tx.careAlert.update({ where: { id: alert.id }, data: { active: false, resolvedAt: new Date() } });
+      await audit(tx, actor, "SOS_RESOLVED", alert.motherId, ["VITALS"]);
     } else if (command.action === "pregnancy") {
       await requireCategory(actor, actor.id, "PREGNANCY", tx);
       requireCare(me.role === "MOTHER");

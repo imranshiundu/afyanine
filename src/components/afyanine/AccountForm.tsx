@@ -1,69 +1,39 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { getSupabase, isAuthConfigured } from "@/lib/supabase";
 import { Icon } from "./Icon";
 
 export function AccountForm({ language, role }: { language: "EN" | "SW"; role: "mother" | "chw" }) {
-  const [mode, setMode] = useState<"signin" | "signup" | "recover">("signin");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const sw = language === "SW";
-  const configured = isAuthConfigured();
-  const change = (next: typeof mode) => { setMode(next); setError(""); setMessage(""); setPassword(""); };
-
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const sb = getSupabase();
-    if (!sb || busy) return;
-    setBusy(true); setMessage(""); setError("");
+    if (busy) return;
+    setBusy(true); setError("");
     try {
-      if (mode === "recover") {
-        const result = await sb.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/auth/reset-password` });
-        if (result.error) throw result.error;
-        setMessage(sw ? "Ikiwa akaunti ipo, utapokea kiungo cha kuweka nenosiri jipya." : "If an account exists, you’ll receive a password-reset link.");
-      } else if (mode === "signup") {
-        const result = await sb.auth.signUp({
-          email: email.trim(), password,
-          options: { data: { display_name: name.trim().slice(0, 80), afyanine_role: role === "chw" ? "CHW" : "MOTHER" }, emailRedirectTo: `${window.location.origin}/auth/callback` },
-        });
-        if (result.error) throw result.error;
-        setPassword("");
-        if (!result.data.session) setMessage(sw ? "Angalia barua pepe yako kuthibitisha akaunti." : "Check your email to confirm your account, then sign in.");
-      } else {
-        const result = await sb.auth.signInWithPassword({ email: email.trim(), password });
-        if (result.error) throw result.error;
-        setPassword("");
-      }
-    } catch {
-      setError(sw ? "Haikufaulu. Hakikisha taarifa zako, au jaribu tena baadaye." : "That didn’t work. Check your details and connection, or try again shortly.");
-    } finally { setBusy(false); }
+      const response = await fetch("/api/account", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode, email, password, ...(mode === "signup" ? { phone, name, role: role === "chw" ? "CHW" : "MOTHER" } : {}) }) });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error);
+      setPassword("");
+      window.dispatchEvent(new Event("afyanine:account"));
+    } catch (err) { setError(err instanceof Error ? err.message : "Please try again."); }
+    finally { setBusy(false); }
   }
-
-  return (
-    <form className="account-form" onSubmit={submit}>
-      <h2>{mode === "signup" ? (sw ? "Fungua akaunti" : "Create your account") : mode === "recover" ? (sw ? "Weka upya nenosiri" : "Reset your password") : (sw ? "Ingia kwenye akaunti" : "Sign in to your account")}</h2>
-      {!configured && <p className="account-notice" role="status">{sw ? "Kuunda akaunti na kuingia kunahitaji mipangilio ya Supabase katika mazingira haya." : "Sign-in and account creation need Supabase settings in this environment."}</p>}
-      {mode === "signup" && <label> {sw ? "Jina la kuonyeshwa" : "Display name"}<input value={name} onChange={e => setName(e.target.value)} autoComplete="name" maxLength={80} required disabled={busy} /></label>}
-      <label>{sw ? "Barua pepe" : "Email"}<input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" required disabled={busy} /></label>
-      {mode !== "recover" && <label>{sw ? "Nenosiri" : "Password"}
-        <span className="password-input"><input type={show ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={mode === "signup" ? 8 : 1} disabled={busy} />
-          <button type="button" aria-label={show ? (sw ? "Ficha nenosiri" : "Hide password") : (sw ? "Onyesha nenosiri" : "Show password")} aria-pressed={show} onClick={() => setShow(!show)}>{show ? (sw ? "Ficha" : "Hide") : (sw ? "Onyesha" : "Show")}</button></span>
-      </label>}
-      {mode === "signup" && <p className="account-hint">{sw ? "Tumia herufi angalau 8. Muunganisho wa huduma unahitaji ombi kwa barua pepe na idhini ya mama." : "Use at least 8 characters. Care connections use email requests and the mother’s approval."}</p>}
-      {error && <p className="account-error" role="alert">{error}</p>}
-      {message && <p className="account-notice" role="status">{message}</p>}
-      <button className="primary-button" type="submit" disabled={!configured || busy}>{busy ? (sw ? "Tafadhali subiri…" : "Please wait…") : mode === "signup" ? (sw ? "Fungua akaunti" : "Create account") : mode === "recover" ? (sw ? "Tuma kiungo" : "Send reset link") : (sw ? "Ingia" : "Sign in")}<Icon name="arrow" /></button>
-      <div className="account-links">
-        {mode !== "signin" && <button type="button" onClick={() => change("signin")}>{sw ? "Rudi kuingia" : "Back to sign in"}</button>}
-        {mode === "signin" && <><button type="button" onClick={() => change("recover")}>{sw ? "Umesahau nenosiri?" : "Forgot password?"}</button><button type="button" onClick={() => change("signup")}>{sw ? "Fungua akaunti" : "Create account"}</button></>}
-      </div>
-      <p className="account-hint">{sw ? "Supabase Auth hushughulikia taarifa za kuingia. Mfano huu haupokei taarifa halisi za afya." : "Credentials are handled by Supabase Auth. This prototype does not accept real health records."}</p>
-    </form>
-  );
+  return <form className="account-form" onSubmit={submit}>
+    <h2>{mode === "signup" ? (sw ? "Fungua akaunti" : "Create your account") : (sw ? "Ingia kwenye akaunti" : "Sign in to your account")}</h2>
+    {mode === "signup" && <label>{sw ? "Jina" : "Display name"}<input required minLength={2} maxLength={80} autoComplete="name" value={name} onChange={e => setName(e.target.value)} disabled={busy} /></label>}
+    <label>{sw ? "Barua pepe" : "Email"}<input type="email" required maxLength={254} autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} disabled={busy} /></label>
+    {mode === "signup" && <label>{sw ? "Nambari ya simu" : "Phone number"}<input type="tel" required autoComplete="tel" placeholder="+254712345678" maxLength={25} value={phone} onChange={e => setPhone(e.target.value)} disabled={busy} /></label>}
+    <label>{sw ? "Nenosiri" : "Password"}<input type="password" minLength={10} maxLength={128} required autoComplete={mode === "signup" ? "new-password" : "current-password"} value={password} onChange={e => setPassword(e.target.value)} disabled={busy} /></label>
+    {error && <p className="account-error" role="alert">{error}</p>}
+    <button className="primary-button" disabled={busy}>{busy ? (sw ? "Tafadhali subiri…" : "Please wait…") : mode === "signup" ? (sw ? "Fungua akaunti" : "Create account") : (sw ? "Ingia" : "Sign in")}<Icon name="arrow" /></button>
+    <div className="account-links"><button type="button" disabled={busy} onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setError(""); setPassword(""); }}>{mode === "signup" ? (sw ? "Rudi kuingia" : "Back to sign in") : (sw ? "Fungua akaunti" : "Create account")}</button></div>
+    <p className="account-hint">{sw ? "Tumia nenosiri lenye herufi angalau 10. Ukiisahau, wasiliana na kliniki yako. Barua pepe na simu hazijathibitishwa kwa ujumbe." : "Use at least 10 characters. Passwords are securely hashed. Forgotten password? Contact your clinic; self-service recovery is not yet available. Email and phone are not message-verified."}</p>
+  </form>;
 }
