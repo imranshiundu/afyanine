@@ -41,7 +41,8 @@ the secure secrets form:
 replit secrets exec --keys OPERATOR_PASSWORD -- node --import tsx scripts/provision-operator.ts operator@example.com
 ```
 Run with the desired database runtime configuration. Existing accounts are
-promoted only if that password authenticates them. Do not grant based only on
+promoted only if their existing password authenticates them; it is not reset.
+New staff accounts require at least12 characters. Do not grant based only on
 an unverified email. There is no self-service operations signup.
 
 Email-address requests are delivered in-app and appear on the mother's Profile;
