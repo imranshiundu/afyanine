@@ -15,6 +15,7 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => voi
   const [account, setAccount] = useState<string>("MW-1048");
   const [mothers, setMothers] = useState<MotherAccount[] | null>(null);
   const [shake, setShake] = useState(false);
+  const [mode, setMode] = useState<"signin" | "testward">("signin");
   const t = LOGIN_COPY[language];
 
   /* Live test-ward accounts for the mother switcher (falls back silently) */
@@ -26,14 +27,16 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => voi
 
   const digits = phone.replace(/\s/g, "");
   const valid = digits.length >= 9;
+  const testward = role === "mother" && mode === "testward";
+  const ready = testward ? mothers !== null : valid;
 
   const submit = () => {
-    if (!valid) {
+    if (!ready) {
       setShake(true);
       window.setTimeout(() => setShake(false), 500);
       return;
     }
-    onEnter(role, role === "mother" ? account : undefined);
+    onEnter(role, testward ? account : undefined);
   };
 
   return (
@@ -131,11 +134,35 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => voi
           </button>
         </div>
 
-        {role === "mother" && mothers && (
-          <div className="acct-field" style={stagger(7)}>
-            <label className="field-label">Test ward · account</label>
+        {role === "mother" && (
+          <div className="mode-tabs" style={stagger(7)} role="tablist" aria-label="Sign-in options">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "signin"}
+              className={mode === "signin" ? "active" : ""}
+              onClick={() => setMode("signin")}
+            >
+              {t.tabSignIn}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "testward"}
+              className={mode === "testward" ? "active" : ""}
+              onClick={() => setMode("testward")}
+            >
+              {t.tabTest}
+            </button>
+            <span className="mode-thumb" aria-hidden="true" data-pos={mode === "signin" ? 0 : 1} />
+          </div>
+        )}
+
+        {testward ? (
+          <div className="acct-field" style={stagger(8)}>
+            <p className="test-lead">{t.testLead}</p>
             <div className="acct-row" role="listbox" aria-label="Test mother accounts">
-              {mothers.map((m) => (
+              {(mothers ?? []).map((m) => (
                 <button
                   key={m.code}
                   type="button"
@@ -158,40 +185,43 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => voi
               ))}
             </div>
           </div>
+        ) : (
+          <>
+            <label className="field-label" htmlFor="phone" style={stagger(8)}>
+              {t.phone}
+            </label>
+            <div
+              className={`phone-field${shake ? " shake" : ""}${digits && !valid ? " invalid" : ""}`}
+              style={stagger(9)}
+            >
+              <span>+254</span>
+              <input
+                id="phone"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, "").slice(0, 11))}
+                placeholder="712 345 678"
+              />
+              {valid && (
+                <span className="field-ok" aria-hidden="true">
+                  <Icon name="check" size={15} strokeWidth={3} />
+                </span>
+              )}
+            </div>
+            <p className="phone-hint" style={stagger(10)}>
+              {valid ? t.otpSent(digits) : t.phoneHint}
+            </p>
+          </>
         )}
-        <label className="field-label" htmlFor="phone" style={stagger(8)}>
-          {t.phone}
-        </label>
-        <div
-          className={`phone-field${shake ? " shake" : ""}${digits && !valid ? " invalid" : ""}`}
-          style={stagger(9)}
-        >
-          <span>+254</span>
-          <input
-            id="phone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, "").slice(0, 11))}
-            placeholder="712 345 678"
-          />
-          {valid && (
-            <span className="field-ok" aria-hidden="true">
-              <Icon name="check" size={15} strokeWidth={3} />
-            </span>
-          )}
-        </div>
-        <p className="phone-hint" style={stagger(10)}>
-          {valid ? t.otpSent(digits) : t.phoneHint}
-        </p>
 
         <button
           type="button"
-          className={`primary-button${valid ? "" : " disabled"}`}
+          className={`primary-button${ready ? "" : " disabled"}`}
           style={stagger(11)}
           onClick={submit}
-          disabled={!valid}
+          disabled={!ready}
         >
           {t.cta} <Icon name="arrow" />
         </button>

@@ -529,6 +529,9 @@ export const LOGIN_COPY = {
     cta: "Continue",
     privacy: "By continuing, you agree to our Terms & Privacy Policy.",
     otpSent: (phone: string) => `Sending a code to +254 ${phone}`,
+    tabSignIn: "Sign in",
+    tabTest: "Test ward",
+    testLead: "Pick a demo account and explore with live AfyaBand data.",
   },
   SW: {
     eyebrow: "AFYA YAKO. SAFARI YAKO.",
@@ -544,6 +547,9 @@ export const LOGIN_COPY = {
     cta: "Endelea",
     privacy: "Kwa kuendelea, unakubali Masharti na Sera ya Faragha.",
     otpSent: (phone: string) => `Tunatuma nambari kwa +254 ${phone}`,
+    tabSignIn: "Ingia",
+    tabTest: "Wodi ya majaribio",
+    testLead: "Chagua akaunti ya majaribio na utumie data hai za AfyaBand.",
   },
 } as const;
 
