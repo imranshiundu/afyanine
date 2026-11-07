@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="620" viewBox="0 0 1040 620" role="img" aria-label="Afyanine draft system overview">
+  <title>Afyanine — system overview (draft)</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="1040" height="620" fill="#f8fafc"/>
+
+  <text x="32" y="44" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#334155">Afyanine — system overview</text>
+  <text x="32" y="68" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#94a3b8">DRAFT · component view only, no stack committed yet</text>
+
+  <!-- principle chips -->
+  <g font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#0b5c53">
+    <rect x="620" y="24" width="196" height="30" rx="15" fill="#e6f7f3" stroke="#bfe8df"/>
+    <text x="718" y="44" text-anchor="middle">① consent before data</text>
+    <rect x="830" y="24" width="160" height="30" rx="15" fill="#e6f7f3" stroke="#bfe8df"/>
+    <text x="910" y="44" text-anchor="middle">② minimize by design</text>
+    <rect x="620" y="62" width="196" height="30" rx="15" fill="#e6f7f3" stroke="#bfe8df"/>
+    <text x="718" y="82" text-anchor="middle">③ encrypted at rest</text>
+    <rect x="830" y="62" width="160" height="30" rx="15" fill="#e6f7f3" stroke="#bfe8df"/>
+    <text x="910" y="82" text-anchor="middle">④ offline-first</text>
+  </g>
+
+  <!-- mother's phone -->
+  <g>
+    <rect x="40" y="120" width="200" height="130" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="140" y="148" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0b5c53">Mother's phone</text>
+    <text x="56" y="174" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">• offline-first cache</text>
+    <text x="56" y="196" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">• vitals & symptoms log</text>
+    <text x="56" y="218" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">• local antenatal reminders</text>
+    <text x="56" y="240" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#64748b">works on low-end / patchy data</text>
+  </g>
+
+  <!-- CHW phone -->
+  <g>
+    <rect x="40" y="410" width="200" height="110" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="140" y="438" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0b5c53">CHW / caregiver phone</text>
+    <text x="56" y="464" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">• household visits</text>
+    <text x="56" y="486" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#334155">• escalation &amp; follow-up</text>
+    <text x="56" y="508" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#64748b">role-based access only</text>
+  </g>
+
+  <!-- sync -->
+  <g>
+    <rect x="330" y="270" width="180" height="84" rx="12" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
+    <text x="420" y="298" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#9a3412">Sync / outbound queue</text>
+    <text x="348" y="322" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#7c2d12">background sync · retry</text>
+    <text x="348" y="340" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#7c2d12">conflict-safe · batched</text>
+  </g>
+
+  <!-- api + auth -->
+  <g>
+    <rect x="590" y="180" width="220" height="96" rx="12" fill="#ffffff" stroke="#0b5c53" stroke-width="2"/>
+    <text x="700" y="208" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0b5c53">API + auth</text>
+    <text x="606" y="232" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">phone-number OTP (TBD)</text>
+    <text x="606" y="252" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">rate-limited · audited</text>
+  </g>
+
+  <!-- consent -->
+  <g>
+    <rect x="590" y="330" width="220" height="84" rx="12" fill="#ffffff" stroke="#16a34a" stroke-width="2"/>
+    <text x="700" y="358" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#16a34a">Consent service</text>
+    <text x="606" y="382" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">granular · revocable</text>
+    <text x="606" y="402" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#334155">checks every write</text>
+  </g>
+
+  <!-- data store -->
+  <g>
+    <rect x="880" y="180" width="132" height="96" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="946" y="206" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">Core data store</text>
+    <text x="890" y="228" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11.5" fill="#64748b">encrypted at rest</text>
+    <text x="890" y="246" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11.5" fill="#64748b">retention rules (TBD)</text>
+  </g>
+
+  <!-- clinician -->
+  <g>
+    <rect x="880" y="340" width="132" height="74" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="946" y="368" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">Clinician view</text>
+    <text x="890" y="392" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11.5" fill="#64748b">case review · referrals</text>
+  </g>
+
+  <!-- analytics -->
+  <g>
+    <rect x="590" y="480" width="220" height="74" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="700" y="508" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#334155">Aggregate analytics only</text>
+    <text x="606" y="532" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#64748b">no raw-data export · no marketing</text>
+  </g>
+
+  <!-- arrows -->
+  <line x1="240" y1="185" x2="322" y2="288" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="240" y1="450" x2="322" y2="336" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="510" y1="308" x2="582" y2="264" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="810" y1="228" x2="872" y2="228" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="810" y1="372" x2="872" y2="372" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="700" y1="276" x2="700" y2="322" stroke="#16a34a" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <line x1="700" y1="414" x2="700" y2="472" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- footer -->
+  <text x="32" y="590" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#94a3b8">Every write passes the consent service · sync is resumable · phone data stays on phone until upload is permitted.</text>
+</svg>
