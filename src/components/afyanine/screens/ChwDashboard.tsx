@@ -1,24 +1,19 @@
-"use client";
+import { useState } from "react";
+import { ChwDashboardPage } from "./chw/ChwDashboardPage";
+import { ChwPatientsPage } from "./chw/ChwPatientsPage";
+import { ChwVisitsPage } from "./chw/ChwVisitsPage";
+import { ChwProfilePage } from "./chw/ChwProfilePage";
+import { ChwNav } from "./chw/ChwShared";
+import type { VisitNotes } from "./chw/types"; 
 
-import { useRef, useState } from "react";
-import { Icon } from "../Icon";
-import { ThemeToggle } from "../chrome";
-import { CHW, PATIENTS, type Patient, type Screen } from "../data";
-import type { PatientsPayload } from "../api";
-import { useCountUp, stagger } from "../useMotion";
-
-function riskClass(risk: Patient["risk"]) {
-  if (risk === "High Risk") return "high";
-  if (risk === "Watch") return "watch";
-  return "";
+interface ChwDashboardProps {
+  payload: any;
+  navigate: (screen: string) => void;
+  openPatient: (id: string) => void;
+  notify: (msg: string) => void;
+  onResolve: () => void;
+  onLogout: () => void;
 }
-
-const TIME_OF_DAY = () => {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning,";
-  if (h < 17) return "Good afternoon,";
-  return "Good evening,";
-};
 
 export function ChwDashboard({
   payload,
@@ -27,207 +22,73 @@ export function ChwDashboard({
   notify,
   onResolve,
   onLogout,
-}: {
-  payload: PatientsPayload | null;
-  navigate: (s: Screen) => void;
-  openPatient: (code: string) => void;
-  notify: (msg: string) => void;
-  onResolve: () => void;
-  onLogout: () => void;
-}) {
-  const [query, setQuery] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
+}: ChwDashboardProps) {
+  // 1. Tab State
+  const [activeTab, setActiveTab] = useState<"dashboard" | "patients" | "visits" | "profile">("dashboard");
 
-  /* Live register from the API; bundled demo register ONLY when the API is down */
-  const live = payload !== null;
-  const list = live ? (payload?.patients ?? []) : PATIENTS;
-  const chw = live ? (payload?.chw ?? CHW) : CHW;
-  const emergency = live ? payload?.emergency ?? null : CHW.emergency;
+  // 2. Local State for Hackathon Visit Notes
+  const [notes, setNotes] = useState<VisitNotes>({});
+  const saveNote = (id: string, note: string) => {
+    setNotes((prev) => ({ ...prev, [id]: note }));
+  };
 
-  const filtered = list.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
-
-  const patients = useCountUp(chw.stats.patients, 900);
-  const attention = useCountUp(chw.stats.attention, 900);
-  const visits = useCountUp(chw.stats.visits, 900);
+  // 3. The Navigation Interceptor
+  // This catches internal CHW routes and turns them into tab switches.
+  // Anything else (like "patient" or "login") gets bubbled up to app.tsx.
+  const handleInternalNavigation = (dest: string) => {
+    if (dest === "chw") setActiveTab("dashboard");
+    else if (dest === "chwPatients") setActiveTab("patients");
+    else if (dest === "chwVisits") setActiveTab("visits");
+    else if (dest === "chwProfile") setActiveTab("profile");
+    else navigate(dest); 
+  };
 
   return (
-    <main className="screen chw-screen">
-      <div className="chw-head stagger">
-        <div style={stagger(0)}>
-          <p>
-            {new Date().toLocaleDateString("en-KE", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()}
-          </p>
-          <h1>
-            {TIME_OF_DAY()}
-            <br />
-            {chw.firstName}
-          </h1>
-        </div>
-        <div className="head-actions">
-          <ThemeToggle className="theme-toggle" />
-          <button
-            type="button"
-            className="notification"
-            aria-label={emergency ? "Notifications, 1 unread" : "Notifications"}
-            onClick={() =>
-              notify(emergency ? "1 active emergency · 2 new messages" : "2 new messages")
-            }
-            style={stagger(1)}
-          >
-            <Icon name="bell" />
-            {emergency && <i />}
-          </button>
-        </div>
-      </div>
+    <div className="chw-layout" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      
+      {/* Scrollable Content Area */}
+      <div className="chw-content" style={{ flexGrow: 1, overflowY: "auto" }}>
+        
+        {activeTab === "dashboard" && (
+          <ChwDashboardPage
+            navigate={handleInternalNavigation}
+            notify={notify}
+            openPatient={openPatient}
+          />
+        )}
 
-      {emergency && (
-        <div
-          role="button"
-          tabIndex={0}
-          className="alert-banner"
-          onClick={() => navigate("tracking")}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !(e.target as HTMLElement).closest(".alert-resolve")) {
-              navigate("tracking");
-            }
-          }}
-          style={stagger(2)}
-        >
-          <span className="alert-icon">
-            <Icon name="ambulance" size={25} stroke="#FFFFFF" />
-          </span>
-          <span className="alert-copy">
-            <small>
-              <i className="alert-live" aria-hidden="true" /> ACTIVE EMERGENCY
-            </small>
-            <b>{emergency.who}</b>
-            <p>
-              <Icon name="pin" size={14} /> {emergency.where}
-            </p>
-          </span>
-          <button
-            type="button"
-            className="alert-resolve"
-            aria-label="Mark SOS resolved"
-            onClick={(e) => {
-              e.stopPropagation();
-              onResolve();
-            }}
-          >
-            <Icon name="x" size={15} stroke="#FFFFFF" strokeWidth={3} />
-          </button>
-          <Icon name="chevron" stroke="#FFFFFF" size={17} />
-        </div>
-      )}
+        {activeTab === "patients" && (
+          <ChwPatientsPage
+            navigate={handleInternalNavigation}
+            notify={notify}
+            openPatient={openPatient}
+          />
+        )}
 
-      <div className="stats-row" aria-label="Practice summary" style={stagger(3)}>
-        <div>
-          <b>{patients}</b>
-          <span>Patients</span>
-        </div>
-        <div>
-          <b className="red-text">{attention}</b>
-          <span>Need attention</span>
-        </div>
-        <div>
-          <b>{visits}</b>
-          <span>Visits today</span>
-        </div>
-      </div>
+        {activeTab === "visits" && (
+          <ChwVisitsPage
+            navigate={handleInternalNavigation}
+            notify={notify}
+            notes={notes}
+            saveNote={saveNote}
+            openPatient={openPatient}
+          />
+        )}
 
-      <div className="section-title patients-title">
-        <h2>My patients</h2>
-        <button type="button" onClick={() => notify(`Showing all ${chw.stats.patients} patients`)}>
-          View all
-        </button>
-      </div>
-
-      <div className="search-box">
-        <Icon name="search" size={18} />
-        <input
-          ref={searchRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search patients"
-          aria-label="Search patients"
-        />
-        {query ? (
-          <button type="button" aria-label="Clear search" onClick={() => setQuery("")}>
-            <Icon name="x" size={16} />
-          </button>
-        ) : (
-          <button type="button" aria-label="Filter list">
-            <Icon name="sliders" size={18} />
-          </button>
+        {activeTab === "profile" && (
+          <ChwProfilePage 
+          navigate={handleInternalNavigation}
+          notify={notify}
+          onLogout={onLogout}/>
         )}
       </div>
 
-      <div className="patient-list stagger" key={query}>
-        {filtered.map((p, i) => (
-          <button
-            className="patient-row"
-            key={p.id}
-            type="button"
-            style={stagger(Math.min(i, 8))}
-            onClick={() => openPatient(p.id)}
-          >
-            <span className="patient-avatar" style={{ background: p.color }} aria-hidden="true">
-              {p.initials}
-            </span>
-            <span className="patient-info">
-              <h3>{p.name}</h3>
-              <p>
-                {p.week} <i /> BP{" "}
-                <b className={p.risk === "High Risk" ? "red-text" : ""}>{p.bp}</b>
-              </p>
-            </span>
-            <span className={`risk ${riskClass(p.risk)}`}>{p.risk}</span>
-            <Icon name="chevron" size={17} />
-          </button>
-        ))}
-        {filtered.length === 0 && (
-          <div className="empty-state" style={stagger(0)}>
-            <span className="empty-art">
-              <Icon name="search" size={26} />
-            </span>
-            <b>No patients match “{query}”</b>
-            <p>Check the spelling or search by clinic ID.</p>
-          </div>
-        )}
-      </div>
-
-      <nav className="chw-nav" aria-label="CHW navigation">
-        <button type="button" className="active" aria-current="page">
-          <Icon name="home" />
-          <span>Dashboard</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setQuery("");
-            searchRef.current?.focus();
-          }}
-        >
-          <Icon name="people" />
-          <span>Patients</span>
-        </button>
-        <button
-          type="button"
-          className="add-patient"
-          aria-label="Add patient"
-          onClick={() => searchRef.current?.focus()}
-        >
-          <Icon name="plus" strokeWidth={2.5} />
-        </button>
-        <button type="button" onClick={() => notify(`${chw.stats.visits} visits scheduled today`)}>
-          <Icon name="calendar" />
-          <span>Visits</span>
-        </button>
-        <button type="button" onClick={onLogout}>
-          <Icon name="user" />
-          <span>Profile</span>
-        </button>
-      </nav>
-    </main>
+      {/* Fixed Bottom Navigation */}
+      <ChwNav 
+        active={activeTab} 
+        navigate={handleInternalNavigation as any} 
+        notify={notify} 
+      />
+    </div>
   );
 }
