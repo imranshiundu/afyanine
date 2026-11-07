@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Icon } from "../Icon";
 import { EMERGENCY_TYPES, type Screen } from "../data";
 import { stagger } from "../useMotion";
-import { useLanguage } from "../language";
 
 export function Sos({
   goBack,
@@ -15,7 +14,6 @@ export function Sos({
   navigate: (s: Screen) => void;
   onEmergencyPicked: (title: string) => void;
 }) {
-  const { t } = useLanguage();
   const [picked, setPicked] = useState<string | null>(null);
 
   const choose = (title: string) => {
@@ -41,18 +39,20 @@ export function Sos({
           <span className="sos-ring slow" />
           <Icon name="plus" size={31} stroke="#FFFFFF" strokeWidth={2.5} />
         </div>
-        <p style={stagger(2)}>{t("EMERGENCY HELP")}</p>
+        <p style={stagger(2)}>EMERGENCY HELP</p>
         <h1 style={stagger(3)}>
-          {t("Is this an emergency?")}
+          Is this an
+          <br />
+          emergency?
         </h1>
         <span style={stagger(4)}>
-          {t("Fictional SOS demo. No emergency services are dispatched.")}
+          Tell us what is happening. Help will be sent immediately.
         </span>
       </section>
 
       <section className="sos-options stagger">
         <p className="field-label" style={stagger(5)}>
-          {t("CHOOSE ONE OPTION")}
+          CHOOSE ONE OPTION
         </p>
         {EMERGENCY_TYPES.map((e, i) => (
           <button
@@ -67,8 +67,8 @@ export function Sos({
               <Icon name={e.icon} size={23} />
             </span>
             <span className="sos-copy">
-              <b>{t(e.title)}</b>
-              <small>{t(e.sub)}</small>
+              <b>{e.title}</b>
+              <small>{e.sub}</small>
             </span>
             {picked === e.title ? (
               <span className="sos-sending">
@@ -81,17 +81,17 @@ export function Sos({
         ))}
 
         <div className="emergency-call" style={stagger(6 + EMERGENCY_TYPES.length)}>
-          <span>{t("Need to speak to emergency services?")}</span>
+          <span>Need to speak to emergency services?</span>
           <div>
             <a href="tel:999" aria-label="Call 999">
               <span className="call-chip">
-                <Icon name="phone" size={16} /> {t("Call 999")}
+                <Icon name="phone" size={16} /> Call 999
               </span>
             </a>
             <i />
             <a href="tel:112" aria-label="Call 112">
               <span className="call-chip">
-                <Icon name="phone" size={16} /> {t("Call 112")}
+                <Icon name="phone" size={16} /> Call 112
               </span>
             </a>
           </div>

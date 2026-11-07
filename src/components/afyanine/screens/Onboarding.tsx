@@ -7,7 +7,7 @@ import { InstallReminder } from "../InstallReminder";
 import { Logo } from "../Logo";
 import { ThemeToggle } from "../chrome";
 import { completeInstalledOnboarding } from "../installed-onboarding";
-import { useLanguage } from "../language";
+import type { Lang } from "../data";
 
 const COPY = {
   EN: {
@@ -45,7 +45,7 @@ const ICONS: IconName[] = ["calendar", "activity", "people"];
 export function Onboarding() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const { language, setLanguage } = useLanguage();
+  const [language, setLanguage] = useState<Lang>("EN");
   const screenRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const t = COPY[language];

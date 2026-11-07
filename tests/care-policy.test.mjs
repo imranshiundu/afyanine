@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { normalizeEmail, trustedAdmin, sharedScopes, overlaps } from "../src/lib/care-policy.ts";
-import { SW } from "../src/components/afyanine/translations.ts";
 test("user-editable metadata cannot grant administrator privileges", () => {
   assert.equal(trustedAdmin({user_metadata:{afyanine_admin:true}}), false);
   assert.equal(trustedAdmin({app_metadata:{afyanine_admin:"true"}}), false);
@@ -16,7 +15,4 @@ test("adjacent visits may touch; overlapping intervals conflict", () => {
   const d = n => new Date(n);
   assert.equal(overlaps(d(1),d(2),d(2),d(3)), false);
   assert.equal(overlaps(d(1),d(3),d(2),d(4)), true);
-});
-test("core care team screens have Swahili labels", () => {
-  for (const key of ["Patients","Visits","Profile","Storage consent","Revoke access","CHW verification","VITALS","PREGNANCY","VISITS","NOTES","CONTACTS","VISIT_CONFLICT"]) assert(SW[key] && SW[key] !== key);
 });

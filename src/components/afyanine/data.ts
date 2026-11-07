@@ -8,10 +8,7 @@ export type Screen =
   | "tracking"
   | "vitals"
   | "chw"
-  | "patient"
-  | "profile"
-  | "logout";
-// Account identity never grants access to real maternal records.
+  | "patient";
 
 export type Role = "mother" | "chw";
 export type Lang = "EN" | "SW";

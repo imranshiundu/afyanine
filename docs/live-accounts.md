@@ -1,5 +1,14 @@
 # Current accounts and live data
 
+**UI rollback:** all app components, styling, layout and visible routes have been
+restored byte-for-byte from `main` at `4ffaf20654a26c47689f4e16253c0e86c39972b6`.
+The database/backend implementation remains separate. The password account,
+profile, live workspace, band-binding and sound components described below were
+removed at the user's request; these backend capabilities are **not yet wired
+into the restored screens**. Do not claim the earlier redesigned browser journey
+is the current UI. Future integration must preserve the existing UI/layout
+unless explicitly requested otherwise.
+
 This supersedes the Supabase Auth instructions in `accounts-care.md` and
 `care-team.md`. The current implementation uses the Supabase **PostgreSQL
 database**, not Supabase Auth.

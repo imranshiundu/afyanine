@@ -15,10 +15,9 @@ import {
 } from "../data";
 import type { MotherSnapshot } from "../api";
 import { stagger } from "../useMotion";
-import { useLanguage } from "../language";
 
-const DAY_MONTH = (iso: string, locale: string) =>
-  new Date(iso).toLocaleDateString(locale, {
+const DAY_MONTH = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-KE", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -36,15 +35,12 @@ export function Home({
   navigate,
   notify,
   onProfile,
-  stale = false,
 }: {
   snapshot: MotherSnapshot | null;
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
   onProfile: () => void;
-  stale?: boolean;
 }) {
-  const { t, locale } = useLanguage();
   const [chpOpen, setChpOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifRead, setNotifRead] = useState(false);
@@ -63,8 +59,8 @@ export function Home({
   const visit = live?.appointment
     ? {
         label: live.appointment.label,
-        date: DAY_MONTH(live.appointment.scheduledAt, locale),
-        detail: `${new Date(live.appointment.scheduledAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", hour12: true })} · ${live.appointment.place}`,
+        date: DAY_MONTH(live.appointment.scheduledAt),
+        detail: `${new Date(live.appointment.scheduledAt).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })} · ${live.appointment.place}`,
         place: live.appointment.place,
       }
     : ANC_VISIT;
@@ -76,11 +72,9 @@ export function Home({
 
   return (
     <main className="screen with-nav">
-      <p className="demo-feed-label">{t("Fictional Test Ward · data refreshes every 30 seconds · not a medical service")}</p>
-      {stale && <p className="account-notice" role="status">{t("Refresh unavailable. Showing the last loaded fictional record.")}</p>}
       <div className="home-head stagger">
         <div style={stagger(0)}>
-          <p>{t(TIME_OF_DAY())}</p>
+          <p>{TIME_OF_DAY()}</p>
           <h1>{live?.mother.firstName ?? "Wanjiku"}</h1>
         </div>
         <div className="head-actions">
@@ -103,10 +97,10 @@ export function Home({
           <span className="card-rings" aria-hidden="true" />
           <WeekRing week={pregnancy.week} totalWeeks={pregnancy.totalWeeks} />
           <div className="pregnancy-copy">
-            <span className="tag">{t(pregnancy.trimester)}</span>
-            <h2>{t(pregnancy.headline)}</h2>
+            <span className="tag">{pregnancy.trimester}</span>
+            <h2>{pregnancy.headline}</h2>
             <p>
-              {t(pregnancy.size)} · <b>{pregnancy.daysLeft} {t("days to go")}</b>
+              {pregnancy.size} · <b>{pregnancy.daysLeft} days to go</b>
             </p>
           </div>
         </section>
@@ -117,7 +111,7 @@ export function Home({
               <Icon name="calendar" />
             </span>
             <div>
-              <small>{t(visit.label)}</small>
+              <small>{visit.label}</small>
               <h3>{visit.date}</h3>
               <p>{visit.detail}</p>
             </div>
@@ -127,19 +121,19 @@ export function Home({
               type="button"
               onClick={() => notify(`Opening directions to ${visit.place}`)}
             >
-              <Icon name="direction" size={17} /> {t("Directions")}
+              <Icon name="direction" size={17} /> Directions
             </button>
             <button type="button" onClick={() => notify("Reschedule request started")}>
-              {t("Reschedule")}
+              Reschedule
             </button>
           </div>
         </section>
       </section>
 
       <div className="section-title">
-        <h2>{t("How can we help?")}</h2>
+        <h2>How can we help?</h2>
         <button type="button" onClick={() => navigate("care")}>
-          {t("See all")}
+          See all
         </button>
       </div>
 
@@ -152,8 +146,8 @@ export function Home({
             <span>
               <Icon name={action.icon} />
             </span>
-            <b>{t(action.title)}</b>
-            <small>{t(action.sub)}</small>
+            <b>{action.title}</b>
+            <small>{action.sub}</small>
           </button>
         ))}
       </section>
@@ -163,8 +157,8 @@ export function Home({
           <Icon name="phone" stroke="#FFFFFF" size={25} />
         </span>
         <div>
-          <b>{t("I need help now")}</b>
-          <small>{t("Emergency support, 24/7")}</small>
+          <b>I need help now</b>
+          <small>Emergency support, 24/7</small>
         </div>
         <Icon name="chevron" stroke="#FFFFFF" />
       </button>
@@ -184,8 +178,8 @@ export function Home({
                 <Icon name={n.icon} size={19} />
               </span>
               <div>
-                <h3>{t(n.title)}</h3>
-                <p>{t(n.body)}</p>
+                <h3>{n.title}</h3>
+                <p>{n.body}</p>
               </div>
               <small>{n.time}</small>
             </article>
@@ -198,8 +192,8 @@ export function Home({
           <span className="avatar">{CHP_CONTACT.initials}</span>
           <div>
             <h3>{CHP_CONTACT.name}</h3>
-            <p>{t(CHP_CONTACT.role)}</p>
-            <small>{t(CHP_CONTACT.hours)}</small>
+            <p>{CHP_CONTACT.role}</p>
+            <small>{CHP_CONTACT.hours}</small>
           </div>
           <button
             type="button"
@@ -210,10 +204,10 @@ export function Home({
             }}
           >
             <Icon name="phone" size={18} />
-            <span>{t("Call")}</span>
+            <span>Call</span>
           </button>
         </div>
-        <p className="sheet-label">{t("QUICK QUESTIONS")}</p>
+        <p className="sheet-label">QUICK QUESTIONS</p>
         <div className="prompt-grid">
           {CHP_CONTACT.prompts.map((p) => (
             <button
@@ -225,7 +219,7 @@ export function Home({
               }}
             >
               <Icon name="chat" size={16} />
-              {t(p.label)}
+              {p.label}
             </button>
           ))}
         </div>
