@@ -4112,3 +4112,203 @@ html.theme-pop .app-shell {
 .install-later { background: var(--surface-soft); color: var(--ink-soft); }
 .install-reminder > small { display: block; margin-top: 9px; color: var(--muted-deep); font-size: 10px; line-height: 1.5; }
 .install-instructions { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--surface-soft); color: var(--ink-soft); font-size: 12px; line-height: 1.7; }
+
+
+
+/* =========================================
+   1. CHW TAB ROUTER FIXES (NEW)
+   ========================================= */
+.chw-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.chw-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.chw-content::-webkit-scrollbar {
+  display: none;
+}
+.chw-content .screen {
+  min-height: auto;
+  overflow: visible;
+  padding-bottom: 100px; /* clears the fixed nav */
+}
+.chw-profile-screen { background-color: #F9FAFB; }
+.visits-screen { /* ready for visit overrides */ }
+
+
+/* =========================================
+   2. CORE CHW HEADERS & NAV (From your code)
+   ========================================= */
+.chw-screen { padding-bottom: 105px; }
+
+.chw-head { align-items: flex-start; margin-top: 8px; }
+.chw-head p { font-size: 8px; color: #77736d; letter-spacing: 0.12em; font-weight: 800; }
+.chw-head h1 { margin-top: 5px; font-size: 28px; line-height: 1.03; letter-spacing: -0.05em; }
+
+.chw-page-head { min-height: 64px; margin: 4px 2px 18px; display: flex; align-items: flex-start; justify-content: space-between; }
+.chw-page-head > div > p { color: #77736d; font-size: 8px; font-weight: 800; letter-spacing: 0.13em; }
+.chw-page-head h1 { margin-top: 5px; font-size: 27px; letter-spacing: -0.05em; }
+
+.chw-section-title { margin-top: 19px; margin-bottom: 9px; }
+.chw-section-title > div p { margin-bottom: 4px; color: #77736d; font-size: 7px; font-weight: 800; letter-spacing: 0.12em; }
+.chw-section-title > div h2 { font-size: 16px; }
+
+.bottom-nav, .chw-nav { position: absolute; z-index: 20; bottom: 0; left: 0; right: 0; height: 84px; padding: 10px 16px 17px; background: #faf8f3; border-top: 1px solid #ded9d0; display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; box-shadow: 0 -8px 24px rgba(55, 47, 35, 0.05); }
+.bottom-nav button, .chw-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 8px; color: #88847d; }
+.bottom-nav button.active, .chw-nav button.active { color: #1a1a1a; font-weight: 800; }
+.chw-nav .add-patient { width: 52px; height: 52px; border-radius: 50%; background: #d8f03a; justify-self: center; transform: translateY(-15px); box-shadow: 0 6px 13px #78841144; }
+
+
+/* =========================================
+   3. DASHBOARD TAB (From your code)
+   ========================================= */
+.day-summary { min-height: 105px; padding: 18px; border-radius: 24px; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 11px 24px rgba(26, 26, 26, 0.14); }
+.day-summary small { color: #a5a59e; font-size: 7px; font-weight: 800; letter-spacing: 0.13em; }
+.day-summary h2 { margin: 6px 0 4px; font-size: 20px; letter-spacing: -0.04em; }
+.day-summary p { color: #9e9e98; font-size: 8px; }
+
+.day-progress { width: 64px; height: 64px; border: 5px solid #393936; border-top-color: #d8f03a; border-right-color: #d8f03a; border-radius: 50%; transform: rotate(25deg); display: grid; place-items: center; }
+.day-progress b { font-size: 9px; transform: rotate(-25deg); }
+.day-progress i { display: none; }
+
+.dashboard-schedule { overflow: hidden; border-radius: 21px; background: white; }
+.schedule-card { width: 100%; min-height: 76px; padding: 10px 11px; display: flex; align-items: flex-start; gap: 10px; text-align: left; }
+.schedule-card:not(:last-child) { border-bottom: 1px solid #ebe7df; }
+.schedule-time { width: 42px; flex: none; padding-top: 2px; display: flex; flex-direction: column; align-items: center; }
+.schedule-time b { font-size: 10px; }
+.schedule-time span { width: 7px; height: 7px; margin-top: 8px; border-radius: 50%; background: #d8f03a; box-shadow: 0 0 0 4px rgba(216, 240, 58, 0.2); }
+.schedule-person { flex: 1; }
+.schedule-person > div { display: flex; align-items: center; gap: 6px; }
+.schedule-person h3 { font-size: 10px; }
+.schedule-person p { margin: 5px 0; font-size: 8px; font-weight: 600; }
+.schedule-person small { color: #77736d; font-size: 7px; display: flex; align-items: center; gap: 3px; }
+.schedule-card > svg { margin-top: 20px; }
+
+.visit-status { padding: 3px 6px; border-radius: 7px; background: #e4dfd5; color: #6d6962; font-size: 6px; font-weight: 800; }
+.visit-status.urgent { background: #f0d1cf; color: #a51e1e; }
+
+.patient-preview-title { margin-top: 17px; }
+.patient-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.patient-preview-grid > button { min-width: 0; height: 116px; padding: 10px 7px; border-radius: 18px; background: #e4dfd5; display: flex; flex-direction: column; align-items: center; }
+.patient-preview-grid .patient-avatar { width: 37px; height: 37px; }
+.patient-preview-grid > button > div { min-width: 0; width: 100%; margin: 7px 0 6px; display: flex; flex-direction: column; }
+.patient-preview-grid > button > div b { overflow: hidden; font-size: 9px; text-overflow: ellipsis; }
+.patient-preview-grid > button > div small { margin-top: 2px; color: #77736d; font-size: 7px; }
+
+
+/* =========================================
+   4. PATIENTS TAB (From your code)
+   ========================================= */
+.patient-count-card { min-height: 73px; border-radius: 21px; background: #1a1a1a; color: white; display: grid; grid-template-columns: repeat(3, 1fr); }
+.patient-count-card div { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.patient-count-card div:not(:last-child)::after { content: ""; position: absolute; right: 0; width: 1px; height: 31px; background: #41413d; }
+.patient-count-card b { font-size: 19px; }
+.patient-count-card span { margin-top: 3px; color: #9b9b95; font-size: 7px; }
+
+.patient-search { margin-top: 13px; }
+.search-box { height: 44px; border-radius: 15px; background: white; display: flex; align-items: center; padding: 0 12px; gap: 9px; }
+.search-box input { flex: 1; border: 0; outline: 0; font-size: 11px; background: transparent; }
+.search-box input::placeholder { color: #9a958d; }
+.search-box button { width: 30px; height: 30px; background: #e4dfd5; display: grid; place-items: center; border-radius: 9px; }
+
+.patient-filters { display: flex; gap: 6px; margin: 10px 0 12px; }
+.patient-filters button { padding: 7px 10px; border: 1px solid #d5d0c7; border-radius: 14px; font-size: 8px; font-weight: 700; }
+.patient-filters button.active { border-color: #1a1a1a; background: #d8f03a; }
+
+.registry-heading { display: flex; align-items: center; justify-content: space-between; color: #77736d; font-size: 8px; }
+.registry-heading button { display: flex; align-items: center; gap: 4px; font-size: 8px; font-weight: 700; }
+
+.patient-list { margin-top: 8px; }
+.patient-row { width: 100%; min-height: 70px; display: flex; align-items: center; text-align: left; border-bottom: 1px solid #dcd7ce; gap: 10px; }
+.patient-avatar { width: 41px; height: 41px; flex: none; border-radius: 50%; color: white; display: grid; place-items: center; font-size: 10px; font-weight: 700; }
+.patient-info { flex: 1; }
+.patient-info h3 { font-size: 11px; }
+.patient-info p { margin-top: 5px; font-size: 8px; color: #77736d; display: flex; align-items: center; gap: 5px; }
+.patient-info p i { width: 3px; height: 3px; border-radius: 50%; background: #aaa59c; }
+.patient-info p b { color: #4f4d48; }
+
+.risk { padding: 5px 7px; border-radius: 10px; background: #d8f03a; font-size: 7px; font-weight: 800; white-space: nowrap; }
+.risk.high { color: #a51e1e; background: #f0d1cf; }
+.risk.watch { background: #eddfaf; color: #75601c; }
+
+
+/* =========================================
+   5. VISITS TAB (From your code)
+   ========================================= */
+.date-strip { padding: 5px; border-radius: 19px; background: #e4dfd5; display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
+.date-strip button { height: 51px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.date-strip button span { color: #77736d; font-size: 7px; }
+.date-strip button b { margin-top: 4px; font-size: 11px; }
+.date-strip button.active { background: #1a1a1a; color: white; }
+.date-strip button.active span { color: #b8b7b1; }
+
+.visits-title { margin-top: 15px; }
+.visits-list { padding: 4px; border-radius: 19px; background: white; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.visits-list > button { min-height: 61px; padding: 8px; border-radius: 15px; display: flex; align-items: center; gap: 7px; text-align: left; }
+.visits-list > button.active { background: #e4dfd5; }
+.visits-list > button > span { width: 31px; flex: none; color: #77736d; font-size: 7px; font-weight: 800; }
+.visits-list > button > div { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.visits-list > button b { overflow: hidden; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.visits-list > button small { overflow: hidden; margin-top: 3px; color: #77736d; font-size: 6px; text-overflow: ellipsis; white-space: nowrap; }
+.visits-list > button > svg { color: #78850e; }
+
+.visit-note-panel { margin-top: 12px; padding: 14px; border-radius: 22px; background: #1a1a1a; color: white; }
+.visit-note-head { display: flex; align-items: center; gap: 9px; }
+.visit-note-head .patient-avatar { width: 40px; height: 40px; background: #9f745d; }
+.visit-note-head > div { min-width: 0; flex: 1; }
+.visit-note-head small { color: #8f8f89; font-size: 6px; font-weight: 800; letter-spacing: 0.1em; }
+.visit-note-head h3 { margin: 2px 0; font-size: 11px; }
+.visit-note-head p { color: #9f9f99; font-size: 7px; }
+.visit-note-head > button { width: 34px; height: 34px; border-radius: 11px; background: #33332f; color: white; display: grid; place-items: center; }
+
+.visit-note-panel > label { display: block; margin: 14px 0 7px; color: #aaa9a3; font-size: 7px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.visit-note-panel textarea { width: 100%; height: 76px; padding: 10px; resize: none; border: 1px solid #484844; border-radius: 13px; outline: 0; background: #282825; color: white; font-size: 8px; line-height: 1.5; }
+.visit-note-panel textarea:focus { border-color: #d8f03a; }
+.visit-note-panel .primary-button { height: 42px; border-radius: 13px; font-size: 10px; }
+.note-sharing { margin: 8px 0; color: #a9a9a3; display: flex; align-items: center; gap: 6px; font-size: 7px; }
+.note-sharing svg { color: #d8f03a; }
+
+
+/* =========================================
+   6. PROFILE TAB (From your code)
+   ========================================= */
+.chw-profile-hero { min-height: 96px; padding: 14px; border-radius: 22px; background: #e4dfd5; display: flex; align-items: center; gap: 11px; }
+.chw-profile-hero > span { width: 57px; height: 57px; flex: none; border: 4px solid #f3f0e8; border-radius: 50%; background: #887465; color: white; display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+.chw-profile-hero > div { min-width: 0; flex: 1; }
+.chw-profile-hero h2 { font-size: 15px; }
+.chw-profile-hero p { overflow: hidden; margin: 4px 0 6px; color: #6f6b65; font-size: 8px; text-overflow: ellipsis; }
+.chw-profile-hero small { padding: 4px 6px; border-radius: 7px; background: #d8f03a; font-size: 6px; font-weight: 800; }
+.chw-profile-hero > button { width: 35px; height: 35px; border-radius: 11px; background: #f3f0e8; display: grid; place-items: center; }
+
+.chw-impact-card { margin-top: 12px; padding: 15px; border-radius: 22px; background: #1a1a1a; color: white; }
+.chw-impact-card > small { color: #a1a19a; font-size: 7px; font-weight: 800; letter-spacing: 0.12em; }
+.chw-impact-card > div { min-height: 60px; display: flex; align-items: center; }
+.chw-impact-card span { flex: 1; display: flex; flex-direction: column; }
+.chw-impact-card span:nth-child(3), .chw-impact-card span:nth-child(5) { align-items: center; }
+.chw-impact-card b { color: #d8f03a; font-size: 21px; letter-spacing: -0.04em; }
+.chw-impact-card p { margin-top: 3px; color: #999993; font-size: 7px; }
+.chw-impact-card i { width: 1px; height: 34px; background: #3f3f3b; }
+
+.profile-group-label { margin: 18px 2px 8px; color: #77736d; font-size: 7px; font-weight: 800; letter-spacing: 0.12em; }
+
+.chw-details-list { overflow: hidden; border-radius: 21px; background: white; }
+.chw-details-list button { width: 100%; min-height: 60px; padding: 9px 12px; display: flex; align-items: center; gap: 10px; text-align: left; }
+.chw-details-list button:not(:last-child) { border-bottom: 1px solid #e9e4dc; }
+.chw-details-list button > span { width: 35px; height: 35px; flex: none; border-radius: 11px; background: #e4dfd5; display: grid; place-items: center; }
+.chw-details-list button > div { flex: 1; display: flex; flex-direction: column; }
+.chw-details-list small { color: #77736d; font-size: 7px; }
+.chw-details-list b { margin-top: 3px; font-size: 9px; }
+
+.profile-contact { min-height: 59px; margin-top: 10px; padding: 10px 12px; border-radius: 18px; background: #e4dfd5; display: flex; align-items: center; gap: 10px; }
+.profile-contact > span { width: 35px; height: 35px; border-radius: 11px; background: #d8f03a; display: grid; place-items: center; }
+.profile-contact > div { flex: 1; display: flex; flex-direction: column; }
+.profile-contact small { color: #77736d; font-size: 6px; font-weight: 800; }
+.profile-contact b { margin-top: 3px; font-size: 9px; }
+.profile-contact i { padding: 4px 6px; border-radius: 8px; background: #d8f03a; font-size: 6px; font-style: normal; font-weight: 800; }
+
+.profile-signout { width: 100%; height: 42px; margin-top: 10px; border: 1px solid #d4cec4; border-radius: 14px; color: #c62828; font-size: 9px; font-weight: 800; }
