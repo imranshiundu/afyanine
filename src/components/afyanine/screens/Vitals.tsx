@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Icon } from "../Icon";
 import { BottomNav, Header } from "../chrome";
 import { BpMeter, ChartAxis, EcgWave, Sparkline } from "../charts";
@@ -23,12 +23,14 @@ export function Vitals({
   snapshot,
   navigate,
   notify,
-  stale = false,
+  accountMode = false,
+  children,
 }: {
   snapshot: MotherSnapshot | null;
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
-  stale?: boolean;
+  accountMode?: boolean;
+  children?: ReactNode;
 }) {
   const [range, setRange] = useState<VitalsRange>("Hourly");
 
@@ -61,19 +63,18 @@ export function Vitals({
             type="button"
             className="icon-button"
             aria-label="Share vitals with my CHP"
-            onClick={() => notify("Vitals shared with Grace (CHP)")}
+            onClick={() => accountMode ? navigate("profile") : notify("Vitals shared with Grace (CHP)")}
           >
             <Icon name="sparkles" />
           </button>
         }
       />
 
-      {stale && <p className="account-notice" role="status">Refresh unavailable. Showing the last loaded fictional record.</p>}
       <div className="sync-state stagger" style={stagger(0)}>
         <span className="live-dot" aria-hidden="true" />
         <p>
-          <b>{current.device} · fictional feed</b>
-          <small>Last reading {snapshot?.current.takenAt ? new Date(snapshot.current.takenAt).toLocaleString("en-KE", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : current.synced}</small>
+          <b>{accountMode ? `${current.device} · saved data` : `${current.device} connected`}</b>
+          <small>Last synced {current.synced}</small>
         </p>
         <span className="sync-badge">
           <Icon name="check" size={15} strokeWidth={3} />
@@ -83,7 +84,7 @@ export function Vitals({
       {/* Range switcher with a sliding thumb */}
       <div className="period-tabs" role="tablist" aria-label="Time range" style={stagger(1)}>
         <span className="period-thumb" data-pos={rangeIndex} aria-hidden="true" />
-        {RANGES.map((r) => (
+        {(accountMode ? (["Hourly"] as const) : RANGES).map((r) => (
           <button
             key={r}
             type="button"
@@ -92,7 +93,7 @@ export function Vitals({
             className={range === r ? "active" : ""}
             onClick={() => setRange(r)}
           >
-            {r}
+            {accountMode ? "Latest saved readings" : r}
           </button>
         ))}
       </div>
@@ -152,7 +153,7 @@ export function Vitals({
         <div className="vital-card-head plain">
           <div>
             <small>
-              <Icon name="heart" size={13} fill="var(--lime)" /> HEART RATE · SIMULATED
+              <Icon name="heart" size={13} fill="var(--lime)" /> HEART RATE · LIVE
             </small>
             <p className="hr-value">
               <b>{current.heartRate}</b>
@@ -163,7 +164,7 @@ export function Vitals({
             {hrCat === "normal" ? "Normal" : "Check"}
           </span>
         </div>
-        <EcgWave />
+        {!accountMode && <EcgWave />}
         <div className="hr-chips">
           <span>
             <i className="dot low" /> Low {current.heartLow}
@@ -177,7 +178,7 @@ export function Vitals({
 
       {/* Mini metrics */}
       <section className="mini-grid stagger">
-        {MINI_METRICS.map((m, i) => (
+        {!accountMode && MINI_METRICS.map((m, i) => (
           <button
             key={m.label}
             type="button"
@@ -199,12 +200,12 @@ export function Vitals({
         <Icon name="sparkles" />
         <p>
           <b>
-            {cat === "normal" || cat === "low"
+            {accountMode ? "Latest saved reading" : cat === "normal" || cat === "low"
               ? "Today's readings look good"
               : "Your BP is elevated today"}
           </b>
           <small>
-            {cat === "normal" || cat === "low"
+            {accountMode ? "Measurements from a simulated band are not clinical readings. Use emergency services if you feel unwell; no clinician is automatically alerted by this card." : cat === "normal" || cat === "low"
               ? "Keep wearing your AfyaBand throughout the day."
               : "Rest, avoid salt, and tap SOS if you feel unwell — Grace has been alerted."}
           </small>
@@ -225,10 +226,11 @@ export function Vitals({
         </div>
         <Icon name="chevron" stroke="#FFFFFF" />
       </button>
+      {children}
       <BottomNav
         active="vitals"
         navigate={navigate}
-        onProfile={() => navigate("profile")}
+        onProfile={() => accountMode ? navigate("profile") : notify(`Signed in as ${snapshot?.mother.firstName ?? "Mother"} · Mother`)}
       />
     </main>
   );

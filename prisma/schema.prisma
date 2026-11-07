@@ -74,3 +74,233 @@ model Emergency {
 
   @@index([status, createdAt])
 }
+
+enum CareRole {
+  MOTHER
+  CHW
+  PARTNER
+}
+
+enum CareScope {
+  VITALS
+  PREGNANCY
+  VISITS
+  NOTES
+  CONTACTS
+}
+
+enum CareInviteKind {
+  CHW
+  PARTNER
+}
+
+enum CareInviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+}
+
+enum CareVisitStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model CareAccount {
+  id                 String   @id
+  email              String
+  displayName        String
+  phone              String?
+  role               CareRole
+  locale             String   @default("EN")
+  isDemo             Boolean  @default(false)
+  institutionName    String?
+  registrationNumber String?
+  institutionContact String?
+  verifiedAt         DateTime?
+  verifiedBy         String?
+  dueDate            DateTime?
+  storageScopes      CareScope[] @default([])
+  opsConsent         Boolean @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  sentInvites        CareInvite[] @relation("CareSender")
+  motherInvites      CareInvite[] @relation("CareInviteMother")
+  motherAccess       CareAccess[] @relation("CareMother")
+  viewerAccess       CareAccess[] @relation("CareViewer")
+  maternalVisits     CareVisit[] @relation("CareVisitMother")
+  chwVisits          CareVisit[] @relation("CareVisitChw")
+  vitals             CareVital[]
+  contacts           CareContact[]
+  authoredNotes      CareNote[]
+  alerts             CareAlert[]
+  band               CareBand?
+
+  @@index([isDemo, email])
+}
+
+model CareInvite {
+  id             String @id @default(cuid())
+  requesterId    String
+  requester      CareAccount @relation("CareSender", fields: [requesterId], references: [id])
+  motherId       String?
+  mother         CareAccount? @relation("CareInviteMother", fields: [motherId], references: [id])
+  targetEmail    String
+  targetPhone    String?
+  kind           CareInviteKind
+  scopes         CareScope[]
+  status         CareInviteStatus @default(PENDING)
+  isDemo         Boolean @default(false)
+  expiresAt      DateTime
+  respondedAt    DateTime?
+  createdAt      DateTime @default(now())
+  access         CareAccess?
+
+  @@index([targetEmail, isDemo, status])
+  @@index([targetPhone, isDemo, status])
+  @@index([requesterId, createdAt])
+}
+
+model CareAccess {
+  id          String @id @default(cuid())
+  motherId    String
+  mother      CareAccount @relation("CareMother", fields: [motherId], references: [id])
+  viewerId    String
+  viewer      CareAccount @relation("CareViewer", fields: [viewerId], references: [id])
+  kind        CareInviteKind
+  scopes      CareScope[]
+  active      Boolean @default(true)
+  isDemo      Boolean @default(false)
+  inviteId    String @unique
+  invite      CareInvite @relation(fields: [inviteId], references: [id])
+  createdAt   DateTime @default(now())
+  revokedAt   DateTime?
+
+  @@index([motherId, active])
+  @@index([viewerId, active])
+}
+
+model CareVisit {
+  id          String @id @default(cuid())
+  motherId    String
+  mother      CareAccount @relation("CareVisitMother", fields: [motherId], references: [id])
+  chwId       String
+  chw         CareAccount @relation("CareVisitChw", fields: [chwId], references: [id])
+  startsAt    DateTime
+  endsAt      DateTime
+  place       String
+  status      CareVisitStatus @default(SCHEDULED)
+  isDemo      Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  notes       CareNote[]
+
+  @@index([chwId, startsAt])
+  @@index([motherId, startsAt])
+}
+
+model CareNote {
+  id          String @id @default(cuid())
+  visitId     String
+  visit       CareVisit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      CareAccount @relation(fields: [authorId], references: [id])
+  body        String
+  createdAt   DateTime @default(now())
+}
+
+model CareVital {
+  id          String @id @default(cuid())
+  motherId    String
+  mother      CareAccount @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  systolic    Int
+  diastolic   Int
+  heartRate   Int
+  measuredAt  DateTime @default(now())
+  source      String @default("MANUAL")
+
+  @@index([motherId, measuredAt])
+}
+
+model CareContact {
+  id           String @id @default(cuid())
+  motherId     String
+  mother       CareAccount @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  name         String
+  relationship String
+  phone        String
+  email        String?
+  createdAt    DateTime @default(now())
+}
+
+model CareAudit {
+  id        String @id @default(cuid())
+  actorId   String
+  motherId  String?
+  action    String
+  scopes    CareScope[] @default([])
+  isDemo    Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([motherId, createdAt])
+}
+
+// Separate from the public workspace payload: hashes never leave the server.
+model AccountIdentity {
+  id           String @id
+  email        String @unique
+  phone        String? @unique
+  passwordHash String
+  role         CareRole
+  displayName  String
+  failures     Int @default(0)
+  lockedUntil  DateTime?
+  createdAt    DateTime @default(now())
+  sessions     AccountSession[]
+  operator     CareOperator?
+}
+
+model AccountSession {
+  tokenHash  String @id
+  identityId String
+  identity   AccountIdentity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  @@index([identityId])
+  @@index([expiresAt])
+}
+
+model AuthThrottle {
+  key       String @id
+  attempts  Int
+  resetAt   DateTime
+}
+
+model CareAlert {
+  id        String @id @default(cuid())
+  motherId  String
+  mother    CareAccount @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  kind      String
+  active    Boolean @default(true)
+  status    String @default("raised")
+  acknowledgedAt DateTime?
+  createdAt DateTime @default(now())
+  resolvedAt DateTime?
+  @@index([motherId, active, createdAt])
+}
+
+model CareBand {
+  id            String @id @default(cuid())
+  motherId      String @unique
+  mother        CareAccount @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  serial        String @unique
+  boundAt       DateTime @default(now())
+  lastReadingAt DateTime?
+}
+
+model CareOperator {
+  identityId String @id
+  identity AccountIdentity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+}

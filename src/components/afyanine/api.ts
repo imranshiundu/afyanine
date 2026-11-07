@@ -25,7 +25,6 @@ export interface MotherSnapshot {
     heartHigh: number;
     device: string;
     synced: string;
-    takenAt: string;
   };
   series: Record<
     "Hourly" | "Daily" | "Weekly",
@@ -49,7 +48,7 @@ export interface Patient {
   bp: string;
   systolic: number;
   diastolic: number;
-  risk: "Normal" | "Watch" | "High Risk";
+  risk: "Normal" | "Watch" | "High Risk" | "Not recorded";
   color: string;
 }
 
@@ -116,7 +115,6 @@ async function post<T>(url: string, body: unknown): Promise<T | null> {
 }
 
 export const api = {
-  generateReading: (code: string) => post<MotherSnapshot>("/api/demo/reading", { code }),
   mother: (code = "MW-1048") => get<MotherSnapshot>(`/api/mother?code=${code}`),
   mothers: () => get<{ mothers: MotherAccount[] }>("/api/mothers"),
   patients: () => get<PatientsPayload>("/api/patients"),

@@ -1,0 +1,24 @@
+/* Requested fields/pages reuse the existing main tokens and card classes. */
+.account-fields { display:grid; gap:12px; margin:18px 0; }
+.account-fields label { display:grid; gap:7px; font-size:13px; font-weight:600; }
+.account-fields input:not([type=checkbox]), .account-fields select, .account-fields textarea {
+  width:100%; min-height:48px; padding:12px 14px; border:1px solid var(--line,#ddd);
+  border-radius:14px; background:var(--surface,#fff); color:var(--ink,#1c211b); font:inherit;
+}
+.account-fields textarea { min-height:90px; }
+.account-fields .consent-check { display:flex; gap:10px; align-items:center; }
+.account-fields button:disabled { opacity:.55; }
+.account-switch { display:block; margin:18px auto; padding:8px; text-decoration:underline; }
+.account-live-status { display:flex; align-items:center; justify-content:space-between; padding:9px 20px; font-size:11px; background:var(--surface,#fff); color:var(--ink,#222); border-bottom:1px solid var(--line,#eee); }
+.account-live-status button { text-decoration:underline; padding:5px; }
+.account-card { border:1px solid var(--line,#ddd); border-radius:20px; padding:18px; margin:14px 0; background:var(--surface,#fff); }
+.account-card h3 { margin:0 0 8px; }
+.account-card p { margin:8px 0; line-height:1.5; font-size:13px; overflow-wrap:anywhere; }
+.account-actions { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:14px 0; }
+.account-actions button, .account-actions a { border:1px solid var(--line,#ddd); padding:10px 15px; border-radius:12px; font-size:13px; }
+.account-error { padding:12px 20px; font-size:13px; color:var(--red,#a31a24); }
+.account-notice { font-size:13px; line-height:1.6; padding:12px 0; }
+.account-shell { display:flex; flex-direction:column; }
+.account-shell > .account-live-status, .account-shell > .account-error { flex-shrink:0; }
+.account-page { padding-bottom:0; }
+.account-fields input[type=checkbox] { accent-color:#cbe52e; width:18px; height:18px; }

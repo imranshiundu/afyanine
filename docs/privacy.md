@@ -58,11 +58,11 @@ and HANDOFF echoes that honestly. Per-commitment status:
 
 | Commitment | Prototype status |
 |---|---|
-| 1. Consent before data | ❌ **Not implemented.** Supabase account identity is separate from health records; no clinical consent service exists. Demo-only APIs use `simulated=true` guards under the shared database role. |
-| 2. Contextual, not blanket | ❌ Not implemented (nothing to gate yet) |
+| 1. Consent before data | 🟡 Private `Care*` prototype now gates category writes/sharing on storage consent and current relationships. Real clinical storage stays operator-disabled; live Auth and deployment review remain gates. Legacy ward APIs remain fictional-only. |
+| 2. Contextual, not blanket | 🟡 Mother-approved category grants per CHW/partner, with pending/declined/revoked states. Verification alone grants no patient access. |
 | 3. Sensitive by default / no marketing | ✅ Honored trivially — demo data only, no ad/analytics SDKs in the tree |
 | 4. Minimize and bound | 🔶 Schema is small and purposeful, but no retention windows exist yet |
-| 5. Deletion is self-serve | ❌ Not implemented |
+| 5. Deletion is self-serve | 🟡 Confirmed prototype category/care-record purge exists. Basic identity/profile and minimal authorization history remain; full identity deletion and statutory retention review are not complete. |
 
 **Operating rule while in prototype:** the demo must never hold real maternal data.
 Real-data acceptance is blocked until commitments 1 and 5 exist in code — pre-production
@@ -75,6 +75,13 @@ or deletion and does not lift the operating rule above. Real sign-in is disabled
 where Supabase configuration is absent. Public care lookup uses third-party map
 services; only an explicit location action requests browser permission, and an
 approximate query centre is sent without durable location storage.
+
+**Care-team successor:** [care-team.md](care-team.md) describes the private
+consent/relationship path, institution verification, read-only partner access,
+recorded visits/notes and prototype purge. Its closed-by-default RLS migration
+does not change legacy demo policies. `CARE_RECORDS_ENABLED` is not activated
+here; the operating rule above remains in force. Do not treat fictional
+workflow tests or prototype deletion behavior as clinical/legal approval.
 
 **Secrets hygiene (verified 2026-11-07):** `.env*` and `tokens.txt` are git-ignored;
 Supabase management token and keys live outside the repo (per the secrets policy in

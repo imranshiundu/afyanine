@@ -1,95 +1,248 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { Icon } from "../Icon";
 import { BottomNav, Header } from "../chrome";
-import { directionsUrl, distanceKm, type CareFacility, type CareCategory } from "@/lib/care-data";
-import type { Screen } from "../data";
+import { Sheet } from "../Sheet";
+import { CARE_FILTERS, CARE_TABS, FACILITIES, type CareTab, type Screen } from "../data";
+import { stagger } from "../useMotion";
 
-const CareMap = dynamic(() => import("../CareMap"), { ssr: false, loading: () => <p className="care-loading">Loading interactive map…</p> });
-const NAIROBI: [number, number] = [-1.2921, 36.8219];
-const CATEGORIES = ["All", "Hospital", "Clinic", "Pharmacy", "Ambulance"] as const;
-export function FindCare({ navigate, onProfile, chw = false }: { navigate: (screen: Screen) => void; onProfile: () => void; chw?: boolean }) {
-  const [centre, setCentre] = useState<[number, number]>(NAIROBI);
-  const [mapCentre, setMapCentre] = useState<[number, number]>(NAIROBI);
-  const [locationLabel, setLocationLabel] = useState("Nairobi centre · not your location");
-  const [locating, setLocating] = useState(false);
-  const [locationError, setLocationError] = useState("");
-  const [category, setCategory] = useState<"All" | CareCategory>("All");
-  const [view, setView] = useState<"Map" | "List">("Map");
-  const [large, setLarge] = useState(false);
-  const [search, setSearch] = useState("");
-  const [maternity, setMaternity] = useState(false);
-  const [always, setAlways] = useState(false);
-  const [data, setData] = useState<CareFacility[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [fetchedAt, setFetchedAt] = useState("");
-  const [retry, setRetry] = useState(0);
-  const alive = useRef(true);
-  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/care", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lat: Number(centre[0].toFixed(3)), lng: Number(centre[1].toFixed(3)) }), signal: controller.signal, cache: "no-store" })
-      .then(async response => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error || "Facility directory unavailable.");
-        return body;
-      }).then(body => { if (!controller.signal.aborted) { setData(body.facilities); setFetchedAt(body.fetchedAt); setLoading(false); } })
-      .catch(error => { if (!controller.signal.aborted) { setError(error instanceof Error ? error.message : "Directory unavailable."); setLoading(false); } });
-    return () => controller.abort();
-  }, [centre, retry]);
-  const facilities = useMemo(() => data.filter(f => (category === "All" || f.category === category) &&
-    (!maternity || f.maternity) && (!always || f.alwaysOpen) &&
-    `${f.name} ${f.address}`.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => distanceKm(centre, [a.lat, a.lng]) - distanceKm(centre, [b.lat, b.lng])), [data, category, maternity, always, search, centre]);
-  const selected = facilities.find(f => f.id === selectedId) ?? facilities[0] ?? null;
-  const loadArea = (point: [number, number], label: string) => {
-    setLoading(true); setError(""); setData([]); setSelectedId(null); setFetchedAt("");
-    setCentre(point); setLocationLabel(label); setRetry(value => value + 1);
+type FilterId = string;
+
+export function FindCare({
+  navigate,
+  notify,
+  onProfile,
+}: {
+  navigate: (s: Screen) => void;
+  notify: (msg: string) => void;
+  onProfile: () => void;
+}) {
+  const [tab, setTab] = useState<CareTab>("Health centre");
+  const [view, setView] = useState<"Map" | "List">("List");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<Record<FilterId, boolean>>({
+    open: false,
+    maternity: false,
+    anc: false,
+    always: false,
+  });
+  const [pending, setPending] = useState<Record<FilterId, boolean>>({ ...filters, });
+
+  const matches = (f: (typeof FACILITIES)[CareTab][number]) => {
+    if (filters.open && !f.open) return false;
+    if (filters.maternity && !f.services.includes("Maternity")) return false;
+    if (filters.anc && !f.services.some((s) => s.includes("ANC"))) return false;
+    if (filters.always && !f.alwaysOpen) return false;
+    return true;
   };
-  const locate = () => {
-    if (!navigator.geolocation) { setLocationError("Location is not supported. Pan the map and search that area instead."); return; }
-    setLocating(true); setLocationError("");
-    navigator.geolocation.getCurrentPosition(position => {
-      if (!alive.current) return;
-      setLocating(false);
-      loadArea([Number(position.coords.latitude.toFixed(3)), Number(position.coords.longitude.toFixed(3))], "Near your approximate location");
-    }, () => {
-      if (!alive.current) return;
-      setLocating(false); setLocationError("Location was unavailable or denied. You can still pan the map and search any area.");
-    }, { timeout: 10_000, maximumAge: 60_000, enableHighAccuracy: false });
+
+  const facilities = FACILITIES[tab].filter(matches);
+
+  const activeCount = Object.values(filters).filter(Boolean).length;
+
+  const toggleFilter = (id: FilterId) => setPending((p) => ({ ...p, [id]: !p[id] }));
+
+  const applyFilters = () => {
+    setFilters({ ...pending });
+    setFilterOpen(false);
   };
-  const details = (facility: CareFacility) => <div className="care-selected-details">
-    <span className="eyebrow">{facility.category} · {(distanceKm(centre, [facility.lat, facility.lng])).toFixed(1)} km straight-line</span>
-    <h3>{facility.name}</h3><p>{facility.address || "Address not listed"}</p>
-    <p>{facility.hours ? `Hours listed: ${facility.hours}` : "Opening hours unknown · call ahead"}</p>
-    <div className="care-detail-actions"><a className="care-directions" href={directionsUrl(facility)} target="_blank" rel="noopener noreferrer"><Icon name="direction" size={16} />Directions</a>
-      {facility.phone && /^[+\d\s()-]+$/.test(facility.phone) && <a href={`tel:${facility.phone.replace(/[^\d+]/g, "")}`}><Icon name="phone" size={16} />Call</a>}
-      <a href={facility.sourceUrl} target="_blank" rel="noopener noreferrer">Source</a>
-    </div>
-  </div>;
-  return <main className="screen with-nav care-screen care-discovery">
-    <Header title="Find care" onBack={() => navigate(chw ? "chw" : "home")} />
-    <div className="care-location-row"><p><b>Care around you</b><small>{locationLabel}</small></p><button className="icon-button" onClick={locate} disabled={locating} aria-label="Use my location"><Icon name="pin" />{locating && <span className="sr-only">Locating</span>}</button></div>
-    <p className="care-privacy">Use my location shares an approximate area with map providers to find care. It is not saved to your profile.</p>
-    {locationError && <p className="account-error" role="status">{locationError}</p>}
-    <label className="care-search"><Icon name="search" size={18} /><input aria-label="Search facilities" value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter names in these results" /></label>
-    <div className="care-category-tabs" role="group" aria-label="Facility type">{CATEGORIES.map(item => <button key={item} aria-pressed={category === item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{item}</button>)}</div>
-    <div className="care-view-controls"><div role="group" aria-label="Map or list view">{(["Map", "List"] as const).map(item => <button aria-pressed={view === item} className={view === item ? "active" : ""} key={item} onClick={() => setView(item)}>{item}</button>)}</div>{view === "Map" && <button onClick={() => setLarge(!large)} aria-pressed={large}>{large ? "Compact map" : "Larger map"}</button>}</div>
-    {view === "Map" && <div className={`care-map-frame${large ? " expanded" : ""}`}><CareMap centre={centre} facilities={facilities} selected={selected?.id ?? null} onSelect={setSelectedId} onMove={setMapCentre} />
-      {distanceKm(centre, mapCentre) > .3 && <button className="search-map-area" onClick={() => loadArea(mapCentre, "Selected map area")}>Search this area</button>}
-    </div>}
-    <div className="care-filter-checks"><label><input type="checkbox" checked={maternity} onChange={e => setMaternity(e.target.checked)} />Maternity listed</label><label><input type="checkbox" checked={always} onChange={e => setAlways(e.target.checked)} />24/7 listed</label></div>
-    {loading ? <p className="care-loading" role="status">Looking up public facility data…</p> : error ? <section className="care-provider-error" role="status"><b>Directory connection unavailable</b><p>{error}</p><button className="secondary-button" onClick={() => loadArea(centre, locationLabel)}>Retry directory</button></section> : <>
-      <p className="care-result-count">{facilities.length} mapped places · within 8 km of search centre</p>
-      {selected && view === "Map" && <section className="care-selected-card" aria-label="Selected facility">{details(selected)}</section>}
-      {view === "List" && <div className="care-real-list">{facilities.map((facility, index) => <section key={facility.id} className="care-selected-card"><button className="facility-select" onClick={() => { setSelectedId(facility.id); setView("Map"); }} aria-label={`Show ${facility.name} on map`}><span>{index + 1}</span><Icon name="pin" size={18} />Show on map</button>{details(facility)}</section>)}</div>}
-      {!facilities.length && <div className="empty-state"><b>No mapped places match</b><p>Try another area or remove a filter. This directory is not complete.</p><button onClick={() => { setMaternity(false); setAlways(false); setSearch(""); setCategory("All"); }}>Clear filters</button></div>}
-    </>}
-    <p className="care-source-note">OpenStreetMap community data{fetchedAt ? ` · fetched ${new Date(fetchedAt).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" })}` : ""}. Availability and services are unverified; call ahead. No travel times or ambulance availability are implied. In an emergency, contact emergency services directly.</p>
-    <BottomNav active="care" navigate={navigate} onProfile={onProfile} chw={chw} />
-  </main>;
+
+  const quickToggle = (id: FilterId) => {
+    const next = !filters[id];
+    setFilters((f) => ({ ...f, [id]: next }));
+    setPending((p) => ({ ...p, [id]: next }));
+  };
+
+  return (
+    <main className={`screen with-nav care-screen${view === "Map" ? " map-mode" : ""}`}>
+      <Header
+        title="Find care"
+        onBack={() => navigate("home")}
+        action={
+          <button type="button" className="icon-button" aria-label="Search services">
+            <Icon name="search" />
+          </button>
+        }
+      />
+
+      <div className="care-tabs" role="tablist" aria-label="Facility type">
+        {CARE_TABS.map((x) => (
+          <button
+            key={x}
+            type="button"
+            role="tab"
+            aria-selected={tab === x}
+            className={tab === x ? "active" : ""}
+            onClick={() => setTab(x)}
+          >
+            {x}
+          </button>
+        ))}
+      </div>
+
+      <div className="map-preview">
+        <div className="road r1" />
+        <div className="road r2" />
+        <div className="road r3" />
+        <span className="map-label care-l1">KIBERA</span>
+        <button
+          type="button"
+          className="map-pin p1"
+          aria-hidden={false}
+          aria-label="First facility on map"
+          onClick={() => notify(FACILITIES[tab][0]?.name ?? "Facility")}
+        >
+          <Icon name="hospital" size={17} />
+        </button>
+        <button
+          type="button"
+          className="map-pin p2"
+          aria-label="Second facility on map"
+          onClick={() => notify(FACILITIES[tab][1]?.name ?? "Facility")}
+        >
+          <Icon name="hospital" size={17} />
+        </button>
+        <span className="you-dot radar" aria-hidden="true" />
+        <div className="view-toggle" role="group" aria-label="Map or list view">
+          {(["Map", "List"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setView(v)}
+              className={view === v ? "active" : ""}
+              aria-pressed={view === v}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="filter-row" role="group" aria-label="Quick filters">
+        <button type="button" className="filter-main" onClick={() => setFilterOpen(true)}>
+          <Icon name="sliders" size={17} /> Filters
+          {activeCount > 0 && <i className="filter-badge">{activeCount}</i>}
+        </button>
+        <button
+          type="button"
+          className={filters.open ? "chip-on" : ""}
+          aria-pressed={filters.open}
+          onClick={() => quickToggle("open")}
+        >
+          Open now
+        </button>
+        <button
+          type="button"
+          className={filters.maternity ? "chip-on" : ""}
+          aria-pressed={filters.maternity}
+          onClick={() => quickToggle("maternity")}
+        >
+          Maternity
+        </button>
+        <button
+          type="button"
+          className={filters.always ? "chip-on" : ""}
+          aria-pressed={filters.always}
+          onClick={() => quickToggle("always")}
+        >
+          24 hours
+        </button>
+      </div>
+
+      <div className="result-count">
+        <b>
+          {facilities.length === FACILITIES[tab].length
+            ? tab === "Ambulance"
+              ? `${FACILITIES.Ambulance.length} services`
+              : `${facilities.length} places nearby`
+            : `${facilities.length} of ${FACILITIES[tab].length} places`}
+        </b>
+        <span>Nearest first</span>
+      </div>
+
+      <div className="facility-list stagger" key={`${tab}-${activeCount}`}>
+        {facilities.map((f, i) => (
+          <button
+            className="facility-card"
+            key={f.name}
+            type="button"
+            style={stagger(i)}
+            onClick={() => notify(`Opening directions to ${f.name}`)}
+          >
+            <div className="facility-icon">
+              <Icon name={f.icon} size={25} />
+            </div>
+            <div className="facility-content">
+              <div className="facility-title">
+                <h3>{f.name}</h3>
+                <span>{f.distance}</span>
+              </div>
+              <p className={f.open ? "open" : "closed"}>{f.meta}</p>
+              <div>
+                {f.services.map((s) => (
+                  <span className="service-chip" key={s}>
+                    {s}
+                  </span>
+                ))}
+              </div>
+              <small>
+                <Icon name="direction" size={14} /> {f.drive} drive
+              </small>
+            </div>
+            <Icon name="chevron" size={18} />
+          </button>
+        ))}
+        {facilities.length === 0 && (
+          <div className="empty-state" style={stagger(0)}>
+            <span className="empty-art">
+              <Icon name="search" size={26} />
+            </span>
+            <b>No places match</b>
+            <p>Try removing a filter to widen your search.</p>
+            <button
+              type="button"
+              onClick={() => {
+                const cleared = { open: false, maternity: false, anc: false, always: false };
+                setFilters(cleared);
+                setPending(cleared);
+              }}
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      <BottomNav active="care" navigate={navigate} onProfile={onProfile} />
+
+      <Sheet
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        title="Filters"
+        label="Filter facilities"
+      >
+        <div className="filter-options">
+          {CARE_FILTERS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              className="filter-option"
+              role="switch"
+              aria-checked={pending[f.id]}
+              onClick={() => toggleFilter(f.id)}
+            >
+              <span>{f.label}</span>
+              <span className={`switch${pending[f.id] ? " on" : ""}`} aria-hidden="true">
+                <i />
+              </span>
+            </button>
+          ))}
+        </div>
+        <button type="button" className="primary-button" onClick={applyFilters}>
+          Show {tab === "Ambulance" ? "services" : "places"}
+        </button>
+      </Sheet>
+    </main>
+  );
 }

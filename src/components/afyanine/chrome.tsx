@@ -77,18 +77,11 @@ export function BottomNav({
   active,
   navigate,
   onProfile,
-  chw = false,
 }: {
   active: Screen;
   navigate: (s: Screen) => void;
   onProfile: () => void;
-  chw?: boolean;
 }) {
-  if (chw) return <nav className="bottom-nav chw-profile-nav" aria-label="CHW">
-    <button type="button" onClick={() => navigate("chw")}><Icon name="home" /><span>Dashboard</span></button>
-    <button type="button" className={active === "care" ? "active" : ""} onClick={() => navigate("care")} aria-current={active === "care" ? "page" : undefined}><Icon name="pin" /><span>Care</span></button>
-    <button type="button" className={active === "profile" ? "active" : ""} onClick={onProfile} aria-current={active === "profile" ? "page" : undefined}><Icon name="user" /><span>Profile</span></button>
-  </nav>;
   return (
     <nav className="bottom-nav" aria-label="Primary">
       <button
@@ -121,7 +114,7 @@ export function BottomNav({
         <Icon name="activity" />
         <span>Vitals</span>
       </button>
-      <button type="button" className={active === "profile" ? "active" : ""} aria-current={active === "profile" ? "page" : undefined} onClick={onProfile}>
+      <button type="button" onClick={onProfile}>
         <Icon name="user" />
         <span>Profile</span>
       </button>

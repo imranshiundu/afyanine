@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Icon } from "../Icon";
 import { BottomNav, ThemeToggle } from "../chrome";
 import { WeekRing } from "../charts";
@@ -35,13 +35,19 @@ export function Home({
   navigate,
   notify,
   onProfile,
-  stale = false,
+  accountMode = false,
+  dueDateKnown = true,
+  onNotifications,
+  children,
 }: {
   snapshot: MotherSnapshot | null;
   navigate: (s: Screen) => void;
   notify: (msg: string) => void;
   onProfile: () => void;
-  stale?: boolean;
+  accountMode?: boolean;
+  dueDateKnown?: boolean;
+  onNotifications?: () => void;
+  children?: ReactNode;
 }) {
   const [chpOpen, setChpOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -55,7 +61,7 @@ export function Home({
         trimester: live.mother.trimester,
         size: live.mother.sizeNote,
         daysLeft: live.mother.daysLeft,
-        headline: live.mother.week >= 28 ? "Your baby is growing beautifully." : "Your baby is on track.",
+        headline: accountMode ? (dueDateKnown ? `Your saved pregnancy: week ${live.mother.week}.` : "Add your pregnancy details in Profile.") : live.mother.week >= 28 ? "Your baby is growing beautifully." : "Your baby is on track.",
       }
     : PREGNANCY;
   const visit = live?.appointment
@@ -65,17 +71,16 @@ export function Home({
         detail: `${new Date(live.appointment.scheduledAt).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })} · ${live.appointment.place}`,
         place: live.appointment.place,
       }
-    : ANC_VISIT;
+    : accountMode ? { label: "NEXT VISIT", date: "No visit scheduled", detail: "Your CHW can schedule a visit.", place: "" } : ANC_VISIT;
 
   const openNotifs = () => {
+    if (onNotifications) { onNotifications(); return; }
     setNotifOpen(true);
     setNotifRead(true);
   };
 
   return (
     <main className="screen with-nav">
-      <p className="demo-feed-label">Fictional Test Ward · data refreshes every 30 seconds · not a medical service</p>
-      {stale && <p className="account-notice" role="status">Refresh unavailable. Showing the last loaded fictional record.</p>}
       <div className="home-head stagger">
         <div style={stagger(0)}>
           <p>{TIME_OF_DAY()}</p>
@@ -99,12 +104,12 @@ export function Home({
       <section className="stagger">
         <section className="pregnancy-card" aria-label="Pregnancy overview" style={stagger(2)}>
           <span className="card-rings" aria-hidden="true" />
-          <WeekRing week={pregnancy.week} totalWeeks={pregnancy.totalWeeks} />
+          {dueDateKnown ? <WeekRing week={pregnancy.week} totalWeeks={pregnancy.totalWeeks} /> : <span className="square-icon"><Icon name="mother" size={36} /></span>}
           <div className="pregnancy-copy">
             <span className="tag">{pregnancy.trimester}</span>
             <h2>{pregnancy.headline}</h2>
             <p>
-              {pregnancy.size} · <b>{pregnancy.daysLeft} days to go</b>
+              {pregnancy.size}{dueDateKnown && <> · <b>{pregnancy.daysLeft} days to go</b></>}
             </p>
           </div>
         </section>
@@ -120,7 +125,8 @@ export function Home({
               <p>{visit.detail}</p>
             </div>
           </div>
-          <div className="appointment-actions">
+          {accountMode && <div className="appointment-actions"><button type="button" onClick={() => navigate("visits")}><Icon name="calendar" size={17} /> View visits</button></div>}
+          {!accountMode && <div className="appointment-actions">
             <button
               type="button"
               onClick={() => notify(`Opening directions to ${visit.place}`)}
@@ -130,7 +136,7 @@ export function Home({
             <button type="button" onClick={() => notify("Reschedule request started")}>
               Reschedule
             </button>
-          </div>
+          </div>}
         </section>
       </section>
 
@@ -144,7 +150,7 @@ export function Home({
       <section className="quick-grid stagger">
         {QUICK_ACTIONS.map((action, i) => (
           <button key={action.title} type="button" style={stagger(i)} onClick={() => {
-            if (action.dest === "chp-call") setChpOpen(true);
+            if (action.dest === "chp-call") { if (accountMode) navigate("care"); else setChpOpen(true); }
             else navigate(action.dest);
           }}>
             <span>
@@ -167,6 +173,7 @@ export function Home({
         <Icon name="chevron" stroke="#FFFFFF" />
       </button>
 
+      {children}
       <BottomNav active="home" navigate={navigate} onProfile={onProfile} />
 
       <Sheet

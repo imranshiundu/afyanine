@@ -9,9 +9,9 @@ export type Screen =
   | "vitals"
   | "chw"
   | "patient"
-  | "profile"
-  | "logout";
-// Account identity never grants access to real maternal records.
+  | "patients"
+  | "visits"
+  | "profile";
 
 export type Role = "mother" | "chw";
 export type Lang = "EN" | "SW";
@@ -358,7 +358,7 @@ export const MINI_METRICS: Array<{
 /* 07 — CHW patient register                                           */
 /* ------------------------------------------------------------------ */
 
-export type RiskLevel = "Normal" | "Watch" | "High Risk";
+export type RiskLevel = "Normal" | "Watch" | "High Risk" | "Not recorded";
 
 export interface Patient {
   id: string;

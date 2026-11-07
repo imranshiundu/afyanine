@@ -243,7 +243,7 @@ ALTER TABLE public."VitalReading"  REPLICA IDENTITY FULL;
 ALTER TABLE public."VisitNote"     REPLICA IDENTITY FULL;
 ALTER TABLE public."Emergency"     REPLICA IDENTITY FULL;
 -- anon/browser can READ only (realtime receiver); the app role writes via Postgres role `afyanine`
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+GRANT SELECT ON public."Mother", public."VitalReading", public."VisitNote", public."Emergency" TO anon;
 -- permissive per-table policies already exist:
 --   "Public read access - <table>" FOR SELECT TO anon, authenticated USING (true)
 --   "App full access - <table>"    FOR ALL   TO afyanine USING (true) WITH CHECK (true)
@@ -255,6 +255,27 @@ holds explicit `GRANT ALL` + permissive RLS policies — writes work. If you run
 `prisma db push` again, re-apply the block above.
 
 # Integration checklist
+
+**Private care-team APIs (successor to the legacy fictional endpoints):**
+`GET /api/care-workspace` returns own profile, verified-email invitation inbox,
+permitted connections, bounded visits and operational stats.
+`GET /api/care-workspace?mother=<id>` returns only current consented categories.
+`POST /api/care-workspace` accepts validated commands for profile, invitation,
+response, revocation, consent/purge, manual reading, due date/contact, scheduled
+visit, visit status, note and privileged CHW verification. All require a
+Supabase-validated bearer token and confirmed email; subject/admin authority is
+never accepted from the body. See [care-team.md](care-team.md).
+
+`/api/demo/care-workspace?actor=mother|chw|partner|admin` exercises the same
+service with fixed fictional actors. It cannot access private-account records.
+Invitation email addresses are restricted to the documented fictional fixtures;
+no email/SMS sends. This is a public demo, not an authentication bypass for the
+account endpoint. Do not enter real information.
+
+**Do not publish or grant broad SDK permissions on the eight new `Care*`
+tables.** Their one-time migration enables RLS and revokes `anon`, `authenticated`
+and PUBLIC privileges. Only the trusted owning server DB role accesses them,
+after authorization. Legacy realtime/permission recipes do not apply to them.
 
 **Full live demo (two-session):**
 1. `npx next dev -p 3001` → open `http://localhost:3001` twice (Mother + CHW tabs; port

@@ -178,8 +178,8 @@ export function Sparkline({
 export function ChartAxis({ labels, indent = false }: { labels: string[]; indent?: boolean }) {
   return (
     <div className={`chart-axis${indent ? " indent" : ""}`} aria-hidden="true">
-      {labels.map((l) => (
-        <span key={l}>{l}</span>
+      {labels.map((l, i) => (
+        <span key={`${i}-${l}`}>{l}</span>
       ))}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Icon } from "../Icon";
 import { ThemeToggle } from "../chrome";
 import { CHW, PATIENTS, type Patient, type Screen } from "../data";
@@ -27,6 +27,8 @@ export function ChwDashboard({
   notify,
   onResolve,
   onLogout,
+  onAddMother,
+  children,
 }: {
   payload: PatientsPayload | null;
   navigate: (s: Screen) => void;
@@ -34,6 +36,8 @@ export function ChwDashboard({
   notify: (msg: string) => void;
   onResolve: () => void;
   onLogout: () => void;
+  onAddMother?: () => void;
+  children?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -46,9 +50,12 @@ export function ChwDashboard({
 
   const filtered = list.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
 
-  const patients = useCountUp(chw.stats.patients, 900);
-  const attention = useCountUp(chw.stats.attention, 900);
-  const visits = useCountUp(chw.stats.visits, 900);
+  const patientAnimation = useCountUp(chw.stats.patients, onAddMother ? 0 : 900);
+  const attentionAnimation = useCountUp(chw.stats.attention, onAddMother ? 0 : 900);
+  const visitAnimation = useCountUp(chw.stats.visits, onAddMother ? 0 : 900);
+  const patients = onAddMother ? chw.stats.patients : patientAnimation;
+  const attention = onAddMother ? chw.stats.attention : attentionAnimation;
+  const visits = onAddMother ? chw.stats.visits : visitAnimation;
 
   return (
     <main className="screen chw-screen">
@@ -70,7 +77,7 @@ export function ChwDashboard({
             className="notification"
             aria-label={emergency ? "Notifications, 1 unread" : "Notifications"}
             onClick={() =>
-              notify(emergency ? "1 active emergency · 2 new messages" : "2 new messages")
+              notify(onAddMother ? emergency ? "Active saved SOS · open the patient to respond" : "No active SOS" : emergency ? "1 active emergency · 2 new messages" : "2 new messages")
             }
             style={stagger(1)}
           >
@@ -137,7 +144,7 @@ export function ChwDashboard({
 
       <div className="section-title patients-title">
         <h2>My patients</h2>
-        <button type="button" onClick={() => notify(`Showing all ${chw.stats.patients} patients`)}>
+        <button type="button" onClick={() => onAddMother ? navigate("patients") : notify(`Showing all ${chw.stats.patients} patients`)}>
           View all
         </button>
       </div>
@@ -196,6 +203,7 @@ export function ChwDashboard({
         )}
       </div>
 
+      {children}
       <nav className="chw-nav" aria-label="CHW navigation">
         <button type="button" className="active" aria-current="page">
           <Icon name="home" />
@@ -204,8 +212,8 @@ export function ChwDashboard({
         <button
           type="button"
           onClick={() => {
-            setQuery("");
-            searchRef.current?.focus();
+            if (onAddMother) navigate("patients");
+            else { setQuery(""); searchRef.current?.focus(); }
           }}
         >
           <Icon name="people" />
@@ -214,12 +222,12 @@ export function ChwDashboard({
         <button
           type="button"
           className="add-patient"
-          aria-label="Add patient"
-          onClick={() => searchRef.current?.focus()}
+          aria-label={onAddMother ? "Add mother" : "Add patient"}
+          onClick={onAddMother ?? (() => searchRef.current?.focus())}
         >
           <Icon name="plus" strokeWidth={2.5} />
         </button>
-        <button type="button" onClick={() => notify(`${chw.stats.visits} visits scheduled today`)}>
+        <button type="button" onClick={() => onAddMother ? navigate("visits") : notify(`${chw.stats.visits} visits scheduled today`)}>
           <Icon name="calendar" />
           <span>Visits</span>
         </button>

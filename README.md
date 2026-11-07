@@ -7,10 +7,13 @@
   <b>afya</b> (health) + <b>nine</b> (months) · <i>maternal health monitoring — consent-first, offline-ready</i>
 </p>
 
-> **Status: prototype.** A first working stack ships demo data only — six bot-simulated
-> mothers, no real maternal records, no auth layer yet. The consent gate described in
-> [`docs/privacy.md`](docs/privacy.md) is a **pre-production mandate** and must exist
-> before any real data is accepted.
+> **Status: prototype.** The original `main` design is preserved, with the
+> explicitly requested signup fields and CHW Patients/Visits/Profile pages.
+> Signed-in accounts use saved data, mother-approved email connections, Socket.IO,
+> real SOS acknowledgement/resolution and bound-only band simulation.
+> See [`docs/shared-live-deploy.md`](docs/shared-live-deploy.md) for configuration
+> and the remaining production-hosting, email-verification and alarm limitations.
+> This is not a certified medical-device or emergency service.
 >
 > Where to read what: [`docs/HANDOFF.md`](docs/HANDOFF.md) (live task ledger + context
 > snapshot + personas), [`docs/API.md`](docs/API.md) (endpoint contract ledger),
