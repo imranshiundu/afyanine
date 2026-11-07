@@ -70,6 +70,7 @@ Realism rules (bot + seed):
 | Vercel env | `DATABASE_URL` `NEXT_PUBLIC_SUPABASE_URL` `NEXT_PUBLIC_SUPABASE_ANON_KEY` (production/preview/development) |
 | Serverless runtime | Supabase **session pooler** `:5432` (transaction pooler `:6543` couldn't be reached from this machine to validate; switch to it + `pgbouncer=true` if connection counts ever become a concern) |
 | Build | `prisma generate && next build` (via `vercel.json`) |
+| Sibling project | **afyanine-ops** — https://afyanine-ops.vercel.app · repo `imranshiundu/afyanine-ops` (Command Center: live-world ops console + embedded app view; SQLite seeded demo db copied to `/tmp` on the lambda; socket.io live-service runs locally/VPS only, console falls back to in-browser engine) |
 | Secrets audit | `git grep` for `sbp_…`, `service_role`, `sb_secret`, `afyanine.…:…` over HEAD → clean |
 
 ## Known non-blockers (pay attention when continuing)
