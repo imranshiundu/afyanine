@@ -15,6 +15,7 @@ import { PatientDetail } from "./screens/PatientDetail";
 import { FLAGGED } from "./data";
 import type { Role, Screen } from "./data";
 import { Onboarding } from "./screens/Onboarding";
+import { InstallReminder } from "./InstallReminder";
 import { getInstalledOnboardingSnapshot, getOnboardingServerSnapshot, subscribeInstalledOnboarding } from "./installed-onboarding";
 
 const NAV_SCREENS: Screen[] = ["home", "care", "vitals"];
@@ -214,6 +215,7 @@ function AfyaNineExperience() {
           )}
         </div>
 
+        <InstallReminder raised={NAV_SCREENS.includes(screen) || screen === "chw"} suppressed={screen === "sos" || screen === "tracking"} />
         {toast && (
           <div
             className={`toast${NAV_SCREENS.includes(screen) ? " raised" : ""}`}

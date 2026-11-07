@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon, type IconName } from "../Icon";
+import { InstallReminder } from "../InstallReminder";
 import { Logo } from "../Logo";
 import { ThemeToggle } from "../chrome";
 import { completeInstalledOnboarding } from "../installed-onboarding";
@@ -114,6 +115,7 @@ export function Onboarding() {
             <p className="onboarding-demo">{t.demo}</p>
           </footer>
         </main>
+        <InstallReminder raised={false} suppressed />
       </div>
     </div>
   );
