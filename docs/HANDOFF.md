@@ -53,7 +53,20 @@ Realism rules (bot + seed):
 | T7 | Mini bot: `POST /api/bot/tick` (1 simulation step, idempotent) + `mini-services/bot.mjs` runner loop (`npm run bot`) | opencode | ✅ done | hooks: `forceSos`, `forceMother`; runner auto-detects next dev port (3000 collides with the user's other running project → 3001) |
 | T8 | Verify locally end-to-end: dev server → seed → bot ticks → realtime delivery proven with a Node supabase listener → SOS resolve → UI states | opencode | ✅ done | `node scripts/realtime-probe.mjs` streamed INSERT/UPDATE events; two-session browser test passed; prod `next build` green; `tsc --noEmit` clean |
 | T9 | Final docs pass: record every endpoint (incl. request/response examples) + flip task statuses | opencode | 🔵 in progress | you are reading it |
-| T10 | Push to GitHub + deploy Vercel project | opencode | 🚫 blocked | `tokens.txt`: **"Do not push to github"** — do not remove the block without Imran's say-so |
+| T10 | Push to GitHub + deploy Vercel project | opencode | ✅ done (unblocked by Imran) | repo `imranshiundu/afyanine` (both histories merged; `tokens.txt`/`.env`/`*.tar`/`.playwright-cli` excluded & audited). Vercel project **afyanine** → https://afyanine.vercel.app — reads **and** serverless writes verified (mothers list, register, bot tick inserts, SOS resolve). Env: `DATABASE_URL` (session pooler) + `NEXT_PUBLIC_SUPABASE_*` on prod/preview/dev; `vercel.json` runs `prisma generate && next build` |
+
+
+## Deployment snapshot (added after T10)
+
+| Item | Value |
+|---|---|
+| GitHub | https://github.com/imranshiundu/afyanine (`main`, planning-phase history merged — brand assets & diagrams preserved) |
+| Vercel | project `afyanine` (scope `imranbuildswithcode`) → **https://afyanine.vercel.app** |
+| Excluded from the repo | `tokens.txt`, `.env` (untracked, contains the `afyanine` DB password), `*.tar`, `.playwright-cli/`, `ops.tar` |
+| Vercel env | `DATABASE_URL` `NEXT_PUBLIC_SUPABASE_URL` `NEXT_PUBLIC_SUPABASE_ANON_KEY` (production/preview/development) |
+| Serverless runtime | Supabase **session pooler** `:5432` (transaction pooler `:6543` couldn't be reached from this machine to validate; switch to it + `pgbouncer=true` if connection counts ever become a concern) |
+| Build | `prisma generate && next build` (via `vercel.json`) |
+| Secrets audit | `git grep` for `sbp_…`, `service_role`, `sb_secret`, `afyanine.…:…` over HEAD → clean |
 
 ## Known non-blockers (pay attention when continuing)
 

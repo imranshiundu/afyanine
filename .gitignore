@@ -51,15 +51,10 @@ prompt
 
 server.log
 # Skills directory
-/skills/
+/skills/\n
 # local-only artifacts (secrets & machine junk — never ship)
 tokens.txt
 *.tar
 .playwright-cli/
 ops.tar
-
-# runtime state & working data — not source
-.zscripts/dev.pid
-db/
-tool-results/
-upload/pasted_image_*.png
+.env*.local
