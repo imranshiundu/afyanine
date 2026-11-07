@@ -1,0 +1,80 @@
+name: AfyaNine
+description: Next.js maternal-health prototype with isolated seeded Postgres; no
+  Supabase Realtime.
+image: ubuntu:26.04
+repo_access: owner
+repos:
+  - repo: https://github.com/imranshiundu/afyanine
+    ref: main
+    path: afyanine
+env:
+  DATABASE_URL: postgresql://root@localhost/afyanine?host=/var/run/postgresql
+  NEXT_TELEMETRY_DISABLED: '1'
+endpoints:
+  - name: afyanine
+    port: 3000
+    default: true
+    previewable: true
+context: 'Demo data only; no authentication or consent gate. The external
+  /opt/afyanine-dev.cjs launcher preserves repo config and permits sandbox
+  preview origins with webpack. Supabase Realtime is not configured. Whole-repo
+  tsc currently fails on missing socket.io example dependencies. Home animates the pregnancy week up to its stored value.'
+build:
+  - name: Install Node.js and Postgres
+    run: |
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update -qq
+      apt-get install -y -qq ca-certificates curl xz-utils openssl postgresql postgresql-client
+      curl -fsSLo /tmp/node.tar.xz https://nodejs.org/dist/v22.22.0/node-v22.22.0-linux-x64.tar.xz
+      tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1
+      rm /tmp/node.tar.xz
+  - name: Install dependencies and compile
+    run: cd afyanine && npm ci --no-audit --no-fund && npm run db:generate && npm
+      run build && test -z "$(git status --porcelain)"
+  - name: Prepare isolated fictional demo database
+    run: |
+      service postgresql start
+      if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='root'" | grep -q 1; then
+        runuser -u postgres -- psql -v ON_ERROR_STOP=1 -c 'CREATE ROLE root WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE;'
+      fi
+      if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_database WHERE datname='afyanine'" | grep -q 1; then
+        runuser -u postgres -- createdb -O root afyanine
+      fi
+      cd afyanine
+      npx prisma db push
+      npm run db:seed
+      test -z "$(git status --porcelain)"
+      service postgresql stop
+  - name: Install sandbox-only dev launcher
+    run: |
+      cat > /opt/afyanine-dev.cjs <<'JS'
+      const path = require("node:path");
+      const http = require("node:http");
+      const dir = process.cwd();
+      const next = require(path.join(dir, "node_modules/next"));
+      const loadConfig = require(path.join(dir, "node_modules/next/dist/server/config")).default;
+      const { PHASE_DEVELOPMENT_SERVER } = require(path.join(dir, "node_modules/next/constants"));
+
+      (async () => {
+        const config = await loadConfig(PHASE_DEVELOPMENT_SERVER, dir);
+        config.allowedDevOrigins = [...(config.allowedDevOrigins || []), "*.kirk.replit.dev"];
+        config.agentRules = false;
+        const app = next({
+          dev: true,
+          dir,
+          webpack: true,
+          hostname: "0.0.0.0",
+          port: 3000,
+          conf: config,
+        });
+        await app.prepare();
+        const server = http.createServer(app.getRequestHandler());
+        server.on("upgrade", app.getUpgradeHandler());
+        server.listen(3000, "0.0.0.0", () => console.log("AfyaNine ready on port 3000"));
+      })().catch((error) => {
+        console.error(error);
+        process.exit(1);
+      });
+      JS
+start:
+  - run: service postgresql start && cd afyanine && node /opt/afyanine-dev.cjs

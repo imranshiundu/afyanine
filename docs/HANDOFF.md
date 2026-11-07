@@ -54,6 +54,7 @@ Realism rules (bot + seed):
 | T8 | Verify locally end-to-end: dev server → seed → bot ticks → realtime delivery proven with a Node supabase listener → SOS resolve → UI states | opencode | ✅ done | `node scripts/realtime-probe.mjs` streamed INSERT/UPDATE events; two-session browser test passed; prod `next build` green; `tsc --noEmit` clean |
 | T9 | Final docs pass: record every endpoint (incl. request/response examples) + flip task statuses | opencode | 🔵 in progress | you are reading it |
 | T10 | Push to GitHub + deploy Vercel project | opencode | ✅ done (unblocked by Imran) | repo `imranshiundu/afyanine` (both histories merged; `tokens.txt`/`.env`/`*.tar`/`.playwright-cli` excluded & audited). Vercel project **afyanine** → https://afyanine.vercel.app — reads **and** serverless writes verified (mothers list, register, bot tick inserts, SOS resolve). Env: `DATABASE_URL` (session pooler) + `NEXT_PUBLIC_SUPABASE_*` on prod/preview/dev; `vercel.json` runs `prisma generate && next build` |
+| T11 | Version the reusable Replit development environment | Replit | ✅ done | Saved environment `afyanine` built and verified in a fresh sandbox. Non-secret specification in `.replit-dev-environment.yaml`, instructions in `docs/development.md`; no production or app-behavior changes. |
 
 
 ## Deployment snapshot (added after T10)
