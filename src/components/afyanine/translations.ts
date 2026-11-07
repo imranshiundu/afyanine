@@ -214,4 +214,9 @@ export const SW: Record<string, string> = {
   "Registered CHW account": "Akaunti ya mhudumu aliyesajiliwa",
   "Each mother must approve your connection.": "Kila mama lazima akubali muunganisho wako.",
   "CHW_ACCOUNT_REQUIRED": "Akaunti ya mhudumu inahitajika.",
+  "Visit details": "Taarifa za ziara",
+  "Loading shared record…": "Tunapakia taarifa zilizoshirikiwa…",
+  "Cancel this scheduled visit?": "Ughairi ziara hii iliyopangwa?",
+  "Saved. Refresh to reload the latest record.": "Imehifadhiwa. Sasisha ili kupakia taarifa za mwisho.",
+  "This visit is no longer available. Return to Visits and refresh.": "Ziara hii haipatikani tena. Rudi kwenye Ziara na usasishe.",
 };

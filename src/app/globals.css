@@ -4202,6 +4202,7 @@ html.theme-pop .app-shell {
 .entry-auth-section .account-form { margin-top: 14px; }
 .entry-back { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 12px; font-weight: 650; text-align: left; cursor: pointer; }
 .entry-back svg { flex-shrink: 0; }
+.entry-back-icon { width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%; }
 .entry-role-label { margin: 18px 0 0; color: var(--muted-deep); }
 .account-entry-screen button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 @media (max-width: 350px) {

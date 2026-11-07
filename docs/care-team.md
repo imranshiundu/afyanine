@@ -61,6 +61,14 @@ Historical demo records remain isolated from real accounts.
 
 ## Scheduling
 
+Patients opens the selected approved mother's scoped record, with explicit
+loading/failure/retry states. Visits opens its own detail screen, retaining the
+Visits navigation highlight and an arrow-only back action to the visit list.
+Selecting a visit requests that visit ID within its authorized mother's record,
+so older listed visits are not lost to the default recent-record window.
+Scheduling/notes require a CHW-kind grant for the corresponding category; a
+read-only family grant cannot enable editing. No schema or auth bypass is added.
+
 Visits have start/end UTC instants, Nairobi/EAT display, place, status and an
 authenticated author. Advisory transaction locks prevent overlapping schedules
 for both CHW and mother. Mothers may cancel; completing and recording visit notes
@@ -88,6 +96,7 @@ flowchart LR
   ReadOnly --> Check
   Check --> Records[Private maternal records]
   Grant --> Schedule[Conflict-checked visits and authored notes]
+  Schedule --> Detail[Visit list to selected authorized visit]
   Mother -->|Revoke or confirmed purge| Deny[Access stops / selected data deleted]
 ```
 

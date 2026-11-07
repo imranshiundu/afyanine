@@ -25,7 +25,7 @@ export function Login() {
       </div></div>
       <p className="brand-tagline">{BRAND.tagline}</p>
       <p className="eyebrow">{copy.eyebrow}</p>
-      <h1>{language === "SW" ? "Karibu AfyaNine." : "Welcome to AfyaNine."}</h1>
+      <h1>{role === "chw" ? (language === "SW" ? "Karibu, mhudumu." : "Welcome, CHW.") : copy.welcome}</h1>
       <p className="lead">{copy.lead}</p>
     </div>
     {!role ? <section className="entry-role-section" aria-label={copy.signInAs}>
@@ -35,7 +35,7 @@ export function Login() {
         <span className="role-copy"><b>{copy[value]}</b><small>{value === "mother" ? copy.motherSub : copy.chwSub}</small></span>
       </button>)}</div>
     </section> : <section className="entry-auth-section">
-      <button className="entry-back" type="button" onClick={() => setRole(null)}><Icon name="back" size={18} />{language === "SW" ? "Badilisha aina ya akaunti" : "Change account type"}</button>
+      <button className="entry-back entry-back-icon" type="button" aria-label={language === "SW" ? "Badilisha aina ya akaunti" : "Change account type"} title={language === "SW" ? "Badilisha aina ya akaunti" : "Change account type"} onClick={() => setRole(null)}><Icon name="back" size={20} /></button>
       <p className="eyebrow entry-role-label">{copy[role]}</p>
       <AccountForm key={role} language={language} role={role} />
     </section>}

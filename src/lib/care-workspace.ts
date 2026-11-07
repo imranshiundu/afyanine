@@ -63,10 +63,10 @@ async function locks(tx: Tx, keys: string[]) {
   for (const key of [...new Set(keys)].sort()) await tx.$queryRaw`SELECT 1 AS acquired FROM pg_advisory_xact_lock(hashtext(${`care:${key}`}))`;
 }
 
-export async function careRecord(actor: CareActor, motherId: string) {
+export async function careRecord(actor: CareActor, motherId: string, visitId?: string) {
   const { owner, allowed } = await mother(actor, motherId);
   const visits = allowed.includes("VISITS") ? await db.careVisit.findMany({
-    where: { motherId, isDemo: actor.isDemo }, orderBy: { startsAt: "desc" }, take: 50,
+    where: { motherId, isDemo: actor.isDemo, ...(visitId ? { id: visitId } : {}) }, orderBy: { startsAt: "desc" }, take: 50,
     include: { chw: { select: { displayName: true } } },
   }) : [];
   const notes = allowed.includes("NOTES") && visits.length ? await db.careNote.findMany({

@@ -61,6 +61,13 @@ try {
   const simultaneous = await Promise.allSettled([careCommand(chw, schedule), careCommand(chw, schedule)]);
   assert.equal(simultaneous.filter(x => x.status === "fulfilled").length, 1, "Overlapping concurrent visits must not both commit");
   const visit = (await careRecord(chw, mother.id)).visits[0];
+  assert.deepEqual((await careRecord(chw, mother.id, visit.id)).visits.map(row => row.id), [visit.id]);
+  assert.deepEqual((await careRecord(chw, mother.id, "not-this-mothers-visit")).visits, []);
+  assert.deepEqual((await careRecord(partner, mother.id, visit.id)).visits, [], "A vitals-only family grant must not reveal a selected visit");
+  const oldVisits = Array.from({ length: 50 }, (_, index) => ({ id: `${prefix}-old-${index}`, motherId: mother.id, chwId: chw.id, startsAt: new Date(Date.UTC(2020, 0, index + 1, 8)), endsAt: new Date(Date.UTC(2020, 0, index + 1, 9)), place: "Historical fictional fixture", status: "CANCELLED" as const, isDemo: true }));
+  await db.careVisit.createMany({ data: oldVisits });
+  assert(!(await careRecord(chw, mother.id)).visits.some(row => row.id === oldVisits[0].id));
+  assert.equal((await careRecord(chw, mother.id, oldVisits[0].id)).visits[0].id, oldVisits[0].id, "Selected authorized visits must work outside the recent50 window");
   await denied(careCommand(partner, { action: "note", visitId: visit.id, body: "Must not save" }));
   await denied(careCommand(chw, { action: "visitStatus", visitId: visit.id, status: "COMPLETED" }), 409);
   await careCommand(chw, { action: "note", visitId: visit.id, body: "Clearly fictional follow-up note." });

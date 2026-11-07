@@ -6,8 +6,11 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   try {
     const actor = await careActor(request);
-    const mother = new URL(request.url).searchParams.get("mother");
-    return Response.json(mother ? await careRecord(actor, mother) : await careWorkspace(actor), { headers: { "Cache-Control": "private, no-store" } });
+    const params = new URL(request.url).searchParams;
+    const mother = params.get("mother");
+    const visit = params.get("visit");
+    if ((mother !== null && (!mother || mother.length > 100)) || (visit !== null && (!mother || !visit || visit.length > 100))) throw new CareError(400, "INVALID_INPUT");
+    return Response.json(mother ? await careRecord(actor, mother, visit ?? undefined) : await careWorkspace(actor), { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) { return careHttpError(error); }
 }
 export async function POST(request: Request) {
