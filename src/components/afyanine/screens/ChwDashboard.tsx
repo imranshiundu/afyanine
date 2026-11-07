@@ -222,9 +222,9 @@ export function ChwDashboard({
         >
           <Icon name="plus" strokeWidth={2.5} />
         </button>
-        <Link href="/care-team-demo?actor=chw&tab=visits">
+        <Link href="/">
           <Icon name="calendar" />
-          <span>{t("Visits")}</span>
+          <span>{t("Sign in")}</span>
         </Link>
         <button type="button" onClick={onLogout}>
           <Icon name="user" />

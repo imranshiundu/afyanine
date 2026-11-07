@@ -9,7 +9,6 @@ import type { Screen } from "../data";
 import type { DemoSession } from "../account-session";
 import type { MotherSnapshot } from "../api";
 import { useLanguage } from "../language";
-import Link from "next/link";
 
 export function Profile({ user, demo, snapshot, navigate, onGenerate }: {
   user: User | null; demo: DemoSession | null; snapshot: MotherSnapshot | null;
@@ -50,7 +49,7 @@ export function Profile({ user, demo, snapshot, navigate, onGenerate }: {
         {demo?.role === "mother" && <><p>{t("Generate at most one fictional reading every 30 seconds.")}</p><button className="secondary-button" disabled={busy} onClick={async () => { setBusy(true); const ok = await onGenerate(); setMessage(ok ? "Latest fictional reading loaded." : "Could not generate a reading. Please retry."); setBusy(false); }}> {t(busy ? "Updating…" : "Generate fictional reading")}</button></>}
         {message && <p role="status">{t(message)}</p>}
       </section>}
-      <section className="profile-card account-form"><label>{t("Language")}<select value={language} onChange={e => setLanguage(e.target.value as "EN" | "SW")}><option value="EN">English</option><option value="SW">Kiswahili</option></select></label><Link className="secondary-button" href="/care-team-demo">{t("Open care-team demo")}</Link></section>
+      <section className="profile-card account-form"><label>{t("Language")}<select value={language} onChange={e => setLanguage(e.target.value as "EN" | "SW")}><option value="EN">English</option><option value="SW">Kiswahili</option></select></label></section>
       <button className="secondary-button danger-action" onClick={() => navigate("logout")}><Icon name="back" size={18} />{t(user ? "Sign out" : "End demo")}</button>
       <BottomNav active="profile" navigate={navigate} onProfile={() => navigate("profile")} chw={demo?.role === "chw"} />
     </main>

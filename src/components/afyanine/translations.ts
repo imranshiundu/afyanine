@@ -211,4 +211,7 @@ export const SW: Record<string, string> = {
   "Revoke this partner’s read-only access?": "Ondoa ruhusa ya mwenzi huyu ya kutazama tu?",
   "Emergency SOS": "SOS ya dharura", "Share vitals with my CHP": "Shiriki vipimo na mhudumu wangu", "Elevated": "Limepanda",
   "Resting range": "Kiwango ukiwa umepumzika", "Latest": "Ya karibuni",
+  "Registered CHW account": "Akaunti ya mhudumu aliyesajiliwa",
+  "Each mother must approve your connection.": "Kila mama lazima akubali muunganisho wako.",
+  "CHW_ACCOUNT_REQUIRED": "Akaunti ya mhudumu inahitajika.",
 };

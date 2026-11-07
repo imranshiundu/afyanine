@@ -13,7 +13,6 @@ const commands = z.discriminatedUnion("action", [
   z.object({ action: z.literal("invite"), email: z.email().max(254), kind: z.enum(["CHW", "PARTNER"]), scopes }),
   z.object({ action: z.literal("respond"), inviteId: id, accept: z.boolean(), scopes }),
   z.object({ action: z.literal("revoke"), accessId: id }),
-  z.object({ action: z.literal("verify"), accountId: id, verified: z.boolean() }),
   z.object({ action: z.literal("consent"), scopes, confirmDelete: z.boolean().default(false) }),
   z.object({ action: z.literal("purge"), confirmDelete: z.literal(true) }),
   z.object({ action: z.literal("pregnancy"), dueDate: z.iso.date() }),
@@ -41,7 +40,7 @@ async function mother(actor: CareActor, motherId: string, tx: Tx = db) {
   const viewer = await account(actor, tx);
   const grants = owner.id === actor.id ? SCOPES : (await tx.careAccess.findMany({
     where: { motherId, viewerId: actor.id, active: true, isDemo: actor.isDemo },
-  })).filter(item => item.kind !== "CHW" || viewer.verifiedAt).flatMap(item => item.scopes);
+  })).filter(item => item.kind !== "CHW" || viewer.role === "CHW").flatMap(item => item.scopes);
   const allowed = enabled(actor) ? sharedScopes(owner.storageScopes, grants) : [];
   requireCare(owner.id === actor.id || grants.length > 0);
   return { owner, allowed, viewer };
@@ -51,7 +50,7 @@ async function requireCategory(actor: CareActor, motherId: string, category: Sco
   const access = await mother(actor, motherId, tx);
   requireCare(access.allowed.includes(category), "CATEGORY_NOT_SHARED");
   if (write && motherId !== actor.id) {
-    requireCare(access.viewer.role === "CHW" && access.viewer.verifiedAt, "CHW_VERIFICATION_REQUIRED");
+    requireCare(access.viewer.role === "CHW", "CHW_ACCOUNT_REQUIRED");
     const grant = await tx.careAccess.findFirst({ where: { motherId, viewerId: actor.id, kind: "CHW", active: true, isDemo: actor.isDemo, scopes: { has: category } } });
     requireCare(grant);
   }
@@ -94,7 +93,7 @@ export async function careWorkspace(actor: CareActor) {
     include: { mother: true, viewer: true }, orderBy: [{ active: "desc" }, { createdAt: "desc" }], take: 100,
   });
   const access = allAccess.filter(item => item.motherId === me.id ||
-    (item.viewerId === me.id && item.active && item.scopes.length > 0 && (item.kind !== "CHW" || me.verifiedAt)));
+    (item.viewerId === me.id && item.active && item.scopes.length > 0 && (item.kind !== "CHW" || me.role === "CHW")));
   const visitMothers = enabled(actor) ? [...new Set([
     ...(me.role === "MOTHER" && me.storageScopes.includes("VISITS") ? [me.id] : []),
     ...access.filter(item => item.viewerId === me.id && item.active && item.scopes.includes("VISITS") && item.mother.storageScopes.includes("VISITS")).map(item => item.motherId),
@@ -106,11 +105,10 @@ export async function careWorkspace(actor: CareActor) {
     access: access.map(item => ({ id: item.id, motherId: item.motherId, viewerId: item.viewerId, kind: item.kind, scopes: item.scopes, active: item.active, createdAt: item.createdAt, mother: { id: item.mother.id, displayName: item.mother.displayName }, viewer: publicProfile(item.viewer) })),
     visits: await db.careVisit.findMany({ where: { isDemo: actor.isDemo, motherId: { in: visitMothers } }, select: { id: true, motherId: true, chwId: true, startsAt: true, endsAt: true, status: true, place: true, mother: { select: { displayName: true } }, chw: { select: { displayName: true } } }, orderBy: { startsAt: "desc" }, take: 100 }),
     stats: me.role === "CHW" ? {
-      activeMothers: me.verifiedAt ? await db.careAccess.count({ where: { viewerId: me.id, kind: "CHW", active: true, scopes: { isEmpty: false }, isDemo: actor.isDemo } }) : 0,
+      activeMothers: await db.careAccess.count({ where: { viewerId: me.id, kind: "CHW", active: true, scopes: { isEmpty: false }, isDemo: actor.isDemo } }),
       completedVisits: await db.careVisit.count({ where: { chwId: me.id, isDemo: actor.isDemo, status: "COMPLETED" } }),
       scheduledVisits: await db.careVisit.count({ where: { chwId: me.id, isDemo: actor.isDemo, status: "SCHEDULED", startsAt: { gte: new Date() } } }),
     } : null,
-    reviews: actor.admin ? (await db.careAccount.findMany({ where: { role: "CHW", isDemo: actor.isDemo }, take: 100 })).map(publicProfile) : [],
     audit: await db.careAudit.findMany({ where: { isDemo: actor.isDemo, OR: [{ actorId: me.id }, ...(me.role === "MOTHER" ? [{ motherId: me.id }] : [])] }, select: { id: true, action: true, scopes: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: 30 }),
   };
 }
@@ -136,7 +134,6 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       const visit = await tx.careVisit.findFirst({ where: { id: command.visitId, isDemo: actor.isDemo } });
       if (visit) extra.push(visit.motherId, visit.chwId);
     }
-    if ("accountId" in command) extra.push(command.accountId);
     await locks(tx, [actor.id, ...extra]);
     if (command.action === "profile") {
       const prior = await tx.careAccount.findUnique({ where: { id: actor.id } });
@@ -159,17 +156,11 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       return { ok: true };
     }
     const me = await account(actor, tx);
-    if (command.action === "verify") {
-      requireCare(actor.admin, "ADMIN_REQUIRED");
-      const candidate = await tx.careAccount.findFirst({ where: { id: command.accountId, isDemo: actor.isDemo, role: "CHW" } });
-      requireCare(candidate?.institutionName && candidate.registrationNumber && candidate.institutionContact, "INSTITUTION_REQUIRED", 400);
-      await tx.careAccount.update({ where: { id: candidate.id }, data: { verifiedAt: command.verified ? candidate.verifiedAt ?? new Date() : null, verifiedBy: command.verified ? actor.id : null } });
-      await audit(tx, actor, command.verified ? "CHW_VERIFIED" : "CHW_VERIFICATION_WITHDRAWN");
-    } else if (command.action === "invite") {
+    if (command.action === "invite") {
       const targetEmail = normalizeEmail(command.email);
       requireCare(targetEmail !== actor.email, "CANNOT_INVITE_SELF", 400);
       requireCare(command.scopes.length > 0, "CHOOSE_CATEGORIES", 400);
-      requireCare(command.kind === "CHW" ? me.role === "CHW" && me.verifiedAt : me.role === "MOTHER", "CHW_VERIFICATION_REQUIRED");
+      requireCare(command.kind === "CHW" ? me.role === "CHW" : me.role === "MOTHER", "CHW_ACCOUNT_REQUIRED");
       if (command.kind === "PARTNER") requireCare(command.scopes.every(scope => me.storageScopes.includes(scope)), "CONSENT_REQUIRED");
       const count = await tx.careInvite.count({ where: { requesterId: actor.id, createdAt: { gt: new Date(Date.now() - 86400000) } } });
       requireCare(count < 10, "INVITE_LIMIT", 429);
@@ -191,7 +182,7 @@ export async function careCommand(actor: CareActor, raw: unknown) {
         const owner = await tx.careAccount.findFirst({ where: { id: ownerId, role: "MOTHER", isDemo: actor.isDemo } });
         requireCare(owner);
         const viewer = await tx.careAccount.findFirst({ where: { id: viewerId, isDemo: actor.isDemo } });
-        requireCare(viewer && (invite.kind !== "CHW" || (viewer.role === "CHW" && viewer.verifiedAt)), "CHW_VERIFICATION_REQUIRED");
+        requireCare(viewer && (invite.kind !== "CHW" || viewer.role === "CHW"), "CHW_ACCOUNT_REQUIRED");
         const selected = invite.kind === "PARTNER" ? invite.scopes : command.scopes;
         requireCare(selected.length > 0 && selected.every(scope => invite.scopes.includes(scope) && owner.storageScopes.includes(scope)), "CONSENT_REQUIRED");
         requireCare(!await tx.careAccess.findFirst({ where: { motherId: ownerId, viewerId, kind: invite.kind, active: true, isDemo: actor.isDemo } }), "ALREADY_CONNECTED", 409);
@@ -210,7 +201,6 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       const next = command.action === "purge" ? [] : command.scopes;
       const removed = me.storageScopes.filter(scope => !next.includes(scope));
       requireCare(!removed.length || command.confirmDelete, "CONFIRM_DELETION", 409);
-      if (next.length) requireCare(enabled(actor), "CLINICAL_STORAGE_DISABLED", 503);
       if (removed.includes("VITALS")) await tx.careVital.deleteMany({ where: { motherId: actor.id } });
       if (removed.includes("CONTACTS")) await tx.careContact.deleteMany({ where: { motherId: actor.id } });
       if (removed.includes("NOTES")) await tx.careNote.deleteMany({ where: { visit: { motherId: actor.id } } });
@@ -242,7 +232,7 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       await audit(tx, actor, "CONTACT_ADDED", me.id, ["CONTACTS"]);
     } else if (command.action === "schedule") {
       const permitted = await requireCategory(actor, command.motherId, "VISITS", tx, true);
-      requireCare(me.role === "CHW" && me.verifiedAt && permitted.owner.id !== actor.id, "CHW_VERIFICATION_REQUIRED");
+      requireCare(me.role === "CHW" && permitted.owner.id !== actor.id, "CHW_ACCOUNT_REQUIRED");
       const start = new Date(command.startsAt), end = new Date(command.endsAt), minutes = (+end - +start) / 60000;
       requireCare(start > new Date() && minutes >= 15 && minutes <= 180, "INVALID_VISIT_TIME", 400);
       const conflict = await tx.careVisit.findFirst({ where: { isDemo: actor.isDemo, status: "SCHEDULED", OR: [{ chwId: me.id }, { motherId: command.motherId }], startsAt: { lt: end }, endsAt: { gt: start } } });

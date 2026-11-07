@@ -22,7 +22,7 @@ import { InstallReminder } from "./InstallReminder";
 import { Profile, Logout } from "./screens/Profile";
 import { AccountHome } from "./screens/AccountHome";
 import { useAccount } from "./useAccount";
-import { emptyDemoSession, parseDemoSession, readDemoSession, subscribeDemoSession, writeDemoSession, type DemoSession } from "./account-session";
+import { writeDemoSession, type DemoSession } from "./account-session";
 import { getInstalledOnboardingSnapshot, getOnboardingServerSnapshot, subscribeInstalledOnboarding } from "./installed-onboarding";
 import { CareWorkspace } from "./CareWorkspace";
 import { useLanguage } from "./language";
@@ -41,19 +41,17 @@ export function AfyaNine() {
 function AccountGate() {
   const { t } = useLanguage();
   const { user, loading, error } = useAccount();
-  const raw = useSyncExternalStore(subscribeDemoSession, readDemoSession, emptyDemoSession);
-  const demo = user ? null : parseDemoSession(raw);
   if (loading) return <div className="page"><div className="app-shell"><main className="screen standalone-screen"><p role="status">{t("Restoring your session…")}</p></main></div></div>;
   if (user) return <CareWorkspace key={user.id} user={user} />;
-  return <AfyaNineExperience key={raw ?? "guest"} user={null} demo={demo} sessionError={error} />;
+  return <AfyaNineExperience key="guest" user={null} demo={null} sessionError={error} />;
 }
 
 function AfyaNineExperience({ user, demo, sessionError }: { user: User | null; demo: DemoSession | null; sessionError: string }) {
   const router = useRouter();
   const [screen, setScreen] = useState<Screen>(user ? "home" : demo ? demo.role === "chw" ? "chw" : "home" : "login");
   const [stack, setStack] = useState<Screen[]>([]);
-  const [role, setRole] = useState<Role>(demo?.role ?? "mother");
-  const [motherCode, setMotherCode] = useState<string>(demo?.code ?? "MW-1048");
+  const [role] = useState<Role>(demo?.role ?? "mother");
+  const [motherCode] = useState<string>(demo?.code ?? "MW-1048");
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [emergencyType, setEmergencyType] = useState("");
   const [toast, setToast] = useState("");
@@ -153,20 +151,6 @@ function AfyaNineExperience({ user, demo, sessionError }: { user: User | null; d
     if (next === "chw") loadPatients(); // fresh register each visit
   };
 
-  /* Entry points (login) reset the whole journey */
-  const enter = async (chosen: Role, code?: string) => {
-    if (chosen === "mother" && code) {
-      const selected = await api.mother(code);
-      if (!selected) throw new Error("Test account unavailable");
-      setSnapshot(selected);
-      setMotherCode(code);
-    }
-    setDir("fwd");
-    setRole(chosen);
-    setStack([]);
-    writeDemoSession({ role: chosen, code: code ?? "MW-1048" });
-  };
-
   /* Back pops history, falling back to the signed-in role's home */
   const goBack = () => {
     setDir("back");
@@ -239,7 +223,7 @@ function AfyaNineExperience({ user, demo, sessionError }: { user: User | null; d
     <div className="page">
       <div className="app-shell">
         <div key={screen} className={`view ${dir}`}>
-          {screen === "login" && <>{sessionError && <p role="alert" className="account-error">{sessionError}</p>}<Login onEnter={enter} /></>}
+          {screen === "login" && <>{sessionError && <p role="alert" className="account-error">{sessionError}</p>}<Login /></>}
           {screen === "home" && user && <AccountHome user={user} navigate={navigate} />}
           {screen === "home" && !user && (snapshot ?
             <Home

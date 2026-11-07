@@ -10,21 +10,32 @@ Every account API validates the bearer token using Supabase `getUser`, requires 
 confirmed email, and takes identity/admin claims only from the verified response.
 Client role/subject IDs, user-editable metadata, and emails are not authorization.
 The first profile selects Mother/CHW/Partner; changing role requires an operator.
-CHW verification requires trusted `app_metadata.afyanine_admin=true`, never
-`user_metadata`. Admin verification confers no access to maternal health records.
-The confirmed policy is administrator-verified CHWs. Verification alone never
-grants access: the mother must also approve each connection.
+Current simplified policy: CHWs self-register and need no separate administrator
+verification. This is eligibility to request a connection, not a claim that a
+professional credential has been independently checked. Authenticated email and
+the stored account role identify the requester; the mother must still approve
+each connection and category. Protected administrator claims remain separate.
+
+Entry is Mother or CHW → Supabase sign in/create account → saved profile.
+Signup metadata carries only an initial role hint, not medical-access authority.
+Existing stored roles cannot be changed by switching the entry button.
+Public care-team demo pages redirect to sign-in and their actor API returns410;
+saved fictional sessions cannot bypass sign-in. Historical fictional rows are
+not deleted. No production migration or clinical activation is added.
+Category-consent preferences and approved email connections can be saved before
+clinical activation. The activation flag still blocks actual medical reads and
+writes; saving permission preferences does not store vitals or other health data.
 
 CHW requests go to a mother's verified email inbox without disclosing whether an
-account exists. The mother sees the requester's name, institution and verified
-status, chooses categories, then approves/declines. Until approval there is no
+account exists. The mother sees the requester's name and institution,
+chooses categories, then approves/declines. Until approval there is no
 relationship or medical access. Partner invitations are initiated by the mother;
 the recipient must accept while signed in with the invited verified email.
 Invites expire after 14 days; duplicate pending requests are suppressed and
 declined/revoked pairs have a cooldown. These are in-app prompts, not email sends.
 
 Access is per relationship and category: vitals, pregnancy, visits, notes and
-contacts. Partners are read-only. Only the accepted, verified CHW can schedule
+contacts. Partners are read-only. Only the accepted, registered CHW can schedule
 visits/write notes for that mother, and only with the corresponding categories.
 Mother revocation takes effect on subsequent server requests, not at JWT expiry.
 Sharing and storage consent are separate. No invitation/contact entry grants
@@ -44,9 +55,9 @@ phone numbers or email addresses. This is a prototype deletion policy, not an
 assertion that clinical/legal retention obligations have been resolved.
 
 Real clinical writes require `CARE_RECORDS_ENABLED=true` after operator review.
-No production activation is performed here. Fictional workspaces can exercise
-the same permission/visit service through a separate fixed-demo-actor API.
-Every demo record/query is tenant-scoped; demo actors cannot access real accounts.
+No production activation is performed here. Synthetic integration tests exercise
+the permission/visit service directly; the public fixed-demo-actor API is retired.
+Historical demo records remain isolated from real accounts.
 
 ## Scheduling
 
@@ -67,7 +78,9 @@ afyanine-ops repository is not modified by this change.
 
 ```mermaid
 flowchart LR
-  CHW[Verified CHW] -->|Request by email| Inbox[Mother's in-app inbox]
+  Entry[Mother or CHW] --> Auth[Supabase sign in or create account]
+  Auth --> CHW[Registered CHW]
+  CHW -->|Request by confirmed email| Inbox[Mother's in-app inbox]
   Inbox -->|Mother approves categories| Grant[Active scoped relationship]
   Mother -->|Invite partner with categories| PartnerInbox[Verified recipient inbox]
   PartnerInbox -->|Accept| ReadOnly[Read-only scoped relationship]
@@ -85,11 +98,8 @@ flowchart LR
    `DATABASE_URL`, so that role owns the new tables. Do not run `db push` against
    production or add this migration to preview builds. If applying through a DBA
    account, deliberately establish the intended server-role ownership first.
-2. Register/confirm the chosen verifier's Supabase account. Through a trusted
-   Supabase administration workflow, grant that account protected
-   `app_metadata.afyanine_admin=true`. Browser profile/user metadata must never
-   grant it. The verifier can review identity/institution and approve CHWs;
-   the mother still separately approves every relationship.
+2. No verifier account or protected admin flag is required for CHW registration.
+   Mother approval and category consent remain required for record access.
 3. Validate real auth/account separation and the SQL ownership/permissions on a
    non-production Supabase project. Existing Vercel public auth settings are
    reused; no service-role key is introduced. `npm run build` generates the
@@ -97,7 +107,7 @@ flowchart LR
 4. Keep `CARE_RECORDS_ENABLED` absent/false until clinical ownership, consent
    wording, statutory retention/deletion, minors/guardian and privacy review
    are approved. Only then explicitly activate real clinical storage. It is not
-   enabled here. Public fictional workspaces always remain isolated.
+  enabled here. Historical fictional records remain isolated.
 
 Stats are database aggregates, not values inferred from the bounded UI lists.
 Connection lists show at most100 rows, visit summaries100, record visits/readings50,
@@ -105,23 +115,23 @@ and visit notes250. This initial UI needs pagination before large-scale rollout.
 Pending invitations expire after14days. Successful approval takes category
 subsets; Notes requires Visits. Revoking a CHW cancels its scheduled visits;
 revoking a partner does not cancel clinical appointments. Changing CHW identity
-or institution revokes clinical grants and requires verification **and new maternal
-approval**; reverification cannot revive old grants. Completed-visit counts describe
+or institution revokes clinical grants and requires **new maternal approval**;
+updating a profile cannot revive old grants. Completed-visit counts describe
 recorded work, not independently verified outcomes.
 
 EN/SW settings are stored per authenticated profile and mirrored on-device; the
-public fictional workspace uses the device setting across its different demo
-personas. Names, authored notes, clinical source narratives and external provider
+retired fictional workspace is no longer an account entry point.
+Names, authored notes, clinical source narratives and external provider
 content retain their original language. Storage purge deletes selected medical
 data/contacts/visits/notes, not the Supabase identity, basic account profile or
 minimal authorization history. This is not a claim of statutory compliance.
 
 ## Verification
 
-- `node --experimental-strip-types --test tests/*.test.mjs` —36 regressions,
+- `node --experimental-strip-types --test tests/*.test.mjs` —38 regressions,
   including shared/device-blocked language state and trusted admin claims.
 - `npx tsx tests/care-workspace.integration.ts` — local-only synthetic identities:
-  verification without maternal approval denies access; scoped CHW/partner reads,
+  self-registration without maternal approval denies access; scoped CHW/partner reads,
   wrong-recipient denial, demo/account separation, read-only family grants even
   for verified CHWs, concurrent booking conflict, authored notes, future completion
   rejection, recorded completion, revocation, consent/purge and institution-change
@@ -129,7 +139,10 @@ minimal authorization history. This is not a claim of statutory compliance.
 - `bash tests/care-migration.integration.sh` — temporary local database/role,
   additive SQL equivalence, RLS enabled on8tables and zero rows visible to a
   non-owner granted SELECT. No production connection accepted.
-- Browser: maternal approval→CHW patients; manual fictional reading→partner
+- Current entry browser check: Mother/CHW → sign-in → blank signup form,
+  EN/SW at320/390px, retired demo redirects to root. Local public Supabase
+  configuration is missing, so live sign-up/email delivery was not exercised.
+- Historical browser coverage before demo retirement: maternal approval→CHW patients; manual fictional reading→partner
   read-only view→revoke/refresh; Nairobi scheduling/conflict and mother-visible
   note; profile EN→SW persisted in DB, reload and320px navigation.
 - Live Supabase identity/sign-up/recovery/session-expiry and production DB

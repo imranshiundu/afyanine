@@ -4188,3 +4188,24 @@ html.theme-pop .app-shell {
 .care-detail-actions .care-directions { color: #1a1a1a; background: var(--lime); }
 .care-real-list { display: grid; gap: 12px; }
 .facility-select { display: flex; gap: 8px; align-items: center; background: transparent; border: 0; color: var(--lime-deep); padding: 6px 0 12px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+/* Account entry uses normal document flow, including short phone/keyboard heights. */
+.account-entry-screen { justify-content: flex-start; gap: 28px; overflow-y: auto; }
+.account-entry-screen > .login-top,
+.account-entry-screen > section { position: relative; z-index: 1; flex-shrink: 0; min-width: 0; width: 100%; }
+.account-entry-screen .login-top h1 { font-size: clamp(36px, 10vw, 48px); line-height: 1.08; margin-bottom: 14px; text-wrap: balance; }
+.account-entry-screen .login-top .eyebrow { margin-top: 30px; }
+.account-entry-screen .lead { max-width: 34ch; line-height: 1.65; }
+.entry-role-section h2 { margin: 0 0 16px; font-size: 18px; letter-spacing: -.025em; }
+.entry-role-section .role-grid { margin-bottom: 8px; }
+.entry-role-section .role-card { min-width: 0; min-height: 148px; gap: 18px; }
+.entry-auth-section .account-form { margin-top: 14px; }
+.entry-back { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 12px; font-weight: 650; text-align: left; cursor: pointer; }
+.entry-back svg { flex-shrink: 0; }
+.entry-role-label { margin: 18px 0 0; color: var(--muted-deep); }
+.account-entry-screen button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+@media (max-width: 350px) {
+  .account-entry-screen { gap: 24px; }
+  .account-entry-screen .login-top-row { gap: 8px; flex-wrap: wrap; }
+  .entry-role-section .role-card { padding: 16px 12px; }
+}

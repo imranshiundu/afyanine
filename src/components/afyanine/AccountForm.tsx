@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { getSupabase, isAuthConfigured } from "@/lib/supabase";
 import { Icon } from "./Icon";
 
-export function AccountForm({ language }: { language: "EN" | "SW" }) {
+export function AccountForm({ language, role }: { language: "EN" | "SW"; role: "mother" | "chw" }) {
   const [mode, setMode] = useState<"signin" | "signup" | "recover">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +30,7 @@ export function AccountForm({ language }: { language: "EN" | "SW" }) {
       } else if (mode === "signup") {
         const result = await sb.auth.signUp({
           email: email.trim(), password,
-          options: { data: { display_name: name.trim().slice(0, 80) }, emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: { data: { display_name: name.trim().slice(0, 80), afyanine_role: role === "chw" ? "CHW" : "MOTHER" }, emailRedirectTo: `${window.location.origin}/auth/callback` },
         });
         if (result.error) throw result.error;
         setPassword("");
@@ -48,14 +48,14 @@ export function AccountForm({ language }: { language: "EN" | "SW" }) {
   return (
     <form className="account-form" onSubmit={submit}>
       <h2>{mode === "signup" ? (sw ? "Fungua akaunti" : "Create your account") : mode === "recover" ? (sw ? "Weka upya nenosiri" : "Reset your password") : (sw ? "Ingia kwenye akaunti" : "Sign in to your account")}</h2>
-      {!configured && <p className="account-notice" role="status">{sw ? "Supabase haijaandaliwa katika mazingira haya. Unaweza kutumia akaunti za kubuni kwenye Wodi ya majaribio." : "Account sign-in needs Supabase configuration. You can still explore fictional accounts in Test ward."}</p>}
+      {!configured && <p className="account-notice" role="status">{sw ? "Kuunda akaunti na kuingia kunahitaji mipangilio ya Supabase katika mazingira haya." : "Sign-in and account creation need Supabase settings in this environment."}</p>}
       {mode === "signup" && <label> {sw ? "Jina la kuonyeshwa" : "Display name"}<input value={name} onChange={e => setName(e.target.value)} autoComplete="name" maxLength={80} required disabled={busy} /></label>}
       <label>{sw ? "Barua pepe" : "Email"}<input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" required disabled={busy} /></label>
       {mode !== "recover" && <label>{sw ? "Nenosiri" : "Password"}
         <span className="password-input"><input type={show ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={mode === "signup" ? 8 : 1} disabled={busy} />
           <button type="button" aria-label={show ? (sw ? "Ficha nenosiri" : "Hide password") : (sw ? "Onyesha nenosiri" : "Show password")} aria-pressed={show} onClick={() => setShow(!show)}>{show ? (sw ? "Ficha" : "Hide") : (sw ? "Onyesha" : "Show")}</button></span>
       </label>}
-      {mode === "signup" && <p className="account-hint">{sw ? "Tumia herufi angalau 8. Akaunti haikupi ruhusa ya mhudumu wala kuunganisha na mama wa majaribio." : "Use at least 8 characters. This account does not grant clinician access or link you to a Test Ward mother."}</p>}
+      {mode === "signup" && <p className="account-hint">{sw ? "Tumia herufi angalau 8. Muunganisho wa huduma unahitaji ombi kwa barua pepe na idhini ya mama." : "Use at least 8 characters. Care connections use email requests and the mother’s approval."}</p>}
       {error && <p className="account-error" role="alert">{error}</p>}
       {message && <p className="account-notice" role="status">{message}</p>}
       <button className="primary-button" type="submit" disabled={!configured || busy}>{busy ? (sw ? "Tafadhali subiri…" : "Please wait…") : mode === "signup" ? (sw ? "Fungua akaunti" : "Create account") : mode === "recover" ? (sw ? "Tuma kiungo" : "Send reset link") : (sw ? "Ingia" : "Sign in")}<Icon name="arrow" /></button>

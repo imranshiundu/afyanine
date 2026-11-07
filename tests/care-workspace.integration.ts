@@ -10,18 +10,31 @@ assert(["localhost", "127.0.0.1"].includes(url.hostname) && url.pathname === "/a
 const prefix = `care-test-${randomUUID()}`;
 const actor = (name: string, admin = false, isDemo = true): CareActor => ({ id: `${prefix}-${name}`, email: `${prefix}-${name}@example.test`, admin, isDemo });
 const mother = actor("mother"), chw = actor("chw"), partner = actor("partner"), other = actor("other"), admin = actor("admin", true), privateMother = actor("private", false, false);
-const actors = [mother, chw, partner, other, admin, privateMother], ids = actors.map(a => a.id);
+const privateChw = actor("private-chw", false, false);
+const actors = [mother, chw, partner, other, admin, privateMother, privateChw], ids = actors.map(a => a.id);
 async function denied(action: Promise<unknown>, status = 403) { await assert.rejects(action, (e: unknown) => e instanceof CareError && e.status === status); }
 const profile = (a: CareActor, role: "MOTHER" | "CHW" | "PARTNER") => careCommand(a, { action: "profile", role, displayName: `Fictional fixture ${role}`, locale: "EN", ...(role === "CHW" ? { institutionName: "Fictional institution", registrationNumber: "NOT-A-REAL-LICENSE", institutionContact: "Fictional office" } : {}) });
 async function main() {
 try {
   for (const [a, role] of [[mother, "MOTHER"], [chw, "CHW"], [partner, "PARTNER"], [other, "MOTHER"], [admin, "PARTNER"], [privateMother, "MOTHER"]] as const) await profile(a, role);
-  await denied(careCommand(chw, { action: "invite", kind: "CHW", email: mother.email, scopes: SCOPES }));
-  await denied(careCommand(partner, { action: "verify", accountId: chw.id, verified: true }));
-  await careCommand(admin, { action: "verify", accountId: chw.id, verified: true });
+  if (process.env.CARE_RECORDS_ENABLED !== "true") {
+    await profile(privateChw, "CHW");
+    await careCommand(privateMother, { action: "consent", scopes: ["VITALS"] });
+    await careCommand(privateChw, { action: "invite", kind: "CHW", email: privateMother.email, scopes: ["VITALS"] });
+    await denied(careRecord(privateChw, privateMother.id));
+    const request = (await careWorkspace(privateMother)).incoming![0];
+    await careCommand(privateMother, { action: "respond", inviteId: request.id, accept: true, scopes: ["VITALS"] });
+    assert.equal((await careWorkspace(privateChw)).stats!.activeMothers, 1);
+    assert.deepEqual((await careRecord(privateChw, privateMother.id)).scopes, []);
+    await denied(careCommand(privateMother, { action: "vital", systolic: 120, diastolic: 80, heartRate: 72 }), 503);
+  }
+  await careCommand(chw, { action: "invite", kind: "CHW", email: mother.email, scopes: SCOPES });
+  await denied(careRecord(chw, mother.id)); // Registration/request alone must not grant access.
+  await denied(careCommand(chw, { action: "profile", role: "MOTHER", displayName: "Fictional changed role", locale: "EN" }));
+  await denied(careCommand(partner, { action: "verify", accountId: chw.id, verified: true }), 400);
   await careCommand(chw, { action: "profile", role: "CHW", displayName: "Fictional fixture CHW", locale: "SW", institutionName: "Fictional institution", registrationNumber: "NOT-A-REAL-LICENSE", institutionContact: "Fictional office" });
   const savedProfile = await db.careAccount.findUniqueOrThrow({ where: { id: chw.id } });
-  assert.equal(savedProfile.locale, "SW"); assert(savedProfile.verifiedAt, "Language-only change must preserve verification");
+  assert.equal(savedProfile.locale, "SW"); assert.equal(savedProfile.verifiedAt, null, "Self-registration must not fabricate independent verification");
   await denied(careRecord(chw, mother.id));
   await denied(careRecord(chw, privateMother.id), 404);
   await denied(careCommand(admin, { action: "verify", accountId: privateMother.id, verified: true }), 400);
@@ -75,8 +88,7 @@ try {
   assert.deepEqual((await careRecord(chw, other.id)).scopes, ["VISITS"]);
   await careCommand(chw, { action: "profile", role: "CHW", displayName: "Fictional fixture CHW", locale: "SW", institutionName: "Different fictional institution", registrationNumber: "NOT-A-REAL-LICENSE", institutionContact: "Fictional office" });
   assert.equal((await db.careAccount.findUniqueOrThrow({ where: { id: chw.id } })).verifiedAt, null);
-  await careCommand(admin, { action: "verify", accountId: chw.id, verified: true });
-  await denied(careRecord(chw, other.id)); // Reverification must not revive old maternal consent.
+  await denied(careRecord(chw, other.id)); // Profile changes cannot revive old maternal consent.
   await careCommand(other, { action: "invite", kind: "PARTNER", email: chw.email, scopes: ["VISITS"] });
   const familyInvite = (await careWorkspace(chw)).incoming![0];
   await careCommand(chw, { action: "respond", inviteId: familyInvite.id, accept: true, scopes: [] });
@@ -86,7 +98,7 @@ try {
   assert(events.length > 10);
   const serialized = JSON.stringify(events);
   assert(!serialized.includes("example.test") && !serialized.includes("Clearly fictional follow-up note.") && !serialized.includes("000000000"));
-  console.log("PASS: verification + mother approval, scoped/redacted partner/CHW reads, demo/account isolation, conflict locking, authored notes, visit completion, immediate revocation, consent deletion, purge and PHI-free audit");
+  console.log("PASS: self-registered CHW + mother approval, immutable roles, scoped/redacted partner/CHW reads, demo/account isolation, conflict locking, authored notes, visit completion, immediate revocation, consent deletion, purge and PHI-free audit");
 } finally {
   await db.careNote.deleteMany({ where: { authorId: { in: ids } } });
   await db.careVisit.deleteMany({ where: { motherId: { in: ids } } });
