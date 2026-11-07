@@ -30,3 +30,39 @@ When a stack decision lands, this page gets a second diagram: the **technology v
 (ways components map onto concrete tools), and the component view is kept for the
 "why it is shaped this way" record. Together they become the review artifact for
 every future feature proposal.
+
+---
+
+## Reality check — current prototype (2026-11-07)
+
+The stack decision **did land** (this section documents what actually got built —
+verify against `package.json` / `prisma/schema.prisma` / [`docs/HANDOFF.md`](HANDOFF.md)):
+
+| Target component | Prototype status |
+|---|---|
+| Mother's phone | ✅ Built as a web app (Next.js 16, React 19) — mobile-first browser experience |
+| Sync / outbound queue | 🔶 Supabase Realtime `postgres_changes` replaces the queue idea for now; **no offline mode** |
+| API + auth | ✅ API routes exist · ❌ **no authentication layer** (deliberately, for the demo) |
+| Consent service | ❌ Not started — **the target architecture stands; it has not moved to center** |
+| Core data store | ✅ Supabase Postgres (project "Imran", ref `xosqbyjzlhjnoscspvcc`, **eu-west-1**) with Prisma models: `Mother`, `VitalReading`, `VisitNote`, `Appointment`, `Emergency` |
+| CHW / clinician view | ✅ CHW dashboard (Grace persona) with register + patient detail + notes |
+| Aggregate analytics | ❌ Not built |
+
+**Simulation reality:** six bot-owned mothers (`simulated = true`), diurnal-curves,
+African Nairobi time-shifts, SOS only from the preeclampsia persona, and round-trip
+reversion — see [`docs/HANDOFF.md`](HANDOFF.md) for the persona table and realism rules.
+
+**What this means for the draft diagram above:** the *shapes* stayed true (mother side,
+CHW side, realtime channel, one data store), but two big assumptions moved: the
+"offline-first cache" is not yet real, and consent — drawn as the gatekeeper between
+writes and storage — does not yet exist in code. Both are pre-production gates, not
+nice-to-haves.
+
+Open technical unknowns carried forward from the draft:
+
+- [x] Stack chosen for prototype (Next.js + Prisma + Supabase)
+- [ ] Sync conflict policy (currently realtime-direct; queue/retry semantics not built)
+- [ ] End-to-end encryption scope (none today; CHW-mediated notes need an answer)
+- [ ] Retention mechanics (none today)
+- [ ] Lowest supported device floor (untested)
+

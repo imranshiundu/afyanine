@@ -32,3 +32,24 @@ the same PR. Stale diagrams fail review, same as stale docs.
 
 Records/data model, authorizations, and sync policy must be decided in `docs/` before
 implementation starts. Planning before pixels.
+
+---
+
+## Artifact hygiene ledger (2026-11-07)
+
+The prototype commits broke our own bar above. Named **for cleanup (permission first —
+not touched yet)**:
+
+| Artifact | Why it shouldn't be committed |
+|---|---|
+| `db/custom.db` | binary SQLite DB (working data file); swap for schema + seed script |
+| `.zscripts/dev.pid`, `server.log` patterns | runtime state |
+| `tool-results/*.txt` (2 files) | leftover agent file-read dumps |
+| `upload/pasted_image_*.png` (3 files) | clipboard artifacts; provenance unclear |
+
+Intentional, reviewed keepers: `bun.lock` (documented: sandbox parity, HANDOFF T1),
+`.zscripts/*` build scripts (documented in-tree). Broken ignore line `/skills/\n`
+in `.gitignore` gets fixed alongside these additions.
+
+Existing ignore coverage (verified): `.env*`, `tokens.txt`, `*.tar`, `dev.log`/`test`
+variants — secrets are NOT in the tree (checked).

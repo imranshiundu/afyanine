@@ -48,3 +48,26 @@ in confidence:
 - Declining a category cannot degrade the app to "disabled" — limited mode stays useful.
 - Any feature pull request that touches data flow must update a diagram (either this
   page or the architecture page) in the same pull request.
+
+---
+
+## Implementation status — prototype honesty panel (2026-11-07)
+
+The prototype (see [`HANDOFF.md`](HANDOFF.md), [`API.md`](API.md)) ships demo data only,
+and HANDOFF echoes that honestly. Per-commitment status:
+
+| Commitment | Prototype status |
+|---|---|
+| 1. Consent before data | ❌ **Not implemented.** No auth layer (API.md says so), no consent service in code; demo data flows directly under the shared `afyanine` Postgres role. |
+| 2. Contextual, not blanket | ❌ Not implemented (nothing to gate yet) |
+| 3. Sensitive by default / no marketing | ✅ Honored trivially — demo data only, no ad/analytics SDKs in the tree |
+| 4. Minimize and bound | 🔶 Schema is small and purposeful, but no retention windows exist yet |
+| 5. Deletion is self-serve | ❌ Not implemented |
+
+**Operating rule while in prototype:** the demo must never hold real maternal data.
+Real-data acceptance is blocked until commitments 1 and 5 exist in code — pre-production
+mandate, not nice-to-have.
+
+**Secrets hygiene (verified 2026-11-07):** `.env*` and `tokens.txt` are git-ignored;
+Supabase management token and keys live outside the repo (per the secrets policy in
+`HANDOFF.md`). Committed artifact debt is tracked in [`contributing.md`](contributing.md).
