@@ -122,6 +122,7 @@ model CareAccount {
   verifiedBy         String?
   dueDate            DateTime?
   storageScopes      CareScope[] @default([])
+  opsConsent         Boolean @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   sentInvites        CareInvite[] @relation("CareSender")
@@ -249,7 +250,7 @@ model CareAudit {
 model AccountIdentity {
   id           String @id
   email        String @unique
-  phone        String @unique
+  phone        String? @unique
   passwordHash String
   role         CareRole
   displayName  String
@@ -257,6 +258,7 @@ model AccountIdentity {
   lockedUntil  DateTime?
   createdAt    DateTime @default(now())
   sessions     AccountSession[]
+  operator     CareOperator?
 }
 
 model AccountSession {
@@ -280,6 +282,8 @@ model CareAlert {
   mother    CareAccount @relation(fields: [motherId], references: [id], onDelete: Cascade)
   kind      String
   active    Boolean @default(true)
+  status    String @default("raised")
+  acknowledgedAt DateTime?
   createdAt DateTime @default(now())
   resolvedAt DateTime?
   @@index([motherId, active, createdAt])
@@ -292,4 +296,11 @@ model CareBand {
   serial        String @unique
   boundAt       DateTime @default(now())
   lastReadingAt DateTime?
+}
+
+model CareOperator {
+  identityId String @id
+  identity AccountIdentity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
 }

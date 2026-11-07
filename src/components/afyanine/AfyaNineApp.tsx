@@ -17,16 +17,21 @@ import type { Role, Screen } from "./data";
 import { Onboarding } from "./screens/Onboarding";
 import { InstallReminder } from "./InstallReminder";
 import { getInstalledOnboardingSnapshot, getOnboardingServerSnapshot, subscribeInstalledOnboarding } from "./installed-onboarding";
+import { useAccount } from "./account-live";
+import { AccountApp } from "./AccountApp";
 
 const NAV_SCREENS: Screen[] = ["home", "care", "vitals"];
 
 export function AfyaNine() {
+  const { user, loading } = useAccount();
   const needsOnboarding = useSyncExternalStore(
     subscribeInstalledOnboarding,
     getInstalledOnboardingSnapshot,
     getOnboardingServerSnapshot,
   );
-  return needsOnboarding ? <Onboarding /> : <AfyaNineExperience />;
+  if (needsOnboarding) return <Onboarding />;
+  if (loading) return <div className="page"><div className="app-shell"><main className="screen" aria-busy="true">Restoring your session…</main></div></div>;
+  return user ? <AccountApp key={user.id} user={user} /> : <AfyaNineExperience />;
 }
 
 function AfyaNineExperience() {

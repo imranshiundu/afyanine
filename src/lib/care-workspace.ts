@@ -12,10 +12,12 @@ const phone = z.string().trim().max(40).regex(/^[+\d\s()\-]*$/);
 const commands = z.discriminatedUnion("action", [
   z.object({ action: z.literal("profile"), displayName: z.string().trim().min(2).max(80), phone: phone.optional(), locale: z.enum(["EN", "SW"]), role: z.enum(["MOTHER", "CHW", "PARTNER"]), institutionName: z.string().trim().max(150).optional(), registrationNumber: z.string().trim().max(80).optional(), institutionContact: z.string().trim().max(120).optional() }),
   z.object({ action: z.literal("invite"), email: z.email().max(254).optional(), phone: z.string().min(9).max(25).optional(), kind: z.enum(["CHW", "PARTNER"]), scopes }).refine(value => !!value.email !== !!value.phone),
-  z.object({ action: z.literal("sos"), kind: z.enum(["Urgent help", "Bleeding", "Labour", "Severe headache", "Other emergency"]) }),
+  z.object({ action: z.literal("sos"), kind: z.string().trim().min(2).max(80) }),
   z.object({ action: z.literal("resolveAlert"), alertId: id }),
+  z.object({ action: z.literal("ackAlert"), alertId: id }),
   z.object({ action: z.literal("bindBand"), serial: z.string().trim().regex(/^SIM-[A-Z0-9-]{4,40}$/) }),
   z.object({ action: z.literal("unbindBand") }),
+  z.object({ action: z.literal("opsConsent"), enabled: z.boolean() }),
   z.object({ action: z.literal("respond"), inviteId: id, accept: z.boolean(), scopes }),
   z.object({ action: z.literal("revoke"), accessId: id }),
   z.object({ action: z.literal("consent"), scopes, confirmDelete: z.boolean().default(false) }),
@@ -106,7 +108,7 @@ export async function careWorkspace(actor: CareActor) {
     ...access.filter(item => item.viewerId === me.id && item.active && item.scopes.includes("VISITS") && item.mother.storageScopes.includes("VISITS")).map(item => item.motherId),
   ])] : [];
   const alertMothers = enabled(actor) ? [
-    ...(me.role === "MOTHER" && me.storageScopes.includes("VITALS") ? [me.id] : []),
+    ...(me.role === "MOTHER" ? [me.id] : []),
     ...allAccess.filter(item => item.viewerId === me.id && me.role === "CHW" && item.kind === "CHW" && item.active && item.scopes.includes("VITALS") && item.mother.storageScopes.includes("VITALS")).map(item => item.motherId),
   ] : [];
   const alerts = await db.careAlert.findMany({ where: { motherId: { in: alertMothers }, active: true }, orderBy: { createdAt: "desc" }, take: 50 });
@@ -115,7 +117,7 @@ export async function careWorkspace(actor: CareActor) {
     alerts: alerts.map(alert => ({ ...alert, motherName: alert.motherId === me.id ? me.displayName : allAccess.find(item => item.motherId === alert.motherId)?.mother.displayName ?? "" })),
     incoming: incoming.map(item => ({ id: item.id, kind: item.kind, scopes: item.scopes, requester: publicProfile(item.requester), createdAt: item.createdAt })),
     sent: await db.careInvite.findMany({ where: { requesterId: me.id, isDemo: actor.isDemo }, select: { id: true, targetEmail: true, targetPhone: true, kind: true, status: true, expiresAt: true }, orderBy: { createdAt: "desc" }, take: 30 }),
-    access: access.map(item => ({ id: item.id, motherId: item.motherId, viewerId: item.viewerId, kind: item.kind, scopes: item.scopes, active: item.active, createdAt: item.createdAt, mother: { id: item.mother.id, displayName: item.mother.displayName }, viewer: publicProfile(item.viewer) })),
+    access: access.map(item => ({ id: item.id, motherId: item.motherId, viewerId: item.viewerId, kind: item.kind, scopes: item.scopes, active: item.active, createdAt: item.createdAt, mother: { id: item.mother.id, displayName: item.mother.displayName }, viewer: { ...publicProfile(item.viewer), ...(item.motherId === me.id && item.active ? { phone: item.viewer.phone } : {}) } })),
     visits: await db.careVisit.findMany({ where: { isDemo: actor.isDemo, motherId: { in: visitMothers } }, select: { id: true, motherId: true, chwId: true, startsAt: true, endsAt: true, status: true, place: true, mother: { select: { displayName: true } }, chw: { select: { displayName: true } } }, orderBy: { startsAt: "desc" }, take: 100 }),
     stats: me.role === "CHW" ? {
       activeMothers: await db.careAccess.count({ where: { viewerId: me.id, kind: "CHW", active: true, scopes: { isEmpty: false }, isDemo: actor.isDemo } }),
@@ -147,7 +149,7 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       const visit = await tx.careVisit.findFirst({ where: { id: command.visitId, isDemo: actor.isDemo } });
       if (visit) extra.push(visit.motherId, visit.chwId);
     }
-    if (command.action === "resolveAlert") {
+    if (command.action === "resolveAlert" || command.action === "ackAlert") {
       const alert = await tx.careAlert.findUnique({ where: { id: command.alertId } });
       if (alert) extra.push(alert.motherId);
     }
@@ -161,7 +163,6 @@ export async function careCommand(actor: CareActor, raw: unknown) {
         // Contact identity used for requests cannot be silently changed here.
         requireCare(!command.phone || normalizePhone(command.phone) === actor.phone, "Use your registered phone number.", 400);
       }
-      if (command.role === "CHW") requireCare(command.institutionName && command.registrationNumber && command.institutionContact, "INSTITUTION_REQUIRED", 400);
       const changedInstitution = prior && (prior.displayName !== command.displayName || prior.institutionName !== (command.institutionName || null) || prior.registrationNumber !== (command.registrationNumber || null) || prior.institutionContact !== (command.institutionContact || null));
       const data = { displayName: command.displayName, phone: actor.phone ?? (command.phone || null), locale: command.locale, institutionName: command.role === "CHW" ? command.institutionName : null, registrationNumber: command.role === "CHW" ? command.registrationNumber : null, institutionContact: command.role === "CHW" ? command.institutionContact : null };
       await tx.careAccount.upsert({ where: { id: actor.id }, create: { id: actor.id, email: actor.email, role: command.role, isDemo: actor.isDemo, ...data }, update: { ...data, ...(changedInstitution ? { verifiedAt: null, verifiedBy: null } : {}) } });
@@ -240,6 +241,10 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       const grants = await tx.careAccess.findMany({ where: { motherId: actor.id, active: true, isDemo: actor.isDemo } });
       for (const grant of grants) await tx.careAccess.update({ where: { id: grant.id }, data: { scopes: grant.scopes.filter(scope => next.includes(scope)), ...(command.action === "purge" ? { active: false, revokedAt: new Date() } : {}) } });
       await audit(tx, actor, command.action === "purge" ? "CARE_RECORD_PURGED" : "STORAGE_CONSENT_UPDATED", me.id, next);
+    } else if (command.action === "opsConsent") {
+      requireCare(me.role === "MOTHER");
+      await tx.careAccount.update({ where: { id: me.id }, data: { opsConsent: command.enabled } });
+      await audit(tx, actor, "OPERATIONS_CONSENT_UPDATED", me.id);
     } else if (command.action === "bindBand") {
       await requireCategory(actor, actor.id, "VITALS", tx);
       requireCare(me.role === "MOTHER");
@@ -253,19 +258,20 @@ export async function careCommand(actor: CareActor, raw: unknown) {
       await tx.careBand.deleteMany({ where: { motherId: actor.id } });
       await audit(tx, actor, "SIMULATED_BAND_UNBOUND", me.id, ["VITALS"]);
     } else if (command.action === "sos") {
-      await requireCategory(actor, actor.id, "VITALS", tx);
+      requireCare(enabled(actor), "LIVE_RECORDS_NOT_ENABLED", 503);
       requireCare(me.role === "MOTHER");
       // One active SOS per mother; repeat taps/retries do not duplicate alarms.
       if (!await tx.careAlert.findFirst({ where: { motherId: me.id, active: true } })) {
         await tx.careAlert.create({ data: { motherId: me.id, kind: command.kind } });
         await audit(tx, actor, "SOS_RAISED", me.id, ["VITALS"]);
       }
-    } else if (command.action === "resolveAlert") {
+    } else if (command.action === "resolveAlert" || command.action === "ackAlert") {
       const alert = await tx.careAlert.findUnique({ where: { id: command.alertId } });
       requireCare(alert, "NOT_FOUND", 404);
-      await requireCategory(actor, alert.motherId, "VITALS", tx, true);
-      await tx.careAlert.update({ where: { id: alert.id }, data: { active: false, resolvedAt: new Date() } });
-      await audit(tx, actor, "SOS_RESOLVED", alert.motherId, ["VITALS"]);
+      if (alert.motherId !== actor.id) await requireCategory(actor, alert.motherId, "VITALS", tx, true);
+      requireCare(alert.active, "ALREADY_RESOLVED", 409);
+      await tx.careAlert.update({ where: { id: alert.id }, data: command.action === "ackAlert" ? { status: "ack", acknowledgedAt: alert.acknowledgedAt ?? new Date() } : { active: false, status: "resolved", resolvedAt: new Date() } });
+      await audit(tx, actor, command.action === "ackAlert" ? "SOS_ACKNOWLEDGED" : "SOS_RESOLVED", alert.motherId, ["VITALS"]);
     } else if (command.action === "pregnancy") {
       await requireCategory(actor, actor.id, "PREGNANCY", tx);
       requireCare(me.role === "MOTHER");

@@ -9,7 +9,7 @@ export const SESSION_SECONDS = 60 * 60 * 12;
 const DUMMY_HASH = hashPassword(randomBytes(32).toString("hex"));
 export const sessionUser = (identity: AccountIdentity) => ({
   id: identity.id, email: identity.email,
-  user_metadata: { display_name: identity.displayName, afyanine_role: identity.role, phone: identity.phone },
+  user_metadata: { display_name: identity.displayName, afyanine_role: identity.role, phone: identity.phone ?? "" },
 });
 export function sameOrigin(request: Request) {
   const origin = request.headers.get("origin");
@@ -55,7 +55,13 @@ export async function authenticateAccount(raw: { email: string; password: string
     try { phone = normalizePhone(raw.phone ?? ""); } catch { throw new CareError(400, "INVALID_PHONE"); }
     if (identity || await db.accountIdentity.findUnique({ where: { phone } })) throw new CareError(409, "Account could not be created. Sign in or contact your clinic.");
     try {
-      identity = await db.accountIdentity.create({ data: { id: randomUUID(), email, phone, passwordHash: hashPassword(raw.password), role: raw.role ?? "MOTHER", displayName: raw.name!.trim() } });
+      const id = randomUUID();
+      const role = raw.role ?? "MOTHER";
+      identity = await db.$transaction(async tx => {
+        const result = await tx.accountIdentity.create({ data: { id, email, phone, passwordHash: hashPassword(raw.password), role, displayName: raw.name!.trim() } });
+        await tx.careAccount.create({ data: { id, email, phone, displayName: raw.name!.trim(), role } });
+        return result;
+      });
     } catch { throw new CareError(409, "Account could not be created. Sign in or contact your clinic."); }
   } else {
     const correct = verifyPassword(raw.password, identity?.passwordHash ?? DUMMY_HASH);

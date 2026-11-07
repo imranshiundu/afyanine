@@ -48,7 +48,7 @@ export interface Patient {
   bp: string;
   systolic: number;
   diastolic: number;
-  risk: "Normal" | "Watch" | "High Risk";
+  risk: "Normal" | "Watch" | "High Risk" | "Not recorded";
   color: string;
 }
 

@@ -7,10 +7,12 @@
   <b>afya</b> (health) + <b>nine</b> (months) · <i>maternal health monitoring — consent-first, offline-ready</i>
 </p>
 
-> **Status: prototype.** The original interface has been restored from `main`.
-> Database-backed email/password accounts, approved phone connections, live streams
-> and bound-band simulation are retained as backend work, **not yet connected to
-> the restored screens**. See [`docs/live-accounts.md`](docs/live-accounts.md).
+> **Status: prototype.** The original `main` design is preserved, with the
+> explicitly requested signup fields and CHW Patients/Visits/Profile pages.
+> Signed-in accounts use saved data, mother-approved email connections, Socket.IO,
+> real SOS acknowledgement/resolution and bound-only band simulation.
+> See [`docs/shared-live-deploy.md`](docs/shared-live-deploy.md) for configuration
+> and the remaining production-hosting, email-verification and alarm limitations.
 > This is not a certified medical-device or emergency service.
 >
 > Where to read what: [`docs/HANDOFF.md`](docs/HANDOFF.md) (live task ledger + context

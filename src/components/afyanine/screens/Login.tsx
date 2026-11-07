@@ -7,18 +7,25 @@ import { ThemeToggle } from "../chrome";
 import { BRAND, LOGIN_COPY, type Role } from "../data";
 import { TestWard } from "./TestWard";
 import { stagger } from "../useMotion";
+import { requestJson, sessionChanged } from "../account-live";
 
 export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Promise<void> }) {
   const [role, setRole] = useState<Role>("mother");
   const [language, setLanguage] = useState<"EN" | "SW">("EN");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [signup, setSignup] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const [mode, setMode] = useState<"signin" | "testward">("signin");
   const t = LOGIN_COPY[language];
 
   const digits = phone.replace(/\s/g, "");
   const valid = digits.length >= 9;
-  const ready = valid;
+  const ready = email.includes("@") && password.length >= (signup ? 10 : 1) && (!signup || (valid && name.trim().length >= 2)) && !busy;
 
   const changeTab = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
@@ -28,13 +35,18 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Pro
     document.getElementById(`login-tab-${next}`)?.focus();
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!ready) {
       setShake(true);
       window.setTimeout(() => setShake(false), 500);
       return;
     }
-    void onEnter(role);
+    setBusy(true); setError("");
+    try {
+      await requestJson("/api/account", "POST", { mode: signup ? "signup" : "signin", email, password, ...(signup ? { name, phone: digits.startsWith("0") ? digits : `+254${digits}`, role: role === "chw" ? "CHW" : "MOTHER" } : {}) });
+      sessionChanged();
+    } catch (e) { setError((e as Error).message); }
+    finally { setBusy(false); }
   };
 
   return (
@@ -170,7 +182,12 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Pro
           </button>
         </div>
 
-        <label className="field-label" htmlFor="phone" style={stagger(8)}>
+        {signup && <><label className="field-label" htmlFor="account-name">Full name</label><div className="phone-field"><input id="account-name" autoComplete="name" value={name} onChange={e => setName(e.target.value)} required maxLength={80} /></div></>}
+        <label className="field-label" htmlFor="account-email">Email</label>
+        <div className="phone-field"><input id="account-email" type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required /></div>
+        <label className="field-label" htmlFor="account-password">Password</label>
+        <div className="phone-field"><input id="account-password" type="password" autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={e => setPassword(e.target.value)} required minLength={signup ? 10 : 1} onKeyDown={e => { if (e.key === "Enter") void submit(); }} /></div>
+        {signup && <><label className="field-label" htmlFor="phone" style={stagger(8)}>
           {t.phone}
         </label>
         <div
@@ -193,9 +210,9 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Pro
             </span>
           )}
         </div>
-        <p className="phone-hint" style={stagger(10)}>
-          {valid ? t.otpSent(digits) : t.phoneHint}
-        </p>
+        </>}
+        <p className="phone-hint">{signup ? "Use at least 10 characters. No PIN or OTP is required. Email ownership is not yet verified." : "Sign in with your email and password."}</p>
+        {error && <p role="alert" className="red-text">{error}</p>}
         <button
           type="button"
           className={`primary-button${ready ? "" : " disabled"}`}
@@ -203,8 +220,9 @@ export function Login({ onEnter }: { onEnter: (role: Role, code?: string) => Pro
           onClick={submit}
           disabled={!ready}
         >
-          {t.cta} <Icon name="arrow" />
+          {busy ? "Please wait…" : signup ? "Create account" : "Sign in"} <Icon name="arrow" />
         </button>
+        <button type="button" className="account-switch" onClick={() => { setSignup(!signup); setError(""); }}>{signup ? "Already registered? Sign in" : "Create an account"}</button>
         <p className="privacy" style={stagger(12)}>
           {t.privacy}
         </p>
