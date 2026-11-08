@@ -69,6 +69,12 @@ function AfyaNineExperience() {
     loadPatients();
   }, [loadPatients]);
 
+  /* PWA: installable shell — the worker is network-first with offline fallback */
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }, []);
+
   /* Realtime: one channel refreshes whichever session is on screen.
      INSERTs (vitals, SOS, notes) → refresh; SOS resolve → clear. */
   useEffect(() => {
